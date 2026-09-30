@@ -17,7 +17,7 @@ export default function LandingPage() {
             You still missed what they meant.
           </h1>
           <p className="mt-6 max-w-prose text-lg leading-relaxed text-muted">
-            Bridgely teaches the unwritten rules of British communication — the hedges, the
+            Chat British teaches the unwritten rules of British communication — the hedges, the
             understatements, the &ldquo;let&rsquo;s see how it goes&rdquo; that actually means no.
             Practice before it happens. Get a straight answer after it already has.
           </p>
@@ -60,7 +60,7 @@ export default function LandingPage() {
             <Feature
               label="Ongoing"
               title="A profile that adapts"
-              body="A short onboarding tells Bridgely your sector, your situation, your struggle — so practice and debriefs stay relevant to your actual life, not generic advice."
+              body="A short onboarding tells Chat British your sector, your situation, your struggle — so practice and debriefs stay relevant to your actual life, not generic advice."
             />
           </div>
         </div>
@@ -72,7 +72,7 @@ export default function LandingPage() {
           <h2 className="font-display text-2xl font-medium text-ink">Built on real coaching, not guesses</h2>
           <div className="space-y-4 text-muted">
             <p>
-              Every entry in Bridgely&rsquo;s library comes from a real client case, reviewed and
+              Every entry in Chat British&rsquo;s library comes from a real client case, reviewed and
               written by a working cultural-communication coach — the same methodology behind
               years of 1:1 sessions, now built into software instead of replaced by it.
             </p>

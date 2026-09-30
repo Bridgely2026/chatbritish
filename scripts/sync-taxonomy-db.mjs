@@ -5,7 +5,7 @@
 //   norm_id (text, primary key / unique), category, definition, surface_markers,
 //   what_it_means, example, good_response, status, content_hash, embedding (vector),
 //   active (boolean), updated_at (timestamptz)
-// per bridgely_rag_schema.sql (applied separately, not part of this repo).
+// per chat_british_rag_schema.sql (applied separately, not part of this repo).
 
 import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
@@ -14,7 +14,7 @@ import { createClient } from "@supabase/supabase-js";
 import { parseTaxonomy } from "./lib/parse-taxonomy.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const SOURCE_PATH = path.join(__dirname, "..", "data", "bridgely_taxonomy_template.xlsx");
+const SOURCE_PATH = path.join(__dirname, "..", "data", "chat_british_taxonomy_template.xlsx");
 
 try {
   process.loadEnvFile(path.join(__dirname, "..", ".env.local"));

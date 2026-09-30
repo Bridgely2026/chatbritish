@@ -15,7 +15,7 @@ export type NormEntry = {
   status: "Draft" | "Approved";
 };
 
-// Real taxonomy content, generated from data/bridgely_taxonomy_template.xlsx.
+// Real taxonomy content, generated from data/chat_british_taxonomy_template.xlsx.
 // Edit the spreadsheet and re-run `npm run taxonomy:import`, don't edit here.
 export const taxonomy: NormEntry[] = generatedTaxonomy;
 

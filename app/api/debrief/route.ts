@@ -10,7 +10,7 @@ import Anthropic from "@anthropic-ai/sdk";
 // Assumes a `taxonomy_entries` table and a `match_taxonomy_entries(query_embedding,
 // match_count)` RPC (returning norm_id, category, definition, surface_markers,
 // what_it_means, example, good_response, similarity) and a `debrief_gaps` table,
-// per bridgely_rag_schema.sql (applied separately, not part of this repo).
+// per chat_british_rag_schema.sql (applied separately, not part of this repo).
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -92,7 +92,7 @@ type GroundedOutcome = { applies: true; result: DebriefResult } | { applies: fal
 type DeclineReason = "below_floor_threshold" | "entry_did_not_apply";
 
 const NO_MATCH_MESSAGE =
-  "I couldn't find a close match for this one yet — it may be outside what Bridgely covers so far, but thanks for flagging it.";
+  "I couldn't find a close match for this one yet — it may be outside what Chat British covers so far, but thanks for flagging it.";
 
 const FOLLOW_UP_TOOL: Anthropic.Tool = {
   name: "ask_clarifying_question",
@@ -215,7 +215,7 @@ async function generateGroundedAnswer(
     model: CLAUDE_MODEL,
     max_tokens: 600,
     system:
-      "You produce structured output for Bridgely's Debrief tool, which explains British cultural communication norms to newcomers. Ground every claim about British culture strictly in the single taxonomy entry provided below — never introduce a claim about British culture, etiquette, or norms that isn't present in that entry. You may reference specifics the user themselves mentioned (e.g. who said what) when phrasing surface_signal and suggested_response, but the underlying explanation must come only from the provided entry.",
+      "You produce structured output for Chat British's Debrief tool, which explains British cultural communication norms to newcomers. Ground every claim about British culture strictly in the single taxonomy entry provided below — never introduce a claim about British culture, etiquette, or norms that isn't present in that entry. You may reference specifics the user themselves mentioned (e.g. who said what) when phrasing surface_signal and suggested_response, but the underlying explanation must come only from the provided entry.",
     messages: [
       {
         role: "user",

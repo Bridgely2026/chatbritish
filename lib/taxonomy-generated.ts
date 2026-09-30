@@ -1,4 +1,4 @@
-// AUTO-GENERATED from data/bridgely_taxonomy_template.xlsx by scripts/import-taxonomy.mjs
+// AUTO-GENERATED from data/chat_british_taxonomy_template.xlsx by scripts/import-taxonomy.mjs
 // Do not edit by hand — edit the spreadsheet and re-run: npm run taxonomy:import
 import type { NormEntry } from "./mock-data";
 

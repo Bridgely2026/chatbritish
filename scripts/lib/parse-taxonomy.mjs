@@ -1,5 +1,5 @@
 // Shared parse+validate logic for the "Taxonomy" sheet in
-// data/bridgely_taxonomy_template.xlsx. Used by both
+// data/chat_british_taxonomy_template.xlsx. Used by both
 // scripts/import-taxonomy.mjs (generates lib/taxonomy-generated.ts) and
 // scripts/sync-taxonomy-db.mjs (embeds and upserts into Supabase).
 

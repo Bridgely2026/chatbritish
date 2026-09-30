@@ -5,7 +5,7 @@ export default function Nav() {
     <header className="border-b border-line">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-5">
         <Link href="/" className="font-display text-xl font-medium tracking-tight text-ink">
-          Bridgely
+          Chat British
         </Link>
         <nav className="flex items-center gap-6 text-sm text-muted">
           <Link href="/onboarding" className="hover:text-ink">

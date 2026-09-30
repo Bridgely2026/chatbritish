@@ -1,4 +1,4 @@
-# Bridgely
+# Chat British
 
 Landing page + app shell. Next.js 14 (App Router) + Tailwind, matching the stack
 locked in the project doc. Everything here runs against mock data in

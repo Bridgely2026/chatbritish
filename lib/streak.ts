@@ -1,4 +1,4 @@
-const STREAK_KEY = "bridgely_streak";
+const STREAK_KEY = "chat_british_streak";
 
 export function getStreak(): number {
   if (typeof window === "undefined") return 0;

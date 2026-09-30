@@ -1,4 +1,4 @@
-// Reads the "Taxonomy" sheet from data/bridgely_taxonomy_template.xlsx and
+// Reads the "Taxonomy" sheet from data/chat_british_taxonomy_template.xlsx and
 // generates lib/taxonomy-generated.ts. Run via `npm run taxonomy:import`.
 
 import { writeFileSync } from "node:fs";
@@ -7,7 +7,7 @@ import path from "node:path";
 import { parseTaxonomy, VALID_CATEGORIES } from "./lib/parse-taxonomy.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const SOURCE_PATH = path.join(__dirname, "..", "data", "bridgely_taxonomy_template.xlsx");
+const SOURCE_PATH = path.join(__dirname, "..", "data", "chat_british_taxonomy_template.xlsx");
 const OUTPUT_PATH = path.join(__dirname, "..", "lib", "taxonomy-generated.ts");
 
 function main() {
@@ -21,7 +21,7 @@ function main() {
     process.exit(1);
   }
 
-  const header = `// AUTO-GENERATED from data/bridgely_taxonomy_template.xlsx by scripts/import-taxonomy.mjs
+  const header = `// AUTO-GENERATED from data/chat_british_taxonomy_template.xlsx by scripts/import-taxonomy.mjs
 // Do not edit by hand — edit the spreadsheet and re-run: npm run taxonomy:import
 import type { NormEntry } from "./mock-data";
 
