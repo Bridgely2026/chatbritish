@@ -14,6 +14,12 @@ export const VALID_CATEGORIES = [
   "Job search",
   "Social",
   "Admin & bureaucracy",
+  "Education",
+  "Dating & relationships",
+  "Money & transactions",
+  "Transport & commuting",
+  "Neighbours & community",
+  "Customer service & retail",
 ];
 
 export const VALID_STATUSES = ["Draft", "Approved"];
@@ -27,7 +33,20 @@ const COLUMNS = {
   example: "Example (anonymized)",
   goodResponse: "Good Response",
   status: "Status",
+  // Optional 9th column, only present in newer taxonomy files.
+  groundingCheck: "Grounding Check",
 };
+
+// Rows whose Grounding Check starts with this are held back from the live
+// database regardless of Status, until the founder decides whether they need
+// grounding in real cases or are approved as cultural consensus on purpose.
+const PENDING_GROUNDING_PREFIX = "cultural consensus";
+
+// A missing/blank Grounding Check means "no note" and is allowed through —
+// the original template rows never had this column.
+export function isPendingGrounding(entry) {
+  return (entry.groundingCheck ?? "").toLowerCase().startsWith(PENDING_GROUNDING_PREFIX);
+}
 
 function isBlank(value) {
   return value === null || value === undefined || String(value).trim() === "";
@@ -117,6 +136,7 @@ export function parseTaxonomy(sourcePath) {
       example: clean(row[COLUMNS.example]),
       goodResponse: clean(row[COLUMNS.goodResponse]),
       status: clean(status),
+      groundingCheck: isBlank(row[COLUMNS.groundingCheck]) ? null : clean(row[COLUMNS.groundingCheck]),
     });
   });
 

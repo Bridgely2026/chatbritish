@@ -1,4 +1,4 @@
-// Embeds the six fixed taxonomy-category reference texts via Voyage and
+// Embeds the twelve fixed taxonomy-category reference texts via Voyage and
 // writes lib/category-reference-embeddings.json, which app/api/classify-struggle
 // compares onboarding "struggle" text against via cosine similarity.
 //
@@ -49,6 +49,30 @@ const CATEGORY_REFERENCES = [
   {
     category: "Admin & bureaucracy",
     text: "Confused about council tax, bank letters, HMRC correspondence, official forms, proof-of-address requirements, formal-sounding letters that turn out to be routine.",
+  },
+  {
+    category: "Education",
+    text: "Confused about UK academic norms, essay/exam expectations, how to address lecturers, seminar participation culture, plagiarism rules that differ from home.",
+  },
+  {
+    category: "Dating & relationships",
+    text: "Confused about British dating norms, how directness or indirectness works in romantic communication, ghosting, what counts as a date versus hanging out.",
+  },
+  {
+    category: "Money & transactions",
+    text: "Confused about UK banking, splitting bills, tipping norms, direct debits, credit scores, or how payment etiquette works day to day.",
+  },
+  {
+    category: "Transport & commuting",
+    text: "Confused about public transport etiquette, queueing for buses, escalator standing side, quiet carriage norms, driving conventions.",
+  },
+  {
+    category: "Neighbours & community",
+    text: "Confused about UK neighbour etiquette, noise norms, bins and recycling rules, introducing yourself, community expectations.",
+  },
+  {
+    category: "Customer service & retail",
+    text: "Confused about UK shopping norms, return policies, how directly to complain, queueing in shops, tipping in service settings.",
   },
 ];
 

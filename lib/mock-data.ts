@@ -6,7 +6,19 @@ import { generatedTaxonomy } from "./taxonomy-generated";
 
 export type NormEntry = {
   normId: string;
-  category: "Workplace" | "Healthcare" | "Housing & landlord" | "Job search" | "Social" | "Admin & bureaucracy";
+  category:
+    | "Workplace"
+    | "Healthcare"
+    | "Housing & landlord"
+    | "Job search"
+    | "Social"
+    | "Admin & bureaucracy"
+    | "Education"
+    | "Dating & relationships"
+    | "Money & transactions"
+    | "Transport & commuting"
+    | "Neighbours & community"
+    | "Customer service & retail";
   definition: string;
   surfaceMarkers: string;
   whatItMeans: string;
@@ -239,7 +251,19 @@ export const scenarios: Scenario[] = [
 // Onboarding: situation-to-category weighting, used to pick a starting point
 // in the taxonomy before any practice or debrief data exists for a user.
 
-export type CategoryCode = "WP" | "HC" | "HL" | "JS" | "SO" | "AB";
+export type CategoryCode =
+  | "WP"
+  | "HC"
+  | "HL"
+  | "JS"
+  | "SO"
+  | "AB"
+  | "ED"
+  | "DR"
+  | "MN"
+  | "TR"
+  | "NB"
+  | "CS";
 
 export const CATEGORY_LABELS: Record<CategoryCode, NormEntry["category"]> = {
   WP: "Workplace",
@@ -248,6 +272,12 @@ export const CATEGORY_LABELS: Record<CategoryCode, NormEntry["category"]> = {
   JS: "Job search",
   SO: "Social",
   AB: "Admin & bureaucracy",
+  ED: "Education",
+  DR: "Dating & relationships",
+  MN: "Money & transactions",
+  TR: "Transport & commuting",
+  NB: "Neighbours & community",
+  CS: "Customer service & retail",
 };
 
 // Reverse of CATEGORY_LABELS, for turning a category label (e.g. the
@@ -262,7 +292,13 @@ export const CATEGORY_BLURBS: Record<string, string> = {
   Healthcare: "GPs, appointments, NHS process",
   "Job search": "Interviews, applications, offers",
   Social: "Invitations, small talk, everyday norms",
-  "Admin & bureaucracy": "Councils, banks, official letters",
+  "Admin & bureaucracy": "Councils, HMRC, official letters",
+  Education: "Lecturers, exams, school letters",
+  "Dating & relationships": "Dates, texting, partners",
+  "Money & transactions": "Bills, payments, tipping",
+  "Transport & commuting": "Trains, buses, driving",
+  "Neighbours & community": "Noise, bins, shared spaces",
+  "Customer service & retail": "Shops, returns, complaints",
 };
 
 export function getScenariosByCategory(category: string): Scenario[] {
@@ -285,15 +321,26 @@ export type Situation = {
 export const SITUATIONS: Situation[] = [
   { label: "Work", description: "Colleagues, managers", category: "WP" },
   { label: "Healthcare", description: "GP, NHS, pharmacy", category: "HC" },
-  { label: "Housing", description: "Landlord, flatmates, neighbours", category: "HL" },
+  { label: "Housing", description: "Landlord, flatmates, repairs", category: "HL" },
   { label: "Job search", description: "Interviews, applications", category: "JS" },
   { label: "Social life", description: "Friends, small talk, invitations", category: "SO" },
-  { label: "Admin & bureaucracy", description: "Banks, councils", category: "AB" },
+  { label: "Admin & bureaucracy", description: "Councils, HMRC, official letters", category: "AB" },
+  { label: "Education", description: "Studying, courses, exams, academic norms", category: "ED" },
+  { label: "Dating & relationships", description: "Dating, relationships, romantic communication", category: "DR" },
+  { label: "Money", description: "Banking, payments, financial norms", category: "MN" },
+  { label: "Transport", description: "Public transport, driving, commuting etiquette", category: "TR" },
+  { label: "Neighbours", description: "Neighbours, local community, shared spaces", category: "NB" },
+  { label: "Shopping & services", description: "Shopping, returns, service interactions", category: "CS" },
 ];
 
 // Life-stage / role chips shown in onboarding, and the category bonus each adds.
 // Additive only: like the time-in-UK modifier, a role never subtracts weight from
 // or overrides what the user explicitly picked in situations.
+//
+// Role and time-in-UK only ever boost the original six categories (WP–AB).
+// ED/DR/MN/TR/NB/CS deliberately get no modifier: there's no clean mapping from
+// role or time-in-UK to them, and forcing one would invent a signal. They're
+// reached via situations or struggle-text classification instead.
 export const ROLES = ["Employed", "Job-seeking", "Student", "Stay-at-home parent", "Retired", "Other"];
 
 const ROLE_MODIFIERS: Record<string, Partial<Record<CategoryCode, number>>> = {
@@ -312,15 +359,31 @@ function naturalJoin(items: string[]): string {
   return `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
 }
 
+// `situations` holds canonical category names (CATEGORY_LABELS values, e.g.
+// "Money & transactions"), never a chip's display label, so renaming a chip
+// can't orphan values already stored in users.situations.
 export function computeStartingPoint(
   situations: string[],
   timeInUk: string,
   role: string,
   struggleCategory?: string | null
 ): { rankedCategories: string[]; summary: string } {
-  const selected = SITUATIONS.filter((s) => situations.includes(s.label));
+  const selected = SITUATIONS.filter((s) => situations.includes(CATEGORY_LABELS[s.category]));
 
-  const scores: Record<CategoryCode, number> = { WP: 0, HC: 0, HL: 0, JS: 0, SO: 0, AB: 0 };
+  const scores: Record<CategoryCode, number> = {
+    WP: 0,
+    HC: 0,
+    HL: 0,
+    JS: 0,
+    SO: 0,
+    AB: 0,
+    ED: 0,
+    DR: 0,
+    MN: 0,
+    TR: 0,
+    NB: 0,
+    CS: 0,
+  };
   for (const s of selected) {
     scores[s.category] += 2;
   }
@@ -358,7 +421,7 @@ export function computeStartingPoint(
   // Ties on score resolve in three tiers: (1) an explicitly selected situation
   // beats an unselected one, (2) a role- or struggle-boosted category beats an
   // un-boosted one, (3) otherwise the key order of `scores` (WP, HC, HL, JS,
-  // SO, AB), which the stable sort preserves.
+  // SO, AB, ED, DR, MN, TR, NB, CS), which the stable sort preserves.
   const rankedCategories = (Object.keys(scores) as CategoryCode[])
     .filter((code) => scores[code] > 0)
     .sort(

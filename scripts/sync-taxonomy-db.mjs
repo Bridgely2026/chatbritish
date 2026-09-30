@@ -1,6 +1,18 @@
 // Embeds and upserts Approved taxonomy entries into Supabase (taxonomy_entries),
 // backing the real RAG pipeline behind Debrief. Run via `npm run taxonomy:sync-db`.
 //
+// Flags (pass after `--`, e.g. `npm run taxonomy:sync-db -- --dry-run`):
+//   --dry-run      parse, read current state from Supabase, and report what a
+//                  real run would do; no Voyage calls and no writes
+//   --file <path>  read a different spreadsheet instead of the default in data/
+//
+// Approved rows whose Grounding Check starts with "Cultural consensus" are
+// held back from the live database — see isPendingGrounding. One exception:
+// a flagged row that is ALREADY active when the sync starts is left exactly
+// as-is (still active, content and embedding untouched) rather than
+// deactivated, pending the founder's decision on it. Flagged rows that aren't
+// live yet are never added.
+//
 // Assumes a `taxonomy_entries` table shaped roughly like:
 //   norm_id (text, primary key / unique), category, definition, surface_markers,
 //   what_it_means, example, good_response, status, content_hash, embedding (vector),
@@ -11,10 +23,16 @@ import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
-import { parseTaxonomy } from "./lib/parse-taxonomy.mjs";
+import { parseTaxonomy, isPendingGrounding } from "./lib/parse-taxonomy.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const SOURCE_PATH = path.join(__dirname, "..", "data", "chat_british_taxonomy_template.xlsx");
+const DEFAULT_SOURCE_PATH = path.join(__dirname, "..", "data", "chat_british_taxonomy_template.xlsx");
+
+const args = process.argv.slice(2);
+const DRY_RUN = args.includes("--dry-run");
+const fileFlagIndex = args.indexOf("--file");
+const SOURCE_PATH =
+  fileFlagIndex === -1 ? DEFAULT_SOURCE_PATH : path.resolve(args[fileFlagIndex + 1] ?? "");
 
 try {
   process.loadEnvFile(path.join(__dirname, "..", ".env.local"));
@@ -88,6 +106,7 @@ async function embed(text, attempt = 1) {
 async function main() {
   requireEnv();
 
+  console.log(`Reading ${SOURCE_PATH}${DRY_RUN ? " (dry run — nothing will be written)" : ""}`);
   const { entries, errors } = parseTaxonomy(SOURCE_PATH);
   if (errors.length > 0) {
     console.error(`Taxonomy sync failed with ${errors.length} problem(s):\n`);
@@ -95,10 +114,30 @@ async function main() {
     process.exit(1);
   }
 
-  const approved = entries.filter((e) => e.status === "Approved");
+  const approvedRows = entries.filter((e) => e.status === "Approved");
+  const approved = approvedRows.filter((e) => !isPendingGrounding(e));
   const approvedNormIds = approved.map((e) => e.normId);
+  const draftCount = entries.length - approvedRows.length;
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+  const { data: activeRows, error: activeError } = await supabase
+    .from("taxonomy_entries")
+    .select("norm_id, content_hash")
+    .eq("active", true);
+
+  if (activeError) {
+    console.error("Failed to read existing taxonomy_entries:", activeError.message);
+    process.exit(1);
+  }
+  const activeNormIds = new Set((activeRows ?? []).map((r) => r.norm_id));
+
+  // Evaluated against the state before this sync touches anything, so a row
+  // only qualifies for the exception if it was already live.
+  const flagged = approvedRows.filter(isPendingGrounding);
+  const keptLive = flagged.filter((e) => activeNormIds.has(e.normId));
+  const pendingGrounding = flagged.filter((e) => !activeNormIds.has(e.normId));
+  const keepActiveNormIds = [...approvedNormIds, ...keptLive.map((e) => e.normId)];
 
   let existingHashByNormId = new Map();
   if (approvedNormIds.length > 0) {
@@ -112,6 +151,32 @@ async function main() {
       process.exit(1);
     }
     existingHashByNormId = new Map((existingRows ?? []).map((r) => [r.norm_id, r.content_hash]));
+  }
+
+  if (pendingGrounding.length > 0) {
+    console.log(
+      `${pendingGrounding.length} Approved row(s) skipped — flagged pending grounding decision:\n  ${pendingGrounding.map((e) => e.normId).join(", ")}`
+    );
+  }
+  if (keptLive.length > 0) {
+    console.log(
+      `${keptLive.length} row(s) flagged pending grounding, but currently live — kept active as an explicit exception, needs founder follow-up:\n  ${keptLive.map((e) => e.normId).join(", ")}`
+    );
+  }
+
+  if (DRY_RUN) {
+    const wouldEmbed = approved.filter((e) => existingHashByNormId.get(e.normId) !== contentHash(e));
+    const wouldDeactivate = [...activeNormIds].filter((id) => !keepActiveNormIds.includes(id));
+    if (wouldEmbed.length > 0) {
+      console.log(`Would embed/upsert with new content:\n  ${wouldEmbed.map((e) => e.normId).join(", ")}`);
+    }
+    if (wouldDeactivate.length > 0) {
+      console.log(`Would deactivate:\n  ${wouldDeactivate.join(", ")}`);
+    }
+    console.log(
+      `Dry run summary: ${entries.length} rows parsed, ${activeNormIds.size} currently active in DB — ${approved.length} sync-eligible (${wouldEmbed.length} new/changed, ${approved.length - wouldEmbed.length} unchanged), ${pendingGrounding.length} skipped — flagged pending grounding decision, ${keptLive.length} kept active as exception, ${draftCount} Draft (not synced), ${wouldDeactivate.length} would be deactivated.`
+    );
+    return;
   }
 
   let embeddedCount = 0;
@@ -168,16 +233,17 @@ async function main() {
     }
   }
 
-  // Reconciliation: deactivate anything no longer in this run's Approved set
-  // (un-approved or removed from the sheet). Never hard-delete — debrief_gaps
+  // Reconciliation: deactivate anything no longer in this run's eligible set
+  // (un-approved, flagged pending grounding, or removed from the sheet) —
+  // except flagged rows kept live as an explicit exception above. Never hard-delete — debrief_gaps
   // may reference the norm_id.
   let deactivateQuery = supabase
     .from("taxonomy_entries")
     .update({ active: false, updated_at: new Date().toISOString() })
     .eq("active", true);
 
-  if (approvedNormIds.length > 0) {
-    deactivateQuery = deactivateQuery.not("norm_id", "in", `(${approvedNormIds.join(",")})`);
+  if (keepActiveNormIds.length > 0) {
+    deactivateQuery = deactivateQuery.not("norm_id", "in", `(${keepActiveNormIds.join(",")})`);
   }
 
   const { data: deactivated, error: deactivateError } = await deactivateQuery.select("norm_id");
@@ -188,7 +254,7 @@ async function main() {
   const deactivatedCount = deactivated?.length ?? 0;
 
   console.log(
-    `Taxonomy sync complete: ${approved.length} Approved rows processed — ${embeddedCount} newly embedded, ${skippedCount} unchanged (skipped), ${deactivatedCount} deactivated.`
+    `Taxonomy sync complete: ${approved.length} eligible Approved rows processed — ${embeddedCount} newly embedded, ${skippedCount} unchanged (skipped), ${deactivatedCount} deactivated. ${pendingGrounding.length} skipped — flagged pending grounding decision, ${keptLive.length} flagged but kept active as an explicit exception (needs founder follow-up).`
   );
 }
 

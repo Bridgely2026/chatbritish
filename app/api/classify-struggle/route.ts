@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import categoryReferenceEmbeddings from "@/lib/category-reference-embeddings.json";
 
-// Classifies onboarding's free-text "struggle" answer against the six fixed
+// Classifies onboarding's free-text "struggle" answer against the twelve fixed
 // taxonomy categories via Voyage embeddings + cosine similarity, so it can
 // feed an extra signal into computeStartingPoint() alongside the situations/
 // timeInUk/role modifiers already collected on the same step.

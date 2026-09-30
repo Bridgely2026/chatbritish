@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Nav from "@/components/Nav";
-import { ROLES, SITUATIONS, computeStartingPoint } from "@/lib/mock-data";
+import { CATEGORY_LABELS, ROLES, SITUATIONS, computeStartingPoint } from "@/lib/mock-data";
 import { ensureAnonymousUserId, getSupabaseBrowser } from "@/lib/supabase-browser";
 
 const TIME_IN_UK = ["Just arrived", "Under 1 year", "1–3 years", "3+ years"];
@@ -25,7 +25,8 @@ const GOALS: { label: string; text: string }[] = [
 ];
 
 // Sector is only collected when one of these situations was picked in step 1.
-const SECTOR_SITUATIONS = ["Work", "Job search"];
+// Canonical category names, matching what `situations` stores.
+const SECTOR_SITUATIONS: string[] = [CATEGORY_LABELS.WP, CATEGORY_LABELS.JS];
 
 const TOTAL_STEPS = 3;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -127,8 +128,9 @@ export default function OnboardingPage() {
 
   const isLastStep = step === TOTAL_STEPS - 1;
 
-  function toggleSituation(label: string) {
-    setSituations((prev) => (prev.includes(label) ? prev.filter((s) => s !== label) : [...prev, label]));
+  // Stores the canonical category name, not the chip's display label.
+  function toggleSituation(category: string) {
+    setSituations((prev) => (prev.includes(category) ? prev.filter((s) => s !== category) : [...prev, category]));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -282,8 +284,8 @@ export default function OnboardingPage() {
                 {SITUATIONS.map((s) => (
                   <Chip
                     key={s.label}
-                    selected={situations.includes(s.label)}
-                    onClick={() => toggleSituation(s.label)}
+                    selected={situations.includes(CATEGORY_LABELS[s.category])}
+                    onClick={() => toggleSituation(CATEGORY_LABELS[s.category])}
                     title={s.description}
                   >
                     {s.label}

@@ -11,7 +11,9 @@ const SOURCE_PATH = path.join(__dirname, "..", "data", "chat_british_taxonomy_te
 const OUTPUT_PATH = path.join(__dirname, "..", "lib", "taxonomy-generated.ts");
 
 function main() {
-  const { entries, errors } = parseTaxonomy(SOURCE_PATH);
+  const { entries: parsed, errors } = parseTaxonomy(SOURCE_PATH);
+  // groundingCheck only gates the DB sync; NormEntry doesn't carry it.
+  const entries = parsed.map(({ groundingCheck, ...entry }) => entry);
 
   if (errors.length > 0) {
     console.error(`Taxonomy import failed with ${errors.length} problem(s):\n`);

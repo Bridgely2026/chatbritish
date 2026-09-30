@@ -62,6 +62,54 @@ const ICON_PATHS: Record<string, ReactNode> = {
       <line x1="4" y1="20" x2="20" y2="20" />
     </>
   ),
+  Education: (
+    <>
+      <path d="M12 6.5C10 5 7 4.5 3.5 5v13c3.5-.5 6.5 0 8.5 1.5" />
+      <path d="M12 6.5c2-1.5 5-2 8.5-1.5v13c-3.5-.5-6.5 0-8.5 1.5" />
+      <line x1="12" y1="6.5" x2="12" y2="19.5" />
+    </>
+  ),
+  "Dating & relationships": (
+    <>
+      <path d="M9 19s-6-3.8-6-8.2A3.3 3.3 0 0 1 9 9a3.3 3.3 0 0 1 6 1.8C15 15.2 9 19 9 19Z" />
+      <path d="M13.5 6.2A3.3 3.3 0 0 1 21 7.8c0 3.3-3.4 6.2-5.2 7.5" />
+    </>
+  ),
+  "Money & transactions": (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M14.5 8.5a2.5 2.5 0 0 0-4.5 1.5v5.5" />
+      <line x1="8.5" y1="12.5" x2="13" y2="12.5" />
+      <line x1="8.5" y1="15.5" x2="15.5" y2="15.5" />
+    </>
+  ),
+  "Transport & commuting": (
+    <>
+      <rect x="5" y="3" width="14" height="15" rx="2.5" />
+      <line x1="5" y1="11" x2="19" y2="11" />
+      <line x1="8" y1="6" x2="16" y2="6" />
+      <circle cx="8.5" cy="14.5" r="1" />
+      <circle cx="15.5" cy="14.5" r="1" />
+      <line x1="7.5" y1="18" x2="7.5" y2="21" />
+      <line x1="16.5" y1="18" x2="16.5" y2="21" />
+    </>
+  ),
+  "Neighbours & community": (
+    <>
+      <path d="M2.5 12 7 8l4.5 4" />
+      <path d="M3.5 11v8h7v-8" />
+      <path d="M12.5 12 17 8l4.5 4" />
+      <path d="M13.5 11v8h7v-8" />
+      <path d="M6 19v-3h2v3" />
+      <path d="M16 19v-3h2v3" />
+    </>
+  ),
+  "Customer service & retail": (
+    <>
+      <path d="M5 8h14l-1 12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1Z" />
+      <path d="M9 10V6.5a3 3 0 0 1 6 0V10" />
+    </>
+  ),
 };
 
 export default function CategoryIcon({ category, className }: CategoryIconProps) {
