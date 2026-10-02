@@ -15,6 +15,8 @@ that's what actually happened at the time.
 
 ## Standard deploy workflow (follow this every time)
 
+**Live URL:** https://bridgely-production-c362.up.railway.app
+
 1. Cursor commits to a **new branch**, not `main` directly.
 2. Branch gets pushed to `origin` — **this alone does not deploy anything.**
    Railway only watches `main`.
