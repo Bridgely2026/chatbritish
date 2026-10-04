@@ -20,13 +20,19 @@ const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const VOYAGE_MODEL = "voyage-3";
 const CLAUDE_MODEL = "claude-sonnet-5";
 
-// Similarity thresholds on Voyage's cosine-similarity scale. Calibrated from
-// a small manual test batch (2026-09-18): a clear, unambiguous match (landlord
-// boiler description -> HL-1) scored 0.41, while genuinely unrelated content
-// (pet care) scored 0.15-0.22 against all four entries. Still a small sample —
-// will likely need further tuning once there's real usage data.
-const CONFIDENT_THRESHOLD = 0.35;
-const FLOOR_THRESHOLD = 0.25;
+// Similarity thresholds on Voyage's cosine-similarity scale. Recalibrated
+// (2026-10-04) against the full 200-entry taxonomy with 16 test descriptions:
+// clear cases (one per category) scored 0.535+ on the right norm, except the
+// landlord boiler case (HL-1) at 0.348; vague, category-less descriptions
+// scored 0.427 and 0.473; unrelated content scored 0.297 (pet care) and 0.195
+// (baking). The old 0.35/0.25 pair let both vague cases through as confident
+// and the pet question past the floor. 0.50 sends vague and borderline cases
+// through the clarifying follow-up instead; 0.30 keeps unrelated content
+// below the floor once the route commits to an answer (the floor is checked
+// after the follow-up, not before it). Still a small sample — revisit with
+// real usage data.
+const CONFIDENT_THRESHOLD = 0.5;
+const FLOOR_THRESHOLD = 0.3;
 
 // Intentionally simple rate limiter: in-memory, per-instance, and it resets on
 // redeploy or cold start (and isn't shared between serverless instances). That's
