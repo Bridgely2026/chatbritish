@@ -276,18 +276,18 @@ function PracticeContent() {
           </div>
         </div>
 
-        <div className="mt-8 flex flex-wrap gap-4">
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
           <button
             type="button"
             onClick={practiceAnotherCategory}
-            className="bg-brick px-6 py-3 text-sm font-medium text-paper transition hover:bg-brick-dark"
+            className="w-full bg-brick px-6 py-3 sm:w-auto text-sm font-medium text-paper transition hover:bg-brick-dark"
           >
             Practice another category
           </button>
           <button
             type="button"
             onClick={restartCategory}
-            className="border border-line px-6 py-3 text-sm font-medium text-ink transition hover:border-ink"
+            className="w-full border border-line px-6 py-3 sm:w-auto text-sm font-medium text-ink transition hover:border-ink"
           >
             Back to this category
           </button>

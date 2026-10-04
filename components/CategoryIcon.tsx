@@ -31,12 +31,13 @@ const ICON_PATHS: Record<string, ReactNode> = {
       <rect x="19" y="31" width="10" height="4" rx="0.5" />
     </>
   ),
-  // Appointment card with a small clock face
+  // Appointment card with a plus sign and a small clock face
   Healthcare: (
     <>
       <rect x="5" y="11" width="38" height="27" rx="2" />
       <path d="M5 18h38" />
-      <path d="M10 24h12M10 28h9M10 32h11" />
+      <path d="M10 14.5h11" />
+      <path d="M15 23.5v10M10 28.5h10" />
       <circle cx="33" cy="28.5" r="6" />
       <path d="M33 25v3.5l2.5 1.5" />
     </>
@@ -118,12 +119,15 @@ const ICON_PATHS: Record<string, ReactNode> = {
       <path d="M18.5 25.2H26" />
     </>
   ),
-  // A bus-stop pole with a plain rectangular flag sign
+  // A bus-stop pole with a plain rectangular flag sign showing a front-view bus
   "Transport & commuting": (
     <>
       <path d="M20 5v18M20 34v9M15 43h10" />
-      <rect x="20" y="7" width="17" height="11" rx="1" />
-      <path d="M24 11h9M24 14.5h6" />
+      <rect x="20" y="5" width="21" height="16" rx="1" />
+      <rect x="24.5" y="7.5" width="12" height="10" rx="2" />
+      <path d="M26.3 9.6h8.4v3.8h-8.4Z" />
+      <path d="M27.3 15.4h.01M33.7 15.4h.01" strokeWidth={1.8} />
+      <path d="M26.5 17.5v1.6M34.5 17.5v1.6" />
       <rect x="16" y="23" width="8" height="11" rx="0.5" />
       <path d="M18 26.5h4M18 29h4M18 31.5h2.5" />
     </>
