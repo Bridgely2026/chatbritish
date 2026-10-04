@@ -100,10 +100,20 @@ type DebriefResult = {
 
 type GroundedOutcome = { applies: true; result: DebriefResult } | { applies: false };
 
+// Thrown when Claude's structured output can't be used as-is (no tool call,
+// non-boolean entry_applies, or a missing/empty answer field). Unlike API or
+// network errors, this is worth retrying, and a candidate that keeps failing
+// is skipped rather than failing the whole request.
+class MalformedOutputError extends Error {}
+
+const MAX_ATTEMPTS_PER_CANDIDATE = 2;
+
 // Why a debrief was logged to debrief_gaps: nothing was even close, vs.
 // retrieval got close but Claude confirmed the entry doesn't fit (the stronger
 // signal that a new taxonomy entry is needed for this exact situation).
 type DeclineReason = "below_floor_threshold" | "entry_did_not_apply";
+
+const TRY_AGAIN_MESSAGE = "Something went wrong. Please try again.";
 
 const NO_MATCH_MESSAGE =
   "I couldn't find a close match for this one yet — it may be outside what Chat British covers so far, but thanks for flagging it.";
@@ -182,7 +192,7 @@ function getToolInput(message: Anthropic.Message, toolName: string): Record<stri
     (b): b is Anthropic.ToolUseBlock => b.type === "tool_use" && b.name === toolName
   );
   if (!block || typeof block.input !== "object" || block.input === null) {
-    throw new Error(`Claude did not return a valid "${toolName}" tool call.`);
+    throw new MalformedOutputError(`Claude did not return a valid "${toolName}" tool call.`);
   }
   return block.input as Record<string, unknown>;
 }
@@ -246,15 +256,34 @@ async function generateGroundedAnswer(
 
   // Primary decline signal. The other fields are placeholders when this is false.
   if (typeof entry_applies !== "boolean") {
-    throw new Error("Claude returned a debrief result without a boolean entry_applies.");
+    throw new MalformedOutputError("Claude returned a debrief result without a boolean entry_applies.");
   }
   if (!entry_applies) return { applies: false };
 
-  // Secondary safety net: catches a genuinely malformed response.
-  if (!likely_norm || !surface_signal || !what_it_means || !suggested_response) {
-    throw new Error("Claude returned an incomplete structured debrief result.");
+  const isFilled = (v: unknown): v is string => typeof v === "string" && v.trim() !== "";
+  if (!isFilled(likely_norm) || !isFilled(surface_signal) || !isFilled(what_it_means) || !isFilled(suggested_response)) {
+    throw new MalformedOutputError("Claude returned an incomplete structured debrief result.");
   }
   return { applies: true, result: { likely_norm, surface_signal, what_it_means, suggested_response } };
+}
+
+// Runs generateGroundedAnswer for one candidate, retrying once on malformed
+// output. Returns null if every attempt was malformed; other errors propagate.
+async function generateWithRetry(
+  anthropic: Anthropic,
+  description: string,
+  followUp: FollowUp | undefined,
+  entry: MatchRow
+): Promise<GroundedOutcome | null> {
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS_PER_CANDIDATE; attempt++) {
+    try {
+      return await generateGroundedAnswer(anthropic, description, followUp, entry);
+    } catch (err) {
+      if (!(err instanceof MalformedOutputError)) throw err;
+      console.warn(`Malformed Claude output for ${entry.norm_id} (attempt ${attempt}):`, err.message);
+    }
+  }
+  return null;
 }
 
 async function logGap(
@@ -393,9 +422,15 @@ export async function POST(request: NextRequest) {
     .slice(0, MAX_GENERATION_CANDIDATES);
 
   try {
-    const tried: { norm_id: string; similarity: number; entry_applies: boolean }[] = [];
+    const tried: { norm_id: string; similarity: number; entry_applies: boolean | "malformed" }[] = [];
     for (const candidate of candidates) {
-      const outcome = await generateGroundedAnswer(anthropic, description, followUp, candidate);
+      const outcome = await generateWithRetry(anthropic, description, followUp, candidate);
+      if (!outcome) {
+        // TEMP DEBUG: remove after threshold calibration.
+        console.log(`[debrief-debug] malformed response for ${candidate.norm_id}, skipped`);
+        tried.push({ norm_id: candidate.norm_id, similarity: candidate.similarity, entry_applies: "malformed" });
+        continue;
+      }
       tried.push({ norm_id: candidate.norm_id, similarity: candidate.similarity, entry_applies: outcome.applies });
       if (outcome.applies) {
         // TEMP DEBUG: remove after threshold calibration.
@@ -405,6 +440,12 @@ export async function POST(request: NextRequest) {
     }
     // TEMP DEBUG: remove after threshold calibration.
     console.log("[debrief-debug] candidates tried:", JSON.stringify(tried));
+
+    // A skipped candidate might have applied, so this isn't a content gap:
+    // don't log one, and let the user retry.
+    if (tried.some((t) => t.entry_applies === "malformed")) {
+      return NextResponse.json({ status: "error", message: TRY_AGAIN_MESSAGE }, { status: 503 });
+    }
     await logGap(supabase, { description, followUp, top, topSimilarity, declineReason: "entry_did_not_apply" });
     return NextResponse.json({ status: "no_match", message: NO_MATCH_MESSAGE });
   } catch (err) {
