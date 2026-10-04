@@ -14,6 +14,10 @@ const config: Config = {
         "sage-light": "#DCE5DF",
         muted: "#5B6670",
         line: "#D9D2C0",
+        // Brand decoration only (rules, card bands, ticket band) — never
+        // feedback states, links or buttons. No light variant: sage-light
+        // stays reserved for correct answers.
+        racing: "#1E4D3A",
       },
       fontFamily: {
         display: ["Fraunces", "Georgia", "serif"],

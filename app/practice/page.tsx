@@ -161,14 +161,15 @@ function PracticeContent() {
     return (
       <div className="mx-auto max-w-xl px-6 py-16">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-medium uppercase tracking-wide text-brick">Practice</p>
+          <p className="eyebrow text-brick">Practice</p>
           {streakLine}
         </div>
 
-        <h1 className="mt-2 font-display text-2xl font-medium text-ink">Choose a category</h1>
+        <div className="rule-double mt-3" aria-hidden="true" />
+        <h1 className="mt-3 font-display text-2xl font-medium text-ink">Choose a category</h1>
 
         {noteCategory && (
-          <p className="mt-4 text-xs font-medium uppercase tracking-wide text-brick">
+          <p className="mt-4 eyebrow text-brick">
             We don&apos;t have practice scenarios for {noteCategory} yet — pick another to get started
           </p>
         )}
@@ -178,26 +179,34 @@ function PracticeContent() {
             const disabled = count === 0;
             const categoryScenarioList = getScenariosByCategory(category);
             const allProvisional = count > 0 && categoryScenarioList.every((s) => s.provisional);
+            // Coming-soon and pending-review cards get a muted band instead of racing.
+            const muted = disabled || allProvisional;
             return (
               <button
                 key={category}
                 type="button"
                 disabled={disabled}
                 onClick={() => !disabled && startSession(category)}
-                className={`border p-4 text-left transition ${
-                  disabled
-                    ? "cursor-not-allowed border-line bg-white/30 opacity-50"
-                    : "border-line bg-white/60 hover:border-ink"
+                className={`flex flex-col border text-left transition ${
+                  disabled ? "cursor-not-allowed border-line bg-white/30" : "border-line bg-white/60 hover:border-ink"
                 }`}
               >
-                <CategoryIcon category={category} className="h-6 w-6 text-ink" />
-                <p className="mt-3 font-display text-lg font-medium text-ink">{category}</p>
-                <p className="mt-1 text-sm text-muted">{CATEGORY_BLURBS[category]}</p>
-                <p className="mt-3 text-xs font-medium uppercase tracking-wide text-brick">
-                  {disabled
-                    ? "No scenarios yet — coming soon"
-                    : `${count} scenario${count === 1 ? "" : "s"}${allProvisional ? " · pending review" : ""}`}
-                </p>
+                <p className={`eyebrow px-4 py-2.5 text-paper ${muted ? "bg-muted" : "bg-racing"}`}>{category}</p>
+                <div className="flex flex-1 items-start gap-4 p-4">
+                  <CategoryIcon
+                    category={category}
+                    className={`h-11 w-11 shrink-0 ${disabled ? "text-muted" : "text-ink"}`}
+                  />
+                  <div>
+                    <p className="text-sm text-muted">{CATEGORY_BLURBS[category]}</p>
+                    <p className={`mt-3 eyebrow ${disabled ? "text-muted" : "text-brick"}`}>
+                      {disabled
+                        ? "No scenarios yet — coming soon"
+                        : `${count} scenario${count === 1 ? "" : "s"}${allProvisional ? " · pending review" : ""}`}
+                    </p>
+                  </div>
+                </div>
+                <div className={`h-0.5 ${disabled ? "bg-line" : "bg-brick"}`} aria-hidden="true" />
               </button>
             );
           })}
@@ -220,27 +229,37 @@ function PracticeContent() {
     return (
       <div className="mx-auto max-w-xl px-6 py-16">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-medium uppercase tracking-wide text-brick">Practice</p>
+          <p className="eyebrow text-brick">Practice</p>
           {streakLine}
         </div>
 
-        {activeCategory && (
-          <p className="mt-6 text-xs font-medium uppercase tracking-wide text-brick">{activeCategory}</p>
-        )}
-        <h1 className="mt-2 font-display text-2xl font-medium text-ink">Session complete</h1>
+        {/* Rail-ticket stub: score above the tear line, record below it. The
+            notches are masks, so the outline is a drop-shadow on the wrapper. */}
+        <div className="cut-outline mt-6">
+          <div className="ticket-top bg-[#fbf9f4]">
+            <div className="flex min-h-[2.25rem] items-center bg-racing px-6 py-2.5">
+              {activeCategory && <p className="eyebrow text-paper">{activeCategory}</p>}
+            </div>
+            <div className="px-6 pb-6 pt-5">
+              <h1 className="font-display text-2xl font-medium text-ink">Session complete</h1>
 
-        <div className="mt-6 flex items-baseline gap-2">
-          <span className="font-display text-6xl font-medium text-ink">{correctCount}</span>
-          <span className="text-lg text-muted">/ {total} correct</span>
-        </div>
+              <div className="mt-6 flex items-baseline gap-2">
+                <span className="font-display text-6xl font-medium text-ink">{correctCount}</span>
+                <span className="text-lg text-muted">/ {total} correct</span>
+              </div>
 
-        <p className="mt-3 text-muted">{message}</p>
-
-        <div className="mt-8 space-y-1">
-          <p className="text-sm text-muted">🔥 {streak} day streak</p>
-          <p className="text-xs text-muted">
-            Practiced: <span className="font-mono">{normIds}</span>
-          </p>
+              <p className="mt-3 text-muted">{message}</p>
+            </div>
+          </div>
+          <div className="ticket-stub bg-[#fbf9f4] px-6 pb-5">
+            <div className="mx-2 border-t-2 border-dashed border-line" aria-hidden="true" />
+            <div className="space-y-1 pt-4">
+              <p className="text-sm text-muted">🔥 {streak} day streak</p>
+              <p className="text-xs text-muted">
+                Practiced: <span className="font-mono">{normIds}</span>
+              </p>
+            </div>
+          </div>
         </div>
 
         <div className="mt-8 flex flex-wrap gap-4">
@@ -268,18 +287,18 @@ function PracticeContent() {
   return (
     <div className="mx-auto max-w-xl px-6 py-16">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-medium uppercase tracking-wide text-brick">Practice</p>
+        <p className="eyebrow text-brick">Practice</p>
         {streakLine}
       </div>
 
       {activeCategory && prioritizedCategory === activeCategory && (
-        <p className="mt-2 text-xs font-medium uppercase tracking-wide text-brick">
+        <p className="mt-2 eyebrow text-brick">
           Prioritized for you: {activeCategory}
         </p>
       )}
 
       {scenario.provisional && (
-        <p className="mt-2 text-xs font-medium uppercase tracking-wide text-brick">
+        <p className="mt-2 eyebrow text-brick">
           Drafted from an unreviewed taxonomy entry — not yet approved by the founder
         </p>
       )}

@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function Nav() {
   return (
-    <header className="border-b border-line">
+    <header>
       <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-5">
         <Link href="/" className="font-display text-xl font-medium tracking-tight text-ink">
           Chat British
@@ -19,6 +19,7 @@ export default function Nav() {
           </Link>
         </nav>
       </div>
+      <div className="rule-double" aria-hidden="true" />
     </header>
   );
 }
