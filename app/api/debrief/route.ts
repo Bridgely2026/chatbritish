@@ -34,6 +34,14 @@ const CLAUDE_MODEL = "claude-sonnet-5";
 const CONFIDENT_THRESHOLD = 0.5;
 const FLOOR_THRESHOLD = 0.3;
 
+// When Claude declines the top candidate (entry_applies: false), the next
+// candidates within this margin of the top similarity are tried too, up to
+// MAX_GENERATION_CANDIDATES. Set from a single observed tie (the landlord
+// repair case: HL-1 and HL-15 both at 0.477, with the wrong one sorted first)
+// — needs revisiting with real usage data.
+const FALLBACK_MARGIN = 0.03;
+const MAX_GENERATION_CANDIDATES = 3;
+
 // Intentionally simple rate limiter: in-memory, per-instance, and it resets on
 // redeploy or cold start (and isn't shared between serverless instances). That's
 // enough to stop a quiet demo from being hammered by accident, but it is NOT a
@@ -236,9 +244,6 @@ async function generateGroundedAnswer(
   const { entry_applies, likely_norm, surface_signal, what_it_means, suggested_response } =
     input as Partial<DebriefResult> & { entry_applies?: unknown };
 
-  // TEMP DEBUG: remove after threshold calibration.
-  console.log("[debrief-debug] entry_applies:", entry_applies, "for", entry.norm_id);
-
   // Primary decline signal. The other fields are placeholders when this is false.
   if (typeof entry_applies !== "boolean") {
     throw new Error("Claude returned a debrief result without a boolean entry_applies.");
@@ -380,13 +385,28 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ status: "no_match", message: NO_MATCH_MESSAGE });
   }
 
+  // Near-ties are common enough that the top-ranked entry isn't always the
+  // right one, so a declined top candidate falls through to the next close one.
+  const candidates = matches
+    .filter((m) => m.similarity >= FLOOR_THRESHOLD && topSimilarity - m.similarity <= FALLBACK_MARGIN)
+    .sort((a, b) => b.similarity - a.similarity)
+    .slice(0, MAX_GENERATION_CANDIDATES);
+
   try {
-    const outcome = await generateGroundedAnswer(anthropic, description, followUp, top);
-    if (!outcome.applies) {
-      await logGap(supabase, { description, followUp, top, topSimilarity, declineReason: "entry_did_not_apply" });
-      return NextResponse.json({ status: "no_match", message: NO_MATCH_MESSAGE });
+    const tried: { norm_id: string; similarity: number; entry_applies: boolean }[] = [];
+    for (const candidate of candidates) {
+      const outcome = await generateGroundedAnswer(anthropic, description, followUp, candidate);
+      tried.push({ norm_id: candidate.norm_id, similarity: candidate.similarity, entry_applies: outcome.applies });
+      if (outcome.applies) {
+        // TEMP DEBUG: remove after threshold calibration.
+        console.log("[debrief-debug] candidates tried:", JSON.stringify(tried));
+        return NextResponse.json({ status: "matched", result: outcome.result });
+      }
     }
-    return NextResponse.json({ status: "matched", result: outcome.result });
+    // TEMP DEBUG: remove after threshold calibration.
+    console.log("[debrief-debug] candidates tried:", JSON.stringify(tried));
+    await logGap(supabase, { description, followUp, top, topSimilarity, declineReason: "entry_did_not_apply" });
+    return NextResponse.json({ status: "no_match", message: NO_MATCH_MESSAGE });
   } catch (err) {
     console.error("Claude grounded generation failed:", err);
     return NextResponse.json(
