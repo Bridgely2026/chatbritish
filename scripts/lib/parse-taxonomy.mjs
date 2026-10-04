@@ -1,9 +1,11 @@
 // Shared parse+validate logic for the "Taxonomy" sheet in
 // data/chat_british_taxonomy_template.xlsx. Used by both
 // scripts/import-taxonomy.mjs (generates lib/taxonomy-generated.ts) and
-// scripts/sync-taxonomy-db.mjs (embeds and upserts into Supabase).
+// scripts/lib/sync-taxonomy.mjs (embeds and upserts into Supabase, from both
+// the CLI and app/api/admin/sync-taxonomy).
 
-import XLSX from "xlsx";
+import { readFileSync } from "node:fs";
+import * as XLSX from "xlsx";
 
 export const SHEET_NAME = "Taxonomy";
 
@@ -62,7 +64,9 @@ function clean(value) {
 // human-readable string in `errors` rather than thrown, so callers can print
 // every problem at once before deciding whether to fail loudly.
 export function parseTaxonomy(sourcePath) {
-  const workbook = XLSX.readFile(sourcePath);
+  // Read the bytes ourselves rather than XLSX.readFile, which relies on xlsx
+  // finding `fs` itself and isn't reliable once bundled into a Next.js route.
+  const workbook = XLSX.read(readFileSync(sourcePath), { type: "buffer" });
   const sheet = workbook.Sheets[SHEET_NAME];
   if (!sheet) {
     return { entries: [], errors: [`Sheet "${SHEET_NAME}" not found in ${sourcePath}`] };
