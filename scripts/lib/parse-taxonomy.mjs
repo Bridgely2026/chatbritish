@@ -1,8 +1,7 @@
 // Shared parse+validate logic for the "Taxonomy" sheet in
 // data/chat_british_taxonomy_template.xlsx. Used by both
 // scripts/import-taxonomy.mjs (generates lib/taxonomy-generated.ts) and
-// scripts/lib/sync-taxonomy.mjs (embeds and upserts into Supabase, from both
-// the CLI and app/api/admin/sync-taxonomy).
+// scripts/lib/sync-taxonomy.mjs (embeds and upserts into Supabase).
 
 import { readFileSync } from "node:fs";
 import * as XLSX from "xlsx";

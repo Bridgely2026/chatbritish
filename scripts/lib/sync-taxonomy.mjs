@@ -1,8 +1,6 @@
 // Embeds and upserts Approved taxonomy entries into Supabase (taxonomy_entries),
 // backing the real RAG pipeline behind Debrief. Shared by
-// scripts/sync-taxonomy-db.mjs (runs everything in one go) and
-// app/api/admin/sync-taxonomy (runs `limit` rows per call, so repeated calls
-// finish the job).
+// scripts/sync-taxonomy-db.mjs.
 //
 // Approved rows whose Grounding Check starts with "Cultural consensus" are
 // held back from the live database — see isPendingGrounding. One exception:
