@@ -3,17 +3,16 @@ import Nav from "@/components/Nav";
 import NormCard from "@/components/NormCard";
 import { taxonomy, type NormEntry } from "@/lib/mock-data";
 
-// One approved entry per category for the field guide, chosen for the
-// shortest, clearest pair. Text is read from the taxonomy at render time, so
-// it stays verbatim: the first quoted phrase of Surface Markers, and the full
-// "What It Actually Means".
+// One approved entry per category for the field guide, chosen by hand. Text
+// is read from the taxonomy at render time, so it stays verbatim: the first
+// quoted phrase of Surface Markers, and the full "What It Actually Means".
 const FIELD_GUIDE_NORM_IDS = [
-  "WP-1-indirect-refusal-workplace",
+  "WP-17-lets-take-this-offline",
   "HC-4-pharmacist-first-point-of-contact",
   "HL-1-landlord-vague-commitment",
   "SO-8-reflexive-sorry-no-fault-apology",
-  "DR-17-relationship-label-avoidance-early-stage",
-  "CS-15-click-and-collect-standard-option",
+  "DR-2-lets-see-where-this-goes-ambiguity",
+  "CS-1-no-worries-service-staff-filler",
 ];
 
 function firstQuotedPhrase(surfaceMarkers: string): string | null {
