@@ -91,16 +91,30 @@ function PracticeContent() {
 
   // The paddingBottom above only helps once the page is actually scrolled —
   // nothing scrolled it there on its own, so right after answering, the bar
-  // can still cover whatever option currently sits in that screen region
-  // until the user discovers they should scroll. Auto-scroll to the bottom
-  // instead: fires once when a new answer lands (using whatever padding is
-  // current, possibly the pre-measurement fallback) and again when
+  // can still cover the option the user just chose. Auto-scroll so the chosen
+  // option sits fully above the bar: fires once when a new answer lands
+  // (using the pre-measurement fallback height) and again when
   // feedbackBarHeight updates to the real value shortly after — the second
   // call retargets the same in-flight smooth scroll to the corrected
   // position, so it self-corrects rather than needing exact ordering.
+  const optionRefs = useRef<(HTMLButtonElement | null)[]>([]);
   useEffect(() => {
-    if (!lastAnswer) return;
-    window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+    if (!lastAnswer || selected === null) return;
+    const option = optionRefs.current[selected];
+    if (!option) return;
+    const barHeight = feedbackBarHeight > 0 ? feedbackBarHeight : 112;
+    const margin = 12;
+    const rect = option.getBoundingClientRect();
+    const visibleBottom = window.innerHeight - barHeight - margin;
+    let delta = 0;
+    if (rect.bottom > visibleBottom) {
+      // Scroll down until the option clears the bar, but never past its top.
+      delta = Math.min(rect.bottom - visibleBottom, rect.top - margin);
+    } else if (rect.top < margin) {
+      delta = rect.top - margin;
+    }
+    if (delta !== 0) window.scrollTo({ top: window.scrollY + delta, behavior: "smooth" });
+    // `selected` changes in the same update as lastAnswer, so it's covered.
   }, [lastAnswer, feedbackBarHeight]);
 
   const categoryCounts = getCategoryScenarioCounts();
@@ -316,6 +330,9 @@ function PracticeContent() {
             return (
               <button
                 key={i}
+                ref={(el) => {
+                  optionRefs.current[i] = el;
+                }}
                 onClick={() => choose(i)}
                 disabled={selected !== null}
                 className={`flex w-full items-center gap-3 border p-4 text-left text-sm transition ${
@@ -351,30 +368,38 @@ function PracticeContent() {
             barVisible ? "" : "translate-y-full"
           } ${lastAnswer.correct ? "border-sage bg-sage-light" : "border-brick bg-brick-light"}`}
         >
-          <div className="mx-auto flex max-w-2xl items-start gap-4 px-6 py-5">
+          {/* Below sm the layout stacks (icon + verdict, explanation, full-width
+              button, norm ID) so the explanation gets the full width; a
+              side-by-side button squeezed it into a column tall enough to
+              cover most of a phone screen. From sm up it's side by side. */}
+          <div className="mx-auto grid max-w-2xl grid-cols-[auto_1fr] items-center gap-x-3 px-6 py-3 sm:grid-cols-[auto_1fr_auto] sm:items-start sm:gap-x-4 sm:py-5">
             <span
-              className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-paper ${
+              className={`col-start-1 row-start-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-paper sm:row-span-3 ${
                 lastAnswer.correct ? "bg-sage" : "bg-brick"
               }`}
             >
               {lastAnswer.correct ? "✓" : "✕"}
             </span>
-            <div className="flex-1">
-              <p className={`text-sm font-semibold ${lastAnswer.correct ? "text-sage" : "text-brick"}`}>
-                {lastAnswer.correct ? "That lands well" : "Not quite"}
-              </p>
-              <p className="mt-1 text-sm leading-relaxed text-muted">{lastAnswer.feedback}</p>
-              <p className="mt-2 text-xs text-muted">
-                Based on norm <span className="font-mono">{lastAnswer.normId}</span>
-              </p>
-            </div>
+            <p
+              className={`col-start-2 row-start-1 text-sm font-semibold ${
+                lastAnswer.correct ? "text-sage" : "text-brick"
+              }`}
+            >
+              {lastAnswer.correct ? "That lands well" : "Not quite"}
+            </p>
+            <p className="col-span-2 row-start-2 mt-1.5 text-sm leading-snug text-muted sm:col-span-1 sm:col-start-2 sm:mt-1 sm:leading-relaxed">
+              {lastAnswer.feedback}
+            </p>
             <button
               type="button"
               onClick={goToNextOrRecap}
-              className="shrink-0 self-center bg-brick px-6 py-3 text-sm font-medium text-paper transition hover:bg-brick-dark"
+              className="col-span-2 row-start-3 mt-3 w-full bg-brick px-6 py-2.5 text-sm font-medium text-paper transition hover:bg-brick-dark sm:col-span-1 sm:col-start-3 sm:row-span-3 sm:row-start-1 sm:mt-0 sm:w-auto sm:self-center sm:py-3"
             >
               {currentIndex + 1 < categoryScenarios.length ? "Next question" : "See results"}
             </button>
+            <p className="col-span-2 row-start-4 mt-2 text-xs text-muted sm:col-span-1 sm:col-start-2 sm:row-start-3">
+              Based on norm <span className="font-mono">{lastAnswer.normId}</span>
+            </p>
           </div>
         </div>
       )}
