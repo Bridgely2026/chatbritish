@@ -1,6 +1,5 @@
 // Shared Voyage embeddings client, used by the taxonomy sync and the
-// category-reference embedding (both from the CLI scripts and the
-// app/api/admin routes).
+// category-reference embedding CLI scripts.
 //
 // Paced for Voyage's free tier: 3 requests/min and 10K tokens/min. Texts are
 // sent ~20 per request, and before each request we wait until a sliding

@@ -1,8 +1,7 @@
 // Embeds the twelve fixed taxonomy-category reference texts via Voyage and
 // writes lib/category-reference-embeddings.json, which app/api/classify-struggle
 // compares onboarding "struggle" text against via cosine similarity. The
-// texts and embedding logic live in scripts/lib/category-references.mjs, shared with
-// app/api/admin/embed-category-refs.
+// texts and embedding logic live in scripts/lib/category-references.mjs.
 //
 // One-time/rarely-rerun: only needs re-running if the reference texts
 // change. Run via `npm run embed-category-refs`. The output file contains no

@@ -1,7 +1,7 @@
 // Embeds and upserts Approved taxonomy entries into Supabase (taxonomy_entries),
 // backing the real RAG pipeline behind Debrief. Run via `npm run taxonomy:sync-db`.
 // The sync itself (gates, hash skip, reconciliation) lives in
-// scripts/lib/sync-taxonomy.mjs, shared with app/api/admin/sync-taxonomy.
+// scripts/lib/sync-taxonomy.mjs.
 //
 // Flags (pass after `--`, e.g. `npm run taxonomy:sync-db -- --dry-run`):
 //   --dry-run      parse, read current state from Supabase, and report what a
