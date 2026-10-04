@@ -22,6 +22,8 @@ const config: Config = {
       fontFamily: {
         display: ["Fraunces", "Georgia", "serif"],
         sans: ["Work Sans", "system-ui", "sans-serif"],
+        // Handwriting, for the red-pen margin note only.
+        hand: ["Caveat", "cursive"],
       },
       maxWidth: {
         prose: "38rem",
