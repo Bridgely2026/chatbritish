@@ -1,7 +1,29 @@
 import Link from "next/link";
 import Nav from "@/components/Nav";
 import NormCard from "@/components/NormCard";
-import { taxonomy } from "@/lib/mock-data";
+import { taxonomy, type NormEntry } from "@/lib/mock-data";
+
+// One approved entry per category for the field guide, chosen for the
+// shortest, clearest pair. Text is read from the taxonomy at render time, so
+// it stays verbatim: the first quoted phrase of Surface Markers, and the full
+// "What It Actually Means".
+const FIELD_GUIDE_NORM_IDS = [
+  "WP-1-indirect-refusal-workplace",
+  "HC-4-pharmacist-first-point-of-contact",
+  "HL-1-landlord-vague-commitment",
+  "SO-8-reflexive-sorry-no-fault-apology",
+  "DR-17-relationship-label-avoidance-early-stage",
+  "CS-15-click-and-collect-standard-option",
+];
+
+function firstQuotedPhrase(surfaceMarkers: string): string | null {
+  return surfaceMarkers.match(/["\u201C]([^"\u201D]+)["\u201D]/)?.[1] ?? null;
+}
+
+const fieldGuide = FIELD_GUIDE_NORM_IDS.map((id) => taxonomy.find((e) => e.normId === id))
+  .filter((e): e is NormEntry => e?.status === "Approved")
+  .map((e) => ({ normId: e.normId, category: e.category, phrase: firstQuotedPhrase(e.surfaceMarkers), meaning: e.whatItMeans }))
+  .filter((row): row is typeof row & { phrase: string } => row.phrase !== null);
 
 export default function LandingPage() {
   return (
@@ -35,12 +57,14 @@ export default function LandingPage() {
           </div>
         </div>
         <div className="flex justify-center md:justify-end">
-          <NormCard entry={taxonomy[0]} stamp />
+          <NormCard entry={taxonomy[0]} stamp annotation="i.e. probably not." />
         </div>
       </section>
 
+      <SectionDivider />
+
       {/* Three features */}
-      <section className="border-y border-line bg-white/40">
+      <section className="bg-white/40">
         <div className="mx-auto max-w-5xl px-6 py-20">
           <h2 className="font-display text-2xl font-medium text-ink">Two moments. One method.</h2>
           <p className="mt-3 max-w-prose text-muted">
@@ -67,6 +91,38 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <SectionDivider />
+
+      {/* Field guide */}
+      <section className="mx-auto max-w-5xl px-6 py-20">
+        <h2 className="font-display text-2xl font-medium text-ink">A short field guide</h2>
+        <div aria-hidden="true" className="mt-10 hidden grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-x-10 pb-3 sm:grid">
+          <p className="eyebrow text-muted">What they say</p>
+          <p className="eyebrow text-muted">What it means</p>
+        </div>
+        <dl className="mt-8 border-t border-line sm:mt-0">
+          {fieldGuide.map((row) => (
+            <div
+              key={row.normId}
+              className="grid gap-2 border-b border-line py-5 sm:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] sm:gap-x-10"
+            >
+              <dt>
+                <span className="eyebrow block text-brick">{row.category}</span>
+                <span className="mt-1.5 block font-display text-lg italic text-ink">&ldquo;{row.phrase}&rdquo;</span>
+              </dt>
+              <dd className="text-sm leading-relaxed text-muted sm:pt-6">{row.meaning}</dd>
+            </div>
+          ))}
+        </dl>
+        <p className="mt-8">
+          <Link href="/debrief" className="text-sm font-medium text-ink underline underline-offset-4">
+            Try the debrief tool
+          </Link>
+        </p>
+      </section>
+
+      <SectionDivider />
+
       {/* Credibility */}
       <section className="mx-auto max-w-5xl px-6 py-20">
         <div className="grid gap-10 md:grid-cols-[1fr_1.4fr] md:items-start">
@@ -85,8 +141,10 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <SectionDivider />
+
       {/* CTA */}
-      <section className="border-t border-line bg-ink">
+      <section className="tweed bg-ink">
         <div className="mx-auto flex max-w-5xl flex-col items-start gap-6 px-6 py-16 md:flex-row md:items-center md:justify-between">
           <h2 className="font-display text-2xl font-medium text-paper">
             Stop guessing what people mean.
@@ -109,6 +167,19 @@ function Feature({ label, title, body }: { label: string; title: string; body: s
       <p className="eyebrow text-brick">{label}</p>
       <h3 className="mt-2 font-display text-xl font-medium text-ink">{title}</h3>
       <p className="mt-2 text-sm leading-relaxed text-muted">{body}</p>
+    </div>
+  );
+}
+
+// Double rule with a small centred diamond, between home sections.
+function SectionDivider() {
+  return (
+    <div aria-hidden="true" className="flex items-center gap-3 text-racing">
+      <div className="rule-double flex-1" />
+      <svg viewBox="0 0 10 10" className="h-2.5 w-2.5 shrink-0">
+        <path d="M5 .5 9.5 5 5 9.5.5 5Z" fill="currentColor" />
+      </svg>
+      <div className="rule-double flex-1" />
     </div>
   );
 }
