@@ -42,6 +42,26 @@ function contentHash(entry) {
   return createHash("sha256").update(raw).digest("hex");
 }
 
+const MAX_WRITE_RETRIES = 3;
+
+// Runs a Supabase write (a function returning a query builder's
+// { data, error }), retrying up to MAX_WRITE_RETRIES times with a short
+// backoff — a transient "fetch failed" once stopped a sync part-way. Both
+// writes here (upsert by norm_id, deactivate-by-filter) are idempotent, so
+// a retry is always safe. Returns the final { data, error }.
+async function withWriteRetry(write, label, log) {
+  let result = await write();
+  for (let attempt = 1; result.error && attempt <= MAX_WRITE_RETRIES; attempt++) {
+    const delayMs = 1000 * 2 ** (attempt - 1);
+    log(
+      `Supabase write failed for ${label} (${result.error.message}), retrying in ${delayMs / 1000}s (attempt ${attempt}/${MAX_WRITE_RETRIES})...`
+    );
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
+    result = await write();
+  }
+  return result;
+}
+
 function embeddingText(entry) {
   return [
     entry.category,
@@ -179,7 +199,11 @@ export async function syncTaxonomy({
       const embedding = embeddingByNormId.get(entry.normId);
       if (embedding) row.embedding = embedding;
 
-      const { error: upsertError } = await supabase.from("taxonomy_entries").upsert(row, { onConflict: "norm_id" });
+      const { error: upsertError } = await withWriteRetry(
+        () => supabase.from("taxonomy_entries").upsert(row, { onConflict: "norm_id" }),
+        entry.normId,
+        log
+      );
       if (upsertError) {
         throw new Error(`Failed to upsert ${entry.normId}: ${upsertError.message}`);
       }
@@ -195,14 +219,18 @@ export async function syncTaxonomy({
     // (un-approved, flagged pending grounding, or removed from the sheet) —
     // except flagged rows kept live as an explicit exception above. Never
     // hard-delete — debrief_gaps may reference the norm_id.
-    let deactivateQuery = supabase
-      .from("taxonomy_entries")
-      .update({ active: false, updated_at: new Date().toISOString() })
-      .eq("active", true);
-    if (keepActiveNormIds.length > 0) {
-      deactivateQuery = deactivateQuery.not("norm_id", "in", `(${keepActiveNormIds.join(",")})`);
-    }
-    const { data, error: deactivateError } = await deactivateQuery.select("norm_id");
+    // Built fresh per attempt so each retry sends a new request.
+    const deactivateStale = () => {
+      let query = supabase
+        .from("taxonomy_entries")
+        .update({ active: false, updated_at: new Date().toISOString() })
+        .eq("active", true);
+      if (keepActiveNormIds.length > 0) {
+        query = query.not("norm_id", "in", `(${keepActiveNormIds.join(",")})`);
+      }
+      return query.select("norm_id");
+    };
+    const { data, error: deactivateError } = await withWriteRetry(deactivateStale, "stale-row deactivation", log);
     if (deactivateError) {
       throw new Error(`Failed to deactivate stale taxonomy_entries: ${deactivateError.message}`);
     }
