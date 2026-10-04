@@ -87,7 +87,7 @@ export default function DebriefPage() {
     <div className="min-h-screen bg-paper">
       <Nav />
       <div className="mx-auto max-w-xl px-6 py-16">
-        <p className="text-xs font-medium uppercase tracking-wide text-brick">Debrief</p>
+        <p className="eyebrow text-brick">Debrief</p>
         <h1 className="mt-2 font-display text-2xl font-medium text-ink">What happened?</h1>
         <p className="mt-3 text-muted">
           Describe a moment that confused you — in your own words. No need to know what category it
@@ -127,7 +127,7 @@ export default function DebriefPage() {
             onSubmit={(e) => handleFollowUpSubmit(e, phase.question)}
             className="mt-10 border border-line bg-white/60 p-6"
           >
-            <p className="text-xs font-medium uppercase tracking-wide text-brick">One quick check</p>
+            <p className="eyebrow text-brick">One quick check</p>
             <p className="mt-2 text-sm leading-relaxed text-ink">{phase.question}</p>
             <textarea
               value={followUpAnswer}
@@ -154,7 +154,7 @@ export default function DebriefPage() {
 
         {phase.kind === "no_match" && (
           <div className="mt-10 border border-line bg-white/60 p-6">
-            <p className="text-xs font-medium uppercase tracking-wide text-brick">No close match yet</p>
+            <p className="eyebrow text-brick">No close match yet</p>
             <p className="mt-2 text-sm leading-relaxed text-ink">{phase.message}</p>
             <button
               type="button"
@@ -207,7 +207,7 @@ export default function DebriefPage() {
 function Field({ label, value, italic }: { label: string; value: string; italic?: boolean }) {
   return (
     <div className="mt-4">
-      <p className="text-xs font-medium uppercase tracking-wide text-brick">{label}</p>
+      <p className="eyebrow text-brick">{label}</p>
       <p className={`mt-1 text-sm leading-relaxed text-ink ${italic ? "font-display italic" : ""}`}>{value}</p>
     </div>
   );

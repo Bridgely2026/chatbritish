@@ -11,6 +11,7 @@ export default function LandingPage() {
       {/* Hero */}
       <section className="mx-auto grid max-w-5xl gap-12 px-6 py-20 md:grid-cols-2 md:items-center md:py-28">
         <div>
+          <div className="rule-double mb-6" aria-hidden="true" />
           <h1 className="font-display text-4xl font-medium leading-[1.1] text-ink md:text-5xl">
             You understood every word.
             <br />
@@ -34,7 +35,7 @@ export default function LandingPage() {
           </div>
         </div>
         <div className="flex justify-center md:justify-end">
-          <NormCard entry={taxonomy[0]} />
+          <NormCard entry={taxonomy[0]} stamp />
         </div>
       </section>
 
@@ -105,7 +106,7 @@ export default function LandingPage() {
 function Feature({ label, title, body }: { label: string; title: string; body: string }) {
   return (
     <div>
-      <p className="text-xs font-medium uppercase tracking-wide text-brick">{label}</p>
+      <p className="eyebrow text-brick">{label}</p>
       <h3 className="mt-2 font-display text-xl font-medium text-ink">{title}</h3>
       <p className="mt-2 text-sm leading-relaxed text-muted">{body}</p>
     </div>

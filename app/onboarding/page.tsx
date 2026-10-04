@@ -225,7 +225,7 @@ export default function OnboardingPage() {
           <div className="mt-8 grid gap-3 sm:grid-cols-3">
             {startingPoint.rankedCategories.map((category, i) => (
               <div key={category} className="border border-line bg-white/60 p-4">
-                <p className="text-xs font-medium uppercase tracking-wide text-brick">Priority {i + 1}</p>
+                <p className="eyebrow text-brick">Priority {i + 1}</p>
                 <p className="mt-1 text-sm text-ink">{category}</p>
               </div>
             ))}
@@ -257,7 +257,7 @@ export default function OnboardingPage() {
     <div className="min-h-screen bg-paper">
       <Nav />
       <div className="mx-auto max-w-xl px-6 py-16">
-        <p className="text-xs font-medium uppercase tracking-wide text-brick">
+        <p className="eyebrow text-brick">
           Step {step + 1} of {TOTAL_STEPS}
         </p>
         <div className="mt-4 flex gap-1.5">

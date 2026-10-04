@@ -183,7 +183,6 @@ export const scenarios: Scenario[] = [
     title: "A colleague declines your invite",
     normId: "SO-2-declining-invitation-vague-excuse",
     category: "Social",
-    provisional: true,
     setup:
       "You invited a colleague to a work social. They said, “I've got a bit of a thing that day, sorry!” and offered no more detail.",
     steps: [
@@ -217,7 +216,6 @@ export const scenarios: Scenario[] = [
     title: "A formal-sounding letter from your bank",
     normId: "AB-2-bank-letter-formal-tone-routine",
     category: "Admin & bureaucracy",
-    provisional: true,
     setup:
       "A letter arrives from your bank in serious, legal-sounding language, asking you to confirm your address with updated proof documents.",
     steps: [

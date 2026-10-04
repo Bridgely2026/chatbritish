@@ -5,109 +5,155 @@ type CategoryIconProps = {
   className?: string;
 };
 
+// Single-colour line drawings of everyday British objects, one per category.
+// Drawn on a 48-unit grid so small details (chimney pots, coin edges) survive
+// at the ~44px the picker renders them; currentColor lets the card state
+// (muted when disabled) carry through.
 const SHARED_PROPS: SVGProps<SVGSVGElement> = {
-  viewBox: "0 0 24 24",
+  viewBox: "0 0 48 48",
   fill: "none",
   stroke: "currentColor",
   strokeWidth: 1.5,
   strokeLinecap: "round",
   strokeLinejoin: "round",
+  "aria-hidden": true,
+  focusable: false,
 };
 
 const ICON_PATHS: Record<string, ReactNode> = {
+  // Office in-tray with a sheet of paper
   Workplace: (
     <>
-      <rect x="3" y="7" width="18" height="12" rx="2" />
-      <path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7" />
-      <line x1="3" y1="12" x2="21" y2="12" />
+      <path d="M15 28 14 9.5l18-1.5 1.5 20" />
+      <path d="M18 14h10M18.2 18h11M18.4 22h7" />
+      <path d="M6 28 9.5 23.5h4.2M34.3 23.5h4.2L42 28" />
+      <rect x="6" y="28" width="36" height="10" rx="1.5" />
+      <rect x="19" y="31" width="10" height="4" rx="0.5" />
     </>
   ),
-  "Housing & landlord": (
-    <>
-      <path d="M3 11 12 4l9 7" />
-      <path d="M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9" />
-      <path d="M10 20v-5a2 2 0 0 1 4 0v5" />
-    </>
-  ),
+  // Appointment card with a plus sign and a small clock face
   Healthcare: (
     <>
-      <circle cx="12" cy="12" r="9" />
-      <line x1="12" y1="8" x2="12" y2="16" />
-      <line x1="8" y1="12" x2="16" y2="12" />
+      <rect x="5" y="11" width="38" height="27" rx="2" />
+      <path d="M5 18h38" />
+      <path d="M10 14.5h11" />
+      <path d="M15 23.5v10M10 28.5h10" />
+      <circle cx="33" cy="28.5" r="6" />
+      <path d="M33 25v3.5l2.5 1.5" />
     </>
   ),
+  // Row of three terraced houses with chimney pots
+  "Housing & landlord": (
+    <>
+      <path d="M3 41h42" />
+      <path d="M5 41V22M43 41V22M17.7 22v19M30.3 22v19" />
+      <path d="M3.5 22.5 9 15h30l5.5 7.5H3.5Z" />
+      <path d="M17.7 15v7.5M30.3 15v7.5" />
+      <path d="M16 15v-4.5h3.4V15M28.6 15v-4.5h3.4V15" />
+      <path d="M17 10.5V8.3M18.4 10.5V8.3M29.6 10.5V8.3M31 10.5V8.3" />
+      <path d="M8 41v-8h3.6v8M20.7 41v-8h3.6v8M33.3 41v-8h3.6v8" />
+      <rect x="9" y="25.5" width="5" height="4" />
+      <rect x="21.7" y="25.5" width="5" height="4" />
+      <rect x="34.3" y="25.5" width="5" height="4" />
+    </>
+  ),
+  // CV page with a paperclip
   "Job search": (
     <>
-      <path d="M7 3h7l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" />
-      <path d="M14 3v4h4" />
-      <line x1="9" y1="12" x2="15" y2="12" />
-      <line x1="9" y1="15" x2="15" y2="15" />
-      <line x1="9" y1="18" x2="13" y2="18" />
+      <path d="M30 6H12.5A1.5 1.5 0 0 0 11 7.5v33a1.5 1.5 0 0 0 1.5 1.5h23a1.5 1.5 0 0 0 1.5-1.5V7.5A1.5 1.5 0 0 0 35.5 6h-.5" />
+      <rect x="15" y="11" width="6" height="7" rx="0.5" />
+      <path d="M24 12.5h3M24 16h2" />
+      <path d="M15 23h18M15 27h18M15 31h14M15 35h16" />
+      <path d="M31 14.5V4.5a2 2 0 0 1 4 0V15a3 3 0 0 1-6 0V8" />
     </>
   ),
+  // A mug beside a biscuit
   Social: (
     <>
-      <path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h7A2.5 2.5 0 0 1 16 6.5v4A2.5 2.5 0 0 1 13.5 13H9l-3 2.5V13h-.5A2.5 2.5 0 0 1 4 10.5Z" />
-      <path d="M12 11.5A2 2 0 0 1 14 9.5h4a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-.3l1.3 1.5-2.5-1.5H14a2 2 0 0 1-2-2Z" />
+      <path d="M5 19h20v14a6 6 0 0 1-6 6h-8a6 6 0 0 1-6-6Z" />
+      <path d="M25 23h2.5a4 4 0 0 1 0 8H25" />
+      <path d="M11.5 14c-1.4-1.6 1.4-2.9 0-4.5M18.5 14c-1.4-1.6 1.4-2.9 0-4.5" />
+      <circle cx="38.5" cy="34" r="5.5" />
+      <path d="M36.5 32h.01M40.5 32h.01M38.5 35h.01M36.5 37h.01M40.5 37h.01" strokeWidth={1.8} />
     </>
   ),
+  // A window envelope
   "Admin & bureaucracy": (
     <>
-      <path d="M3 9 12 4l9 5" />
-      <line x1="4" y1="9" x2="20" y2="9" />
-      <line x1="6" y1="9" x2="6" y2="17" />
-      <line x1="10" y1="9" x2="10" y2="17" />
-      <line x1="14" y1="9" x2="14" y2="17" />
-      <line x1="18" y1="9" x2="18" y2="17" />
-      <line x1="4" y1="20" x2="20" y2="20" />
+      <rect x="5" y="12" width="38" height="25" rx="1.5" />
+      <rect x="10" y="21" width="18" height="10" rx="1" />
+      <path d="M13 24.5h11M13 27.5h7" />
+      <rect x="33.5" y="15.5" width="5.5" height="6.5" rx="0.5" strokeDasharray="1.5 1.5" />
     </>
   ),
+  // An exercise book with a pencil
   Education: (
     <>
-      <path d="M12 6.5C10 5 7 4.5 3.5 5v13c3.5-.5 6.5 0 8.5 1.5" />
-      <path d="M12 6.5c2-1.5 5-2 8.5-1.5v13c-3.5-.5-6.5 0-8.5 1.5" />
-      <line x1="12" y1="6.5" x2="12" y2="19.5" />
+      <rect x="6" y="6" width="23" height="36" rx="1.5" />
+      <path d="M10.5 6v36" />
+      <rect x="14" y="12" width="11" height="7" rx="0.5" />
+      <path d="M16.5 15.5h6" />
+      <g transform="rotate(18 38 25)">
+        <path d="M35.5 9h5v25h-5Z" />
+        <path d="M35.5 13h5" />
+        <path d="M35.5 34 38 40l2.5-6" />
+        <path d="M37.2 38h1.6" />
+      </g>
     </>
   ),
+  // Two overlapping speech bubbles, a small heart in one
   "Dating & relationships": (
     <>
-      <path d="M9 19s-6-3.8-6-8.2A3.3 3.3 0 0 1 9 9a3.3 3.3 0 0 1 6 1.8C15 15.2 9 19 9 19Z" />
-      <path d="M13.5 6.2A3.3 3.3 0 0 1 21 7.8c0 3.3-3.4 6.2-5.2 7.5" />
+      <path d="M19 27h-5l-5 5v-5H6a3 3 0 0 1-3-3V13a3 3 0 0 1 3-3h20a3 3 0 0 1 3 3v7" />
+      <path d="M14 22.5c-3-2.2-4.5-3.8-4.5-5.4a2.25 2.25 0 0 1 4.5-.8 2.25 2.25 0 0 1 4.5.8c0 1.6-1.5 3.2-4.5 5.4Z" />
+      <path d="M22 20h17a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3h-2v5l-5-5H22a3 3 0 0 1-3-3V23a3 3 0 0 1 3-3Z" />
+      <path d="M24 26h12M24 30h8" />
     </>
   ),
+  // A 12-sided pound coin with a £ inside
   "Money & transactions": (
     <>
-      <circle cx="12" cy="12" r="9" />
-      <path d="M14.5 8.5a2.5 2.5 0 0 0-4.5 1.5v5.5" />
-      <line x1="8.5" y1="12.5" x2="13" y2="12.5" />
-      <line x1="8.5" y1="15.5" x2="15.5" y2="15.5" />
+      <path d="M40.4 28.4 36 36l-7.6 4.4h-8.8L12 36l-4.4-7.6v-8.8L12 12l7.6-4.4h8.8L36 12l4.4 7.6Z" />
+      <circle cx="24" cy="24" r="13" />
+      <path d="M28 18.6a3.6 3.6 0 0 0-6.6 1.8v7.1c0 2.3-1 3.5-2.4 4H29" />
+      <path d="M18.5 25.2H26" />
     </>
   ),
+  // A bus-stop pole with a plain rectangular flag sign showing a front-view bus
   "Transport & commuting": (
     <>
-      <rect x="5" y="3" width="14" height="15" rx="2.5" />
-      <line x1="5" y1="11" x2="19" y2="11" />
-      <line x1="8" y1="6" x2="16" y2="6" />
-      <circle cx="8.5" cy="14.5" r="1" />
-      <circle cx="15.5" cy="14.5" r="1" />
-      <line x1="7.5" y1="18" x2="7.5" y2="21" />
-      <line x1="16.5" y1="18" x2="16.5" y2="21" />
+      <path d="M20 5v18M20 34v9M15 43h10" />
+      <rect x="20" y="5" width="21" height="16" rx="1" />
+      <rect x="24.5" y="7.5" width="12" height="10" rx="2" />
+      <path d="M26.3 9.6h8.4v3.8h-8.4Z" />
+      <path d="M27.3 15.4h.01M33.7 15.4h.01" strokeWidth={1.8} />
+      <path d="M26.5 17.5v1.6M34.5 17.5v1.6" />
+      <rect x="16" y="23" width="8" height="11" rx="0.5" />
+      <path d="M18 26.5h4M18 29h4M18 31.5h2.5" />
     </>
   ),
+  // A garden gate with a rounded hedge behind it
   "Neighbours & community": (
     <>
-      <path d="M2.5 12 7 8l4.5 4" />
-      <path d="M3.5 11v8h7v-8" />
-      <path d="M12.5 12 17 8l4.5 4" />
-      <path d="M13.5 11v8h7v-8" />
-      <path d="M6 19v-3h2v3" />
-      <path d="M16 19v-3h2v3" />
+      <path d="M3 41h42" />
+      <path d="M13.5 17H9a5 5 0 0 0-5 5v19M16.5 17h15M34.5 17H39a5 5 0 0 1 5 5v19" />
+      <path d="M7 27.5q1.5-1.5 3 0M8.5 34q1.5-1.5 3 0M37.5 27.5q1.5-1.5 3 0M36 34q1.5-1.5 3 0" />
+      <path d="M13.5 41V14h3v27M31.5 41V14h3v27" />
+      <circle cx="15" cy="12" r="1.6" />
+      <circle cx="33" cy="12" r="1.6" />
+      <path d="M16.5 25h15M16.5 35h15" />
+      <path d="M20 38V22M24 38V21M28 38V22" />
+      <path d="M19.3 23.3 20 22l.7 1.3M23.3 22.3 24 21l.7 1.3M27.3 23.3 28 22l.7 1.3" />
     </>
   ),
+  // A paper carrier bag with a till receipt
   "Customer service & retail": (
     <>
-      <path d="M5 8h14l-1 12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1Z" />
-      <path d="M9 10V6.5a3 3 0 0 1 6 0V10" />
+      <path d="M6 17h23l1.5 25h-26Z" />
+      <path d="M6.3 21.5h22.4" />
+      <path d="M12 17v-4a5.5 5.5 0 0 1 11 0v4" />
+      <path d="M33 14h10v26l-1.67-1.2-1.66 1.2-1.67-1.2-1.67 1.2-1.66-1.2L33 40Z" />
+      <path d="M35.5 18h5M35.5 21.5h5M35.5 25h3.5M35.5 30h5M35.5 32h5" />
     </>
   ),
 };

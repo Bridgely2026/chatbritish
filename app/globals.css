@@ -17,3 +17,65 @@ body {
   outline: 2px solid #a63a2e;
   outline-offset: 2px;
 }
+
+@layer components {
+  /* Letter-spaced uppercase label used above headings and on category bands. */
+  .eyebrow {
+    @apply text-xs font-medium uppercase tracking-[0.12em];
+  }
+
+  /* Printed double rule: two hairlines with a small gap. */
+  .rule-double {
+    @apply h-[5px] border-y border-racing;
+  }
+
+  /* Perforated stamp edge. Four hole patterns (top, bottom, left, right) are
+     intersected; `round` fits a whole number of holes along each side. Holes
+     bite at most --stamp-r into the box, so content needs padding > --stamp-r. */
+  .stamp-edge {
+    --stamp-r: 5px;
+    --stamp-gap: 16px;
+    --stamp-hole: #0000 var(--stamp-r), #000 calc(var(--stamp-r) + 0.5px);
+    -webkit-mask:
+      radial-gradient(circle at 50% 0, var(--stamp-hole)) 0 0 / var(--stamp-gap) 100% round no-repeat,
+      radial-gradient(circle at 50% 100%, var(--stamp-hole)) 0 0 / var(--stamp-gap) 100% round no-repeat,
+      radial-gradient(circle at 0 50%, var(--stamp-hole)) 0 0 / 100% var(--stamp-gap) no-repeat round,
+      radial-gradient(circle at 100% 50%, var(--stamp-hole)) 0 0 / 100% var(--stamp-gap) no-repeat round;
+    -webkit-mask-composite: source-in;
+    mask:
+      radial-gradient(circle at 50% 0, var(--stamp-hole)) 0 0 / var(--stamp-gap) 100% round no-repeat,
+      radial-gradient(circle at 50% 100%, var(--stamp-hole)) 0 0 / var(--stamp-gap) 100% round no-repeat,
+      radial-gradient(circle at 0 50%, var(--stamp-hole)) 0 0 / 100% var(--stamp-gap) no-repeat round,
+      radial-gradient(circle at 100% 50%, var(--stamp-hole)) 0 0 / 100% var(--stamp-gap) no-repeat round;
+    mask-composite: intersect;
+  }
+
+  /* Hairline outline that follows a masked shape (applied to a wrapper, since
+     a mask would clip the element's own border and shadow). */
+  .cut-outline {
+    filter: drop-shadow(1px 0 0 #d9d2c0) drop-shadow(-1px 0 0 #d9d2c0) drop-shadow(0 1px 0 #d9d2c0)
+      drop-shadow(0 -1px 0 #d9d2c0);
+  }
+
+  /* Rail-ticket halves: semicircular notches where the two halves meet. */
+  .ticket-top,
+  .ticket-stub {
+    --notch: 12px;
+  }
+  .ticket-top {
+    -webkit-mask:
+      radial-gradient(circle at 0 100%, #0000 var(--notch), #000 calc(var(--notch) + 0.5px)) left / 51% 100% no-repeat,
+      radial-gradient(circle at 100% 100%, #0000 var(--notch), #000 calc(var(--notch) + 0.5px)) right / 51% 100% no-repeat;
+    mask:
+      radial-gradient(circle at 0 100%, #0000 var(--notch), #000 calc(var(--notch) + 0.5px)) left / 51% 100% no-repeat,
+      radial-gradient(circle at 100% 100%, #0000 var(--notch), #000 calc(var(--notch) + 0.5px)) right / 51% 100% no-repeat;
+  }
+  .ticket-stub {
+    -webkit-mask:
+      radial-gradient(circle at 0 0, #0000 var(--notch), #000 calc(var(--notch) + 0.5px)) left / 51% 100% no-repeat,
+      radial-gradient(circle at 100% 0, #0000 var(--notch), #000 calc(var(--notch) + 0.5px)) right / 51% 100% no-repeat;
+    mask:
+      radial-gradient(circle at 0 0, #0000 var(--notch), #000 calc(var(--notch) + 0.5px)) left / 51% 100% no-repeat,
+      radial-gradient(circle at 100% 0, #0000 var(--notch), #000 calc(var(--notch) + 0.5px)) right / 51% 100% no-repeat;
+  }
+}
