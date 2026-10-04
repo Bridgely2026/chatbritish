@@ -1,9 +1,7 @@
 // The twelve fixed taxonomy-category reference texts that
 // app/api/classify-struggle compares onboarding "struggle" text against via
 // cosine similarity, and the logic to embed them. Used by
-// scripts/embed-category-references.mjs (writes the JSON to disk) and
-// app/api/admin/embed-category-refs (returns it in the response, since
-// Railway's disk resets on deploy).
+// scripts/embed-category-references.mjs (writes the JSON to disk).
 
 import { embedTexts } from "./voyage.mjs";
 
