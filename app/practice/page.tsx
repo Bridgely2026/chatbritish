@@ -4,7 +4,15 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Nav from "@/components/Nav";
 import CategoryIcon from "@/components/CategoryIcon";
-import { CATEGORY_BLURBS, getCategoryScenarioCounts, getScenariosByCategory, type ScenarioStep } from "@/lib/mock-data";
+import { CATEGORY_BLURBS } from "@/lib/mock-data";
+import {
+  drawSession,
+  getCategoryScenarioCounts,
+  getScenarioForNorm,
+  getScenariosByCategory,
+  shuffle,
+  type Scenario,
+} from "@/lib/scenarios";
 import { getStreak, incrementStreak } from "@/lib/streak";
 
 type View = "picker" | "session" | "recap";
@@ -16,31 +24,31 @@ function pickCategoryWithScenarios(rankedCategories: string[]): string | null {
   return null;
 }
 
-// Every scenario in lib/mock-data.ts currently has its correct answer stored
-// at the same position, so it's shuffled here at render time (not in the
-// stored content) each time a scenario is presented. Fisher-Yates.
-function shuffle<T>(items: T[]): T[] {
-  const result = [...items];
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]];
-  }
-  return result;
-}
-
 function PracticeContent() {
   const searchParams = useSearchParams();
   const categoriesParam = searchParams.get("categories");
   const rankedCategories = categoriesParam ? categoriesParam.split(",").filter(Boolean) : [];
 
-  const initialCategory = pickCategoryWithScenarios(rankedCategories);
-  const initialNoteCategory = rankedCategories.length > 0 && !initialCategory ? rankedCategories[0] : null;
-  const initialScenario = initialCategory ? getScenariosByCategory(initialCategory)[0] : undefined;
+  // ?norm= comes from Debrief's "Practice this norm": when an approved
+  // scenario exists for that norm, the session opens on it. Otherwise this
+  // falls through to the onboarding ?categories= handling (or the picker).
+  const normParam = searchParams.get("norm");
+  const [handoffScenario] = useState(() => (normParam ? getScenarioForNorm(normParam) : undefined));
+
+  const rankedCategory = handoffScenario ? null : pickCategoryWithScenarios(rankedCategories);
+  const initialCategory = handoffScenario?.category ?? rankedCategory;
+  const initialNoteCategory =
+    !handoffScenario && rankedCategories.length > 0 && !rankedCategory ? rankedCategories[0] : null;
 
   const [view, setView] = useState<View>(initialCategory ? "session" : "picker");
   const [activeCategory, setActiveCategory] = useState<string | null>(initialCategory);
-  const [prioritizedCategory] = useState<string | null>(initialCategory);
+  const [prioritizedCategory] = useState<string | null>(rankedCategory);
   const [noteCategory, setNoteCategory] = useState<string | null>(initialNoteCategory);
+  // This session's draw: up to SESSION_LENGTH random scenarios from the
+  // category, fixed for the session so the progress bar and recap match it.
+  const [sessionScenarios, setSessionScenarios] = useState<Scenario[]>(() =>
+    initialCategory ? drawSession(initialCategory, handoffScenario) : []
+  );
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -50,8 +58,8 @@ function PracticeContent() {
   // question (see startSession/goToNextOrRecap below) rather than derived
   // reactively, since revisiting the same (possibly single-question) category
   // can land on the same scenario object without any dependency changing.
-  const [shuffledOptions, setShuffledOptions] = useState<ScenarioStep["options"]>(() =>
-    initialScenario ? shuffle(initialScenario.steps[0].options) : []
+  const [shuffledOptions, setShuffledOptions] = useState<Scenario["options"]>(() =>
+    sessionScenarios[0] ? shuffle(sessionScenarios[0].options) : []
   );
   const [lastAnswer, setLastAnswer] = useState<{ correct: boolean; feedback: string; normId: string } | null>(
     null
@@ -118,9 +126,7 @@ function PracticeContent() {
   }, [lastAnswer, feedbackBarHeight]);
 
   const categoryCounts = getCategoryScenarioCounts();
-  const categoryScenarios = activeCategory ? getScenariosByCategory(activeCategory) : [];
-  const scenario = categoryScenarios[currentIndex];
-  const step = scenario?.steps[0];
+  const scenario = sessionScenarios[currentIndex];
 
   function startSession(category: string) {
     setActiveCategory(category);
@@ -131,12 +137,13 @@ function PracticeContent() {
     setBarVisible(false);
     setNoteCategory(null);
     setView("session");
-    const firstScenario = getScenariosByCategory(category)[0];
-    setShuffledOptions(firstScenario ? shuffle(firstScenario.steps[0].options) : []);
+    const draw = drawSession(category);
+    setSessionScenarios(draw);
+    setShuffledOptions(draw[0] ? shuffle(draw[0].options) : []);
   }
 
   function choose(i: number) {
-    if (selected !== null || !step || !scenario) return;
+    if (selected !== null || !scenario) return;
     const opt = shuffledOptions[i];
     if (!opt) return;
     setSelected(i);
@@ -147,9 +154,9 @@ function PracticeContent() {
 
   function goToNextOrRecap() {
     setBarVisible(false);
-    if (currentIndex + 1 < categoryScenarios.length) {
-      const nextScenario = categoryScenarios[currentIndex + 1];
-      setShuffledOptions(shuffle(nextScenario.steps[0].options));
+    if (currentIndex + 1 < sessionScenarios.length) {
+      const nextScenario = sessionScenarios[currentIndex + 1];
+      setShuffledOptions(shuffle(nextScenario.options));
       setCurrentIndex((i) => i + 1);
       setSelected(null);
     } else {
@@ -191,10 +198,6 @@ function PracticeContent() {
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
           {categoryCounts.map(({ category, count }) => {
             const disabled = count === 0;
-            const categoryScenarioList = getScenariosByCategory(category);
-            const allProvisional = count > 0 && categoryScenarioList.every((s) => s.provisional);
-            // Coming-soon and pending-review cards get a muted band instead of racing.
-            const muted = disabled || allProvisional;
             return (
               <button
                 key={category}
@@ -205,7 +208,8 @@ function PracticeContent() {
                   disabled ? "cursor-not-allowed border-line bg-white/30" : "border-line bg-white/60 hover:border-ink"
                 }`}
               >
-                <p className={`eyebrow px-4 py-2.5 text-paper ${muted ? "bg-muted" : "bg-racing"}`}>{category}</p>
+                {/* Coming-soon cards get a muted band instead of racing. */}
+                <p className={`eyebrow px-4 py-2.5 text-paper ${disabled ? "bg-muted" : "bg-racing"}`}>{category}</p>
                 <div className="flex flex-1 items-start gap-4 p-4">
                   <CategoryIcon
                     category={category}
@@ -216,7 +220,7 @@ function PracticeContent() {
                     <p className={`mt-3 eyebrow ${disabled ? "text-muted" : "text-brick"}`}>
                       {disabled
                         ? "No scenarios yet — coming soon"
-                        : `${count} scenario${count === 1 ? "" : "s"}${allProvisional ? " · pending review" : ""}`}
+                        : `${count} scenario${count === 1 ? "" : "s"}`}
                     </p>
                   </div>
                 </div>
@@ -230,7 +234,7 @@ function PracticeContent() {
   }
 
   if (view === "recap") {
-    const total = categoryScenarios.length;
+    const total = sessionScenarios.length;
     const ratio = total > 0 ? correctCount / total : 0;
     const message =
       ratio === 1
@@ -238,7 +242,7 @@ function PracticeContent() {
         : ratio === 0
           ? "Worth another look — everyone needs a few passes at these."
           : "Good start — a couple worth revisiting when you're ready.";
-    const normIds = categoryScenarios.map((s) => s.normId).join(", ");
+    const normIds = sessionScenarios.map((s) => s.normId).join(", ");
 
     return (
       <div className="mx-auto max-w-xl px-6 py-16">
@@ -296,7 +300,7 @@ function PracticeContent() {
     );
   }
 
-  if (!scenario || !step) return null;
+  if (!scenario) return null;
 
   return (
     <div className="mx-auto max-w-xl px-6 py-16">
@@ -311,14 +315,8 @@ function PracticeContent() {
         </p>
       )}
 
-      {scenario.provisional && (
-        <p className="mt-2 eyebrow text-brick">
-          Drafted from an unreviewed taxonomy entry — not yet approved by the founder
-        </p>
-      )}
-
       <div className="mt-4 flex gap-1.5">
-        {categoryScenarios.map((_, i) => (
+        {sessionScenarios.map((_, i) => (
           <div
             key={i}
             className={`h-1.5 flex-1 rounded-full ${
@@ -328,7 +326,8 @@ function PracticeContent() {
         ))}
       </div>
 
-      <h1 className="mt-4 font-display text-2xl font-medium text-ink">{scenario.title}</h1>
+      {/* The spreadsheet has no per-scenario title, so the heading is the category. */}
+      <h1 className="mt-4 font-display text-2xl font-medium text-ink">{scenario.category}</h1>
 
       <div
         className="mt-8 border border-line bg-white/60 p-6"
@@ -340,7 +339,7 @@ function PracticeContent() {
         style={lastAnswer ? { paddingBottom: (feedbackBarHeight > 0 ? feedbackBarHeight + 24 : 112) + "px" } : undefined}
       >
         <p className="text-sm leading-relaxed text-muted">{scenario.setup}</p>
-        <p className="mt-4 font-display text-lg italic text-ink">{step.prompt}</p>
+        <p className="mt-4 font-display text-lg italic text-ink">{scenario.prompt}</p>
 
         <div className="mt-6 space-y-3">
           {shuffledOptions.map((opt, i) => {
@@ -414,7 +413,7 @@ function PracticeContent() {
               onClick={goToNextOrRecap}
               className="col-span-2 row-start-3 mt-3 w-full bg-brick px-6 py-2.5 text-sm font-medium text-paper transition hover:bg-brick-dark sm:col-span-1 sm:col-start-3 sm:row-span-3 sm:row-start-1 sm:mt-0 sm:w-auto sm:self-center sm:py-3"
             >
-              {currentIndex + 1 < categoryScenarios.length ? "Next question" : "See results"}
+              {currentIndex + 1 < sessionScenarios.length ? "Next question" : "See results"}
             </button>
             <p className="col-span-2 row-start-4 mt-2 text-xs text-muted sm:col-span-1 sm:col-start-2 sm:row-start-3">
               Based on norm <span className="font-mono">{lastAnswer.normId}</span>
