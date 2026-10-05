@@ -5,6 +5,7 @@ import type { FormEvent } from "react";
 import Link from "next/link";
 import Nav from "@/components/Nav";
 import { taxonomy } from "@/lib/mock-data";
+import { hasScenarioForNorm } from "@/lib/scenarios";
 
 type MatchedResult = {
   likely_norm: string;
@@ -82,6 +83,12 @@ export default function DebriefPage() {
 
   const matchedCategory =
     phase.kind === "matched" ? taxonomy.find((e) => e.normId === phase.result.likely_norm)?.category : undefined;
+  // Opens Practice on this norm's scenario when an approved one exists;
+  // otherwise the plain picker, as before.
+  const practiceHref =
+    phase.kind === "matched" && hasScenarioForNorm(phase.result.likely_norm)
+      ? `/practice?norm=${encodeURIComponent(phase.result.likely_norm)}`
+      : "/practice";
 
   return (
     <div className="min-h-screen bg-paper">
@@ -180,7 +187,7 @@ export default function DebriefPage() {
             <Field label="Suggested response" value={phase.result.suggested_response} />
 
             <div className="mt-6 flex flex-wrap items-center gap-4 border-t border-line pt-5">
-              <Link href="/practice" className="bg-ink px-4 py-2 text-xs font-medium text-paper hover:bg-ink/90">
+              <Link href={practiceHref} className="bg-ink px-4 py-2 text-xs font-medium text-paper hover:bg-ink/90">
                 Practice this norm
               </Link>
               <button
