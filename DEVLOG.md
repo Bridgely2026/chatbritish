@@ -342,6 +342,23 @@ cause as Voyage, but the cause was never isolated. Cursor worked normally
 afterwards, so it didn't block anything; don't spend time on it unless it
 recurs.
 
+## Practice variety and a streak crash
+- The recap no longer lists norm IDs. After any wrong answer it says "The
+  ones you missed will come back first."
+- lib/seen.ts records each answered scenario (right or wrong, with a
+  timestamp) in localStorage under chat_british_seen, at answer time, so
+  quitting midway still counts. Slots fill: never seen, then last answered
+  wrong, then least recently seen; the Debrief hand-off scenario goes
+  first. It is per browser, so clearing data or switching device starts
+  fresh. Tested over three sessions in one category: sessions 1 and 2
+  covered all 10 with no repeats, and session 3 began with the misses.
+- A bug found on the way: lib/streak.ts had no try/catch, so a browser
+  that blocks storage crashed the whole Practice page (also on main
+  before). Fixed; counting is unchanged.
+- Norm ID labels were removed from the feedback bar and the Debrief answer
+  card. The feedback bar is now at most 28.2% of the screen at 375x667 and
+  29.4% at 360x640, down from 31.8% and 35.6%.
+
 ---
 
 ## Open technical items (engineering-only; see CLAUDE.md for the rest)
