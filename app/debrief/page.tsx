@@ -175,12 +175,7 @@ export default function DebriefPage() {
 
         {phase.kind === "matched" && (
           <div className="mt-10 border border-line bg-white/60 p-6">
-            <div className="flex items-center justify-between">
-              <span className="font-mono text-xs uppercase tracking-wide text-muted">
-                {phase.result.likely_norm}
-              </span>
-              {matchedCategory && <span className="text-xs text-muted">{matchedCategory}</span>}
-            </div>
+            {matchedCategory && <p className="text-xs text-muted">{matchedCategory}</p>}
 
             <Field label="Surface signal" value={phase.result.surface_signal} italic />
             <Field label="What it actually means" value={phase.result.what_it_means} />
