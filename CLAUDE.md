@@ -6,155 +6,162 @@
 
 **Client/founder's name: Kianoush.**
 
-**Naming note:** the product was originally built and shipped under the name "Bridgely." Renamed to "Chat British" this session — every user-facing reference, `package.json`, and the app's own text has been updated. **GitHub stayed on the `Bridgely2026` account** (deliberately not renamed, to avoid breaking Railway's integration and local git remotes for no real benefit) — the repo itself is `Bridgely2026/chatbritish`. Don't be confused if old references to "Bridgely" turn up in git history or the account name; the product name is Chat British everywhere that matters.
+**Naming note:** the product was originally built under the name "Bridgely" and renamed "Chat British". Every user-facing reference, `package.json` and the app's own text has been updated. **GitHub stayed on the `Bridgely2026` account** (deliberately not renamed) — the repo is `Bridgely2026/chatbritish`. Old "Bridgely" references in git history, the account name, the Railway service name (`bridgely.railway.internal`) and the Word documents are expected; the product name is Chat British everywhere a user or reader sees it.
+
+**Live site: https://chatbritish.ai** — the only domain we own. (`chatbritish.co.uk` was only ever a suggestion and is not owned; never cite it. `www.chatbritish.ai` is not attached either — see `DEVLOG.md`.)
 
 ---
 
-## MVP build status (as of this session)
+## MVP build status (as of the latest session)
 
-**Chat British is live.** All three built features (onboarding, practice, debrief) have been verified end-to-end on a real public deployment, and hardened since against real bugs found by Kianoush on his own phone (full detail in `DEVLOG.md`).
+**Chat British is live on Railway at chatbritish.ai.** All three built features are deployed. Everything below was verified by Cursor against the build and the live HTML/headers; **the real-phone checks of the latest deploys are still pending** (see Open items).
 
-- **Deployment: Railway.** See `DEVLOG.md` for the Netlify/Vercel/Railway platform history and why Railway is what's live — don't re-litigate from scratch.
-- **Repo/accounts:** kept fully separate from Amiro's other ventures per explicit decision — GitHub account `Bridgely2026` (repo `chatbritish`), own Supabase project (`ehyglngeobtppgxtupiv`), own Anthropic API account, own Voyage AI account, own Railway account.
-- **Standard deploy workflow** (new branch → push → merge to `main` → confirm Railway rebuild → verify live at mobile width) is written up in `DEVLOG.md` — follow it every time, re-learned the hard way more than once.
-- **Feature 1 (onboarding):** real 3-step flow with real persistence via Supabase Anonymous Auth, upserting into a real `users` table (RLS-protected).
-  - Step 1: situations multi-select. Step 2: household, time-in-UK, role/life-stage, sector (conditional). Step 3: city, struggle (required), goal, optional email.
-  - **Ranking algorithm has four signals:** `situations` (explicit, +2/category) and `role`/`time-in-UK` (additive modifiers), plus **struggle-text classification** via Voyage embeddings (0.30 confidence floor). None can override an explicit `situations` pick.
-  - `household`, `city`, `email` remain stored-only, not scored — deliberate, for future segmentation.
-  - `goal` is also deliberately stored-only — 7 options, each a two-line chip (bold category label + full sentence, both user-facing). Full reasoning in `DEVLOG.md`.
-  - Google/social OAuth remains deliberately deferred — anonymous auth by design.
-- **Feature 2 (practice):** category picker, multi-question sessions, animated feedback, real `localStorage` streak (key renamed to `chat_british_streak` as part of the rebrand — existing streaks reset, accepted as fine at this stage), adaptive recap. 6 scenarios exist across the original 6 categories, 2 flagged `provisional: true` pending founder review. Several real mobile-only bugs found live and fixed this session — full detail in `DEVLOG.md`.
-- **Feature 3 (debrief):** real RAG pipeline (Supabase pgvector + Voyage embeddings + Claude), hardened with real test data. Two independent confidence signals (retrieval threshold + `entry_applies` generation-stage check), graceful `no_match` handling logged to `debrief_gaps` with a `decline_reason`. Deliberately stays a bounded diagnostic tool, not an open-ended chatbot.
-- **Norm ID references** ("Based on norm WP-1-...") shown on Practice/Debrief screens are currently a dead-end reference — no norm library exists yet to link to. Decision on whether to remove/restyle deliberately deferred.
-- **Design system:** Fraunces (display) + Work Sans (body), paper/ink/brick/sage palette.
+- **Deployment: Railway** (deploys `main` only). See `DEVLOG.md` for the Netlify/Vercel/Railway history, the deploy workflow, and the custom-domain incident.
+- **Repo/accounts:** kept fully separate from Amiro's other ventures — GitHub `Bridgely2026` (repo `chatbritish`), own Supabase project (`ehyglngeobtppgxtupiv`), own Anthropic API account, own Voyage AI account, own Railway account. The domain's DNS is managed in Kianoush's Hostinger account (signed up with Google, no separate password yet; Hostinger's unlink-Google-and-set-password flow is the route to shared access).
+- **Feature 1 (onboarding):** real 3-step flow, Supabase Anonymous Auth, `users` table (RLS-protected). Step 1 now offers **12 situations**; `situations[]` stores the full canonical category name (e.g. "Money & transactions"), never the chip label. Step 2: household, time-in-UK, role, sector (conditional on Workplace/Job search). Step 3: city, struggle (required), goal, optional email.
+  - **Four ranking signals:** `situations` (+2/category), `role` and `time-in-UK` (additive modifiers, original 6 categories only — deliberately no modifiers for the 6 new categories), and **struggle-text classification** via Voyage embeddings against 12 reference texts (floor 0.30). None can override an explicit `situations` pick.
+  - `household`, `city`, `email` and `goal` are stored-only, not scored — deliberate. `goal` has 7 options (two-line chips: bold label + sentence; labels are user-facing).
+- **Feature 2 (practice):** **data-driven from `data/chat_british_scenarios.xlsx`** — 120 scenarios, 10 per category across all 12. `npm run scenarios:import` validates (unique IDs, Norm ID exists and is Approved in the taxonomy, category matches, exactly one right and two wrong answers) and generates `lib/scenarios-generated.ts` from **Approved** rows only. A session draws up to 5 at random from the category, options shuffled. Streak, recap (styled as a rail-ticket stub), feedback bar and norm-ID line as before. Debrief's "Practice this norm" opens `/practice?norm=<id>` and starts with that norm's scenario when one exists.
+  - **Authorship, stated plainly:** all 120 scenarios were drafted by Claude from approved taxonomy entries (setup from the entry's example, right answer from its Good Response, wrong answers from the misreadings it warns about, feedback restating "What It Actually Means"; legal and statistical details deliberately left out). The workbook's **Review state** column records the truth: **24 rows** (the original 6 and the first 18) were read and approved individually by Kianoush; **96 rows** were accepted in bulk by him with item-by-item review pending. 15 of those 96 are flagged "Spot-check first". The founder-approves-everything rule is preserved by that record, not by pretending all 120 were read.
+- **Feature 3 (debrief):** real RAG pipeline (Supabase pgvector + Voyage + Claude), now matching against **all 200 approved entries**. Two independent confidence signals: retrieval thresholds **0.50 (confident) / 0.30 (floor)**, plus the `entry_applies` generation check. If the top candidate is declined, up to 3 further candidates within **0.03** of the top similarity are tried before `no_match`. A malformed Claude response is retried once, then skipped; if nothing applies and one was skipped, the user gets a friendly error (503) and **no** gap row. Unmatched/declined cases are logged to `debrief_gaps` with a `decline_reason`. Deliberately a bounded diagnostic tool, not a chatbot.
+- **Design ("quietly British"):** Fraunces + Work Sans on paper/ink/brick/sage, plus **racing green** (#1E4D3A) as a brand-only accent (never for answer states). Double rules, banded category cards, a perforated stamp edge on the home hero card only, 12 redrawn line icons of everyday objects, a hand-written red-pen margin note on the hero, a six-row "field guide" (verbatim taxonomy text), herringbone on the closing band, favicon and 1200×630 share images. No landmarks, flags, crowns, red boxes, or "Made in Britain" claims (the product was built outside the UK).
+- **Metadata:** per-page titles ("Start your profile — Chat British", "Practice — Chat British", "Debrief — Chat British"), canonical URLs per page, `metadataBase` falls back to `https://chatbritish.ai` if `NEXT_PUBLIC_SITE_URL` is unset (it was unset at build time on Railway).
+- **Norm ID references** ("Based on norm WP-1-…") are still a dead-end reference (no norm library). Decision deferred.
 
 ---
 
 ## The stakes and the clock
 
-- Client is on a Graduate visa expiring **Dec 22, 2026** (date confirmed this session).
+- Client is on a Graduate visa expiring **Dec 22, 2026**. Roughly 11 weeks remained at the start of October.
 - Realistic process time: 4–8 weeks endorsement + 8 weeks UKVI decision (or 5 working days–next day with Priority/Super Priority service).
-- **UKES contacted and confirmed as the endorsing body**, with no capacity limitations flagged — no longer a "leading candidate," this is settled.
+- **UKES contacted and confirmed as the endorsing body.**
 - Client's deposit/maintenance funds and job-creation budget: **not confirmed yet.**
-- **Company structure:** Kianoush has an existing UK company, Kianoush Academy (incorporated May 2025), for his 1:1 English tuition — separate from this venture. **Chat British will be incorporated as its own new, separate UK company**, not folded under Kianoush Academy.
-- **Payment timing decision:** Chat British (the new company) will **not accept real customer payments or connect Stripe until the visa itself is granted** — not just endorsed. This is deliberate, to avoid risking the "new, not already trading" eligibility requirement. Keep this in mind for the monetization section below — none of that gets switched on early no matter how tempting real revenue evidence sounds.
+- **Company structure:** Kianoush has an existing UK company, Kianoush Academy (incorporated May 2025), for his 1:1 tuition — separate. **Chat British will be incorporated as its own new UK company.**
+- **Payment timing decision:** Chat British will **not accept real payments or connect Stripe until the visa is granted** — not just endorsed — to protect the "new, not already trading" requirement.
+- **The product is ahead of the paperwork.** The Business Plan, CV and Financial Plan are the critical path and none has started.
 
 ## Deliverables required for endorsement submission
 
 **UKES's actual published requirements:**
 
 **4 required documents:**
-1. Complete Business Plan (UKES provides a template) — **not started**; an executive summary draft exists (still under the old "Bridgely" name — batching the docx rebrand for later, not done yet).
+1. Complete Business Plan (UKES provides a template) — **not started**; an executive summary draft exists (still under the old "Bridgely" name; Word rebrand deliberately batched for later).
 2. CV (Kianoush's) — **not started.**
-3. Financial Plan: 3-year forecasts (P&L, Balance Sheet, Cashflow; UKES provides templates) — **not started.**
-4. Identity documents: passport, second form of ID, selfie with passport, proof of address — Kianoush's own administrative gathering.
+3. Financial Plan: 3-year forecasts (P&L, Balance Sheet, Cashflow; UKES templates) — **not started.**
+4. Identity documents: passport, second form of ID, selfie with passport, proof of address — Kianoush's own gathering.
 
-**8 things the Business Plan specifically needs to address:**
-1. Innovation driven/developed internally, not outsourced — **strong ground already**: the founder-gated taxonomy architecture is direct evidence.
-2. New-to-market approach aligned with Innovate UK's Priority Themes — **not researched yet.**
+**8 things the Business Plan must address:**
+1. Innovation driven internally, not outsourced — **strong ground**: the founder-gated taxonomy and the review record.
+2. New-to-market approach aligned with Innovate UK Priority Themes — **not researched.**
 3. IP protection strategy — **not addressed.**
 4. Technology Readiness Level (TRL) scoring — **not addressed.**
-5. Clear USP with real barriers to entry — partially covered narratively.
-6. Growth driven by the core innovation — partially covered by business model/job creation narrative.
-7. R&D activity/spend shown in the financials — blocked on the financial plan not existing yet.
-8. CV + business plan showing founder's relevant skills — narrative exists, CV document doesn't.
+5. Clear USP with real barriers to entry — partially covered.
+6. Growth driven by the core innovation — partially covered.
+7. R&D activity/spend in the financials — blocked on the financial plan.
+8. CV + business plan showing founder's relevant skills — narrative exists, CV doesn't.
 
-**Executive summary:** a first draft exists, still under the "Bridgely" name pending the docx rebrand batch — covers Opportunity, Solution, Founder-Market Fit, Innovation, Traction, Market & Go-to-Market, Business Model, and Job Creation & Scalability. Kianoush should review it for tone/accuracy. Starting point for the full Business Plan, not a substitute.
+**Executive summary:** first draft exists (1–2 pages, written for UKES; still says "Bridgely"). Kianoush should review it. **When citing the product in any UKES document, say** "founder-reviewed taxonomy of 200 entries; practice scenarios drafted by AI from it and approved by the founder", and use only `chatbritish.ai`.
 
 ---
 
 ## The product: Chat British
 
-**Tagline:** "Speak the language. Understand the culture. Belong." (unchanged by the rename)
-**Core idea:** Scale the founder's existing 1:1 cultural-communication coaching methodology through software.
+**Tagline:** "Speak the language. Understand the culture. Belong."
+**Core idea:** Scale the founder's 1:1 cultural-communication coaching methodology through software.
 
 ### Five features
-
-1. **Onboarding profile** — personalized form, real persisted four-signal-weighted persona per user. **Built and persisted.**
-2. **Scenario-based AI conversation practice** — rehearsal, before a real situation happens. **Built.**
-3. **Real-situation debrief tool** — diagnosis, after a real situation happens. **Built, hardened, live.**
-4. **Cultural norm library** — browsable taxonomy reference. Roadmapped, not built.
-5. **Premium 1:1 coaching, UK-based teachers trained on the taxonomy** — premium revenue tier + UK job-creation story. Roadmapped, not an MVP build item.
-
-### MVP build scope
-**Features 1–3: done, live, hardened.** Features 4–5 stay scoped-but-not-built.
+1. **Onboarding profile** — **Built.**
+2. **Scenario-based practice** — rehearsal before a real situation. **Built; data-driven, 120 scenarios.**
+3. **Real-situation debrief** — diagnosis after the fact. **Built, hardened, live on 200 entries.**
+4. **Cultural norm library** — browsable taxonomy. Roadmapped, not built.
+5. **Premium 1:1 coaching by UK-based teachers trained on the taxonomy** — premium tier + the UK job-creation story. Roadmapped.
 
 ---
 
-## The taxonomy — the actual IP and moat, and a real open question
+## The taxonomy — the actual IP and moat
 
-**Definition:** Norm ID, Category, Definition, Surface Markers, What It Actually Means, Example (anonymized), Good Response, Status. **Now 12 categories**, not 6 — see below.
+**Definition:** Norm ID, Category, Definition, Surface Markers, What It Actually Means, Example (anonymized), Good Response, Status (plus a "Grounding Check" column, now blank). **12 categories**; prefixes WP/HC/HL/JS/SO/AB and ED/DR/MN/TR/NB/CS. Norm IDs are never renumbered or reused.
 
-**Norm ID convention:** `PREFIX-NUMBER-slug`. Sequential within category, never renumbered/reused. Original six: WP/HC/HL/JS/SO/AB. **Six new prefixes, from the 200-row file:** ED (Education), DR (Dating & relationships), MN (Money & transactions), TR (Transport & commuting), NB (Neighbours & community), CS (Customer service & retail).
+### Locked decision: founder writes every entry
+No automatic taxonomy generation. Quality control, and directly tied to the IFV founder-leadership requirement.
 
-### Locked decision: no automatic taxonomy generation
-Founder writes every entry, always — quality control, and directly tied to the IFV founder-leadership requirement. This is the single most important rule in this whole document.
+### The 200 rows are live
+- Kianoush's 200-row workbook (all `Approved`) is synced: **200 active rows with 1024-dim embeddings** in `taxonomy_entries`. HC-1's text changed in the new file (it now includes the ~9-minute UK GP consultation figure; checked accurate against published research).
+- **The grounding question is resolved by the founder.** The file had arrived with a "Grounding Check" column saying 159 rows were "cultural consensus — needs a real client case" and 41 "search-verified". Kianoush then stated that he reviewed all 200 **row by row**, and the column was cleared. **Consequence to remember:** clearing it also deleted the citation notes on the 41 search-verified rows; the content is untouched but the "what we checked this against" trail is gone. The sync script still holds back any row whose Grounding Check begins "Cultural consensus" (with a keep-live exception), so a future row can be flagged the same way.
+- **Homepage claims** that are now public and must stay true: "Every entry … comes from a real client case, reviewed and written by a working coach" and "Nothing gets published without review". Kianoush should be comfortable that both hold for all 200 entries, and that the scenarios' status is described honestly (above).
+- **Original 30 AI-drafted reference rows** still sit in the old 41-row template (backup in Downloads), `Draft`, not live.
 
-### The 200-row submission — received, NOT yet synced, open grounding question
-
-Kianoush sent a completed spreadsheet with 200 rows, all marked `Status: Approved`, spanning 12 categories (the original 6 plus 6 new ones — see above). Structurally clean: no duplicate Norm IDs, no missing required fields.
-
-**But there's an unresolved problem, and nothing from this file should be synced into the live system until it's settled.** The file has a 9th column, "Grounding Check," not part of the original template:
-- **159 of the 200 rows** contain the note: *"Cultural consensus — no independent citation to check; needs a real client case, not further AI search."* — i.e., by the data's own self-description, these are **not** grounded in a specific remembered client case.
-- **41 rows** say *"Search-verified"* — fact-checked against real external sources (e.g. ACAS's disciplinary process, the FCA's contactless limit change), which is good for factual accuracy but is a different thing from case-grounding.
-
-Asked Amiro how this was produced; answer given was "the founder built it himself." That doesn't resolve the actual issue — the question isn't who operated the spreadsheet, it's that the rows' own self-assessment contradicts their `Approved` status. **Open, unresolved as of this session:** does Kianoush want to go back and ground the 159 flagged rows in real cases (matching what his own note suggests), or is he making a deliberate, conscious call that "cultural consensus" is an acceptable basis for some entries without a specific case? Either is a legitimate decision for him to make — but it needs to be an explicit one, not something that slides through because a status column defaulted to `Approved`. **Nothing from this file gets embedded/synced as live content until this is answered.**
-
-### Exception, unrelated to the above: the original 30 AI-drafted reference rows
-Still sitting in the original template, marked `Draft`, light-blue filled, flagged for founder rewrite before ever `Approved` — unrelated to the 200-row submission, not a shortcut around the locked decision.
-
-### 12-category app expansion — in progress, separate from the grounding question
-Decided this session: expand the app's fixed category list from 6 to 12 to match the new taxonomy scope (onboarding situations, Practice picker, struggle-classification reference embeddings). **Deliberately not** adding role/time-in-UK scoring modifiers for the 6 new categories — no clean mapping exists, and inventing one would mean forcing a signal that isn't really there. This work is independent of the grounding question above — pure schema/UI scaffolding, no taxonomy content gets marked live either way. CLI prompt for this handed off; implementation status not yet confirmed as of this doc's last update.
+### Taxonomy gaps for Kianoush to judge (from real `debrief_gaps` and replays)
+Ask him, for each: "Have you seen this with real clients?" If yes, he writes the entry (three-question method); nothing is drafted for him.
+1. Colleagues not returning greetings (closest entry is about neighbours).
+2. Sports-banter slang (e.g. the football "cross over the ball").
+3. Classroom and teacher phrasing (education looks thin there).
+4. Making friends, conversations that end abruptly.
+5. Asking an existing manager for a raise (MN-4 and WP-2 each cover half; JS-2 is about job offers).
+Also: the AB-2 scenario omits the taxonomy's "(not the letter)" detail — his call whether to restore it.
 
 ### Extraction process
-`bridgely_taxonomy_extraction_script.md` (three-question loop — filename still under the old name, not yet renamed) + the taxonomy template (now `chat_british_taxonomy_template.xlsx` in the repo, renamed as part of the rebrand).
+`bridgely_taxonomy_extraction_script.md` (three-question loop; filename still old) + the taxonomy workbook (`data/chat_british_taxonomy_template.xlsx`, now the 200-row file).
 
 ---
 
-## Monetization & go-to-market strategy (discussed this session — direction, not committed; also gated on the payment-timing decision above)
+## Monetization & go-to-market strategy (direction, not committed; gated on the payment-timing decision above)
 
 **Segmentation:** primary — skilled-visa holders and international students, 0–18 months in the UK. Secondary — long-settled people hitting a specific wall.
 
-**Free vs. paid, proposed split:** onboarding always free; 1 free Practice session per category; first 2–3 Debrief uses free; public glossary pages never gated. Paid: unlimited Practice/Debrief, saved debrief log, spaced nudges, premium 1:1 human-coaching tier.
+**Free vs paid (proposed):** onboarding free; 1 free Practice session per category; first 2–3 Debriefs free; public glossary never gated. Paid: unlimited Practice/Debrief, saved log, nudges, premium 1:1 tier.
 
-**Pricing direction:** anchor to relocation costs, not language-app pricing — ~£15–19/month discussed, **not committed.**
+**Pricing direction:** anchor to relocation costs — ~£15–19/month discussed, **not committed.**
 
-**Go-to-market sequencing:** (1) existing ~50 clients first, (2) Instagram (12k followers) via the glossary/SEO pipeline, (3) Nika Visa as a pilot distribution partner, (4) employer/HR relocation benefits later.
+**Go-to-market:** (1) existing ~50 clients, (2) Instagram (12k) via the glossary/SEO pipeline, (3) Nika Visa as pilot partner, (4) employer/HR relocation benefits later.
 
-**Reminder given the payment-timing decision above:** none of this — free tiers, paid tiers, Stripe — goes live for real money until the visa is *granted*, not just endorsed. Converting existing clients "to evidence viability" needs rethinking in light of that constraint; flag if this creates tension with the endorsement-case argument that relied on real revenue as evidence.
+**Tension to resolve:** "convert existing clients to paid before submission, as evidence of viability" conflicts with the no-payments-until-the-visa-is-granted decision. Don't act on the first until reconciled.
+
+**Running costs (checked Oct 2026 — re-check before relying):** Voyage `voyage-3` $0.06 per million tokens with the first 200 million free (a Debrief embeds ~200 tokens, so Voyage is effectively free). Claude Sonnet 5 listed at $2 / $10 per million input/output tokens; a Debrief is probably under a cent. An account with no payment method on Voyage is limited to 3 requests/min and 10K tokens/min — **add a payment method before sharing the site more widely** (Kianoush's UK card was suggested as the natural owner). Set a monthly spend cap in the Anthropic Console.
 
 ---
 
 ## Tech stack
 
-- **Frontend:** Next.js 16 + Tailwind.
-- **Deployment: Railway.**
-- **Backend/data:** Supabase (Postgres + auth + `pgvector`) — own separate project (`ehyglngeobtppgxtupiv`).
-- **AI layer:** Claude API (`claude-sonnet-5`) — debrief's classification/structured output **wired, live**; live scenario-practice conversations **not yet wired.**
-- **Embeddings:** Voyage AI, `voyage-3`, 1024 dimensions — debrief retrieval + onboarding's struggle-text classification (soon to be re-run for 12 categories).
-- **Auth:** Supabase Anonymous Auth — **wired, live.**
-- **Data model (built):** `users`, `taxonomy_entries`, `debrief_gaps`, `match_taxonomy_entries()` — see `DEVLOG.md` for exact columns.
-- **Data model (not yet built):** `scenarios`/`conversations` as live Supabase tables.
+- **Frontend:** Next.js 16 + Tailwind. **Deployment:** Railway (one custom domain on the current plan: `chatbritish.ai`).
+- **Backend/data:** Supabase (Postgres + auth + `pgvector`), project `ehyglngeobtppgxtupiv`. Tables: `users`, `taxonomy_entries`, `debrief_gaps`; function `match_taxonomy_entries()`.
+- **AI layer:** Claude API (`claude-sonnet-5`) for Debrief; Practice is static, data-driven content, not live model conversation.
+- **Embeddings:** Voyage AI `voyage-3`, 1024 dims — taxonomy sync, Debrief retrieval, onboarding struggle classification (`lib/category-reference-embeddings.json`, 12 entries, regenerated).
+- **Auth:** Supabase Anonymous Auth. Google/social OAuth deferred.
+- **Content pipelines:** `npm run taxonomy:import` / `taxonomy:sync-db` (embeds Approved rows, batched ~20 per Voyage request, paced under the free-tier limits, retry on 429 and on Supabase write failures); `npm run scenarios:import`; `npm run embed-category-refs`.
+- **Network note:** from the local machine's normal network path, Voyage returned **403** (and Claude Code's login did too) until terminal traffic took a different path (VPN/proxy); the pattern fits geographic blocking at the edge (presumed, not confirmed). Railway's own calls to Voyage are unaffected. Local scripts that call Voyage need that path.
 
-### RAG robustness notes
-Low-confidence → follow-up, never a guess (**built, verified**). Retrieval-confident but generation-inappropriate → `entry_applies: false` catches it independently (**built, verified**). **Confidence thresholds still provisional** (`0.35`/`0.25` for debrief, `0.30` for struggle-text) — worth a real recalibration pass once the 200-row grounding question is resolved and real `Approved` content volume goes up meaningfully.
+### RAG robustness
+Low confidence → one follow-up, never a guess. Retrieval-confident but inappropriate → `entry_applies: false`. Fallback candidates and malformed-output handling as above. **Thresholds are judgments from a small calibration set** (12 clear cases scored 0.535+ except one at 0.348; vague cases 0.427/0.473; unrelated 0.297/0.195). The margins are thin, the 0.03 fallback margin rests on one observed tie, and `[debrief-debug]` logging stays on to tune from real use. Check that debug logs don't print users' descriptions before real clients arrive (descriptions are personal).
 
 ---
 
 ## Open items / next steps
 
-- [ ] **Resolve the 200-row taxonomy grounding question** — see above, this blocks syncing any of that content live
-- [ ] Confirm the 12-category app expansion landed and works (CLI prompt handed off, not yet confirmed complete)
-- [ ] Batch-rebrand the remaining Word/docx files (executive summary, etc.) — deliberately deferred, not forgotten
-- [ ] Gather client's deposit/maintenance funds and job-creation budget picture
-- [ ] Full Business Plan, CV, Financial Plan — none started
+**Needs Amiro (only he can do these):**
+- [ ] **Phone checks of the latest deploys** (Debrief leaking-tap landlord matches; a vague Debrief asks a follow-up; a money struggle ranks Money & transactions; Practice shows 12 green cards with 10 scenarios each and a 5-question session; no "Bridgely" text; favicon and WhatsApp share preview using a never-shared link such as `https://chatbritish.ai/?v=3`)
+- [ ] Add a payment method to Voyage (see costs)
+- [ ] In Hostinger DNS, delete the two stale `www` records (`CNAME www` → `73fk74lm.up.railway.app`, `TXT _railway-verify.www`); keep `ALIAS @` and `TXT _railway-verify`
+- [ ] Confirm who the registrant of `chatbritish.ai` is (should be Kianoush or the new company, not a personal account of Amiro)
+- [ ] Say who made the two real Debriefs logged on the live site on 4 Oct (if neither Amiro nor Kianoush, a real user is on the site and a privacy notice becomes urgent)
+
+**Needs Kianoush:**
+- [ ] Read the 15 "Spot-check first" scenarios, then the rest at his pace, and flip Review state as he goes
+- [ ] Confirm approval of the new public text: page titles, the margin note "i.e. probably not.", the field guide and its six rows (CS-1 is 163 characters; WP-17's phrase carries a trailing comma in the spreadsheet)
+- [ ] The five taxonomy gaps above; the AB-2 "(not the letter)" detail
+- [ ] A short privacy notice is needed before promoting the site (it collects free text and optional email; fonts load from Google). Not a lawyer's advice — have the wording checked.
+
+**Endorsement (critical path):**
+- [ ] Business Plan (UKES template), CV, Financial Plan — none started. Start with the CV; collect his teaching history, qualifications, years coaching, client numbers, Instagram reach, testimonials
 - [ ] Research Innovate UK Priority Themes alignment, IP protection strategy, TRL scoring
-- [ ] Pitch deck — not started
-- [ ] Wire live Claude-powered scenario-practice conversations
-- [ ] Build debrief's "save to my log," the spaced follow-up nudge
-- [ ] Recalibrate confidence thresholds once the taxonomy question resolves and real volume exists
-- [ ] Build scenarios for the 6 new categories (and eventually the rest of the original 6 beyond the single-scenario-each state)
-- [ ] Decide whether to remove/restyle the "Based on norm..." dead-end reference
-- [ ] Firm up pricing — and reconcile the proposed "convert clients to paid before submission" idea with the payment-timing decision above
-- [ ] When there's a real domain: add Google/social OAuth as an *additional* login option
-- [ ] What new "goal" option Kianoush originally wanted — resolved this session (7 options added), but double-check nothing further was expected
+- [ ] Client funds and job-creation budget; pitch deck
+- [ ] Batch-rebrand the Word files (executive summary etc.) and use only `chatbritish.ai`
+
+**Engineering / product (not urgent):**
+- [ ] Revisit thresholds with real usage; trim `[debrief-debug]` logging
+- [ ] Debrief "save to my log" and the spaced follow-up nudge
+- [ ] Public glossary/SEO pipeline (now more viable with 200 entries); og:title per page; self-hosted fonts
+- [ ] Decide on the "Based on norm…" dead-end reference and whether practice questions need titles (a Title column)
+- [ ] Optional: register `chatbritish.co.uk` (cheap; blocks squatters) and redirect it to `.ai`; `www` needs a higher Railway plan or registrar forwarding
+- [ ] When there's a paid tier: account claiming at payment, Google OAuth as an additional login
+- [ ] Delete merged branches once the live checks pass

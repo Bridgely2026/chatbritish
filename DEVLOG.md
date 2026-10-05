@@ -15,18 +15,34 @@ that's what actually happened at the time.
 
 ## Standard deploy workflow (follow this every time)
 
-**Live URL:** https://bridgely-production-c362.up.railway.app
+**Live URL: https://chatbritish.ai** (the old `bridgely-production-c362.up.railway.app` address no longer exists).
 
 1. Cursor commits to a **new branch**, not `main` directly.
 2. Branch gets pushed to `origin` — **this alone does not deploy anything.**
    Railway only watches `main`.
 3. Merge the branch into `main` explicitly, every time.
-4. Check Railway's **Deployments tab** for a fresh build actually running.
+4. Check the GitHub commit status for the merge commit: Railway reports
+   "Success - <domain>" when the deploy finishes.
 5. **Verify live, not just "build succeeded."** Check the exact reported
-   scenario, at mobile width (375×667 minimum), and the actual network
-   payload/console output where possible — not just that the UI looks right.
+   scenario, at a true 375x667 phone profile, and the real payload or
+   page source where possible. A check against the live HTML (title,
+   canonical, `og:image`, no "bridgely" text) is something Cursor can do;
+   a real phone is something only Amiro can do.
+6. Feature branches stay until the live check passes, then can be deleted.
 
-Feature branches are left in place until the live check passes.
+Standing rules learned this session:
+- **Never give an agent a Railway CLI login.** It can read every project
+  variable, including the Anthropic, Supabase service-role and Voyage keys.
+  Everything needed is two steps in the dashboard.
+- **`NEXT_PUBLIC_*` values are baked in at build time.** Setting one in
+  Railway does nothing until a new build runs. The live `og:image` pointed
+  at localhost for this reason until `metadataBase` got a code fallback.
+- **Playwright's "iPhone SE" profile is 320x568, not 375x667.** Use a true
+  375x667 and 360x640 profile and keep 320 as an extra only.
+- **Check a plan's custom-domain limit before adding a domain** (see the
+  domain incident below).
+- When an agent says a prompt's job doesn't exist in the repo, believe it:
+  a prompt that was corrected before it was sent never ran.
 
 ---
 
@@ -109,7 +125,7 @@ genuine issues were found and fixed:
 Free-text "what's confusing you" classified into a taxonomy category via
 Voyage embeddings, a 4th additive modifier in `computeStartingPoint()`.
 
-- Fixed reference texts (one per category, now being expanded to 12),
+- Fixed reference texts (one per category; now 12, regenerated and live),
   embedded via `scripts/embed-category-references.mjs`, stored in
   `lib/category-reference-embeddings.json`.
 - `app/api/classify-struggle/route.ts` logs the full sorted list
@@ -154,36 +170,193 @@ shouldn't be user-facing" decision; they're deliberately visible now.
 
 ---
 
-## The 200-row taxonomy submission — structural validation results
+---
 
-Ran the same validation pass as the original template: **200 rows, zero
-duplicate Norm IDs, zero missing required fields.** Structurally clean.
+## Voyage connectivity, the taxonomy sync, and the admin-route detour
 
-**Not structurally clean, though — a content/process issue, not a data-
-integrity one:** the file has a 9th "Grounding Check" column not part of
-the original template. 159/200 rows self-flag as "Cultural consensus — no
-independent citation to check; needs a real client case, not further AI
-search"; 41/200 say "Search-verified" (fact-checked, not case-grounded).
-All 200 are marked `Status: Approved` regardless. This contradicts the
-locked no-automatic-generation/founder-grounding rule as written. See
-`CLAUDE.md`'s taxonomy section for the full discussion — **nothing from
-this file has been synced into the live system**, pending resolution.
+**Symptom.** Every Voyage call from the local machine (and from Cursor's
+environment) returned a bare HTML **403**, even with no API key. Claude
+Code's login returned an OAuth **403** too. A 403 with no JSON error, before
+any key is checked, fits geographic blocking at the service's edge (a
+presumption, not confirmed). Live Debrief on Railway was unaffected,
+because Railway's calls come from elsewhere. Once the terminal's traffic
+took a different network path (VPN/proxy), Voyage answered locally. The
+exact setting wasn't recorded.
 
-Also found: the file introduces 6 new categories (Education, Dating &
-relationships, Money & transactions, Transport & commuting, Neighbours &
-community, Customer service & retail) with their own consistent Norm ID
-prefix scheme (ED/DR/MN/TR/NB/CS) — adopted as-is for the app's 12-category
-expansion rather than inventing a different one.
+**Detour.** While the cause was unconfirmed, two secret-protected admin
+routes were built to run the sync and the reference-embedding job on
+Railway (shared `scripts/lib` modules, `x-admin-secret` header, dry run by
+default). They were never needed, were left inert (the secret was never
+set on Railway), and were **deleted** (`remove-admin-routes`). The shared
+modules stayed and the CLI scripts use them.
+
+**What the sync does now.** `scripts/lib` batches about 20 texts per Voyage
+request, paces requests to stay under the no-payment-method limits (3
+requests/min, 10K tokens/min), retries 429s with backoff, skips unchanged
+rows by content hash, and retries Supabase writes. Eligibility: `Approved`,
+and the Grounding Check cell must not start "Cultural consensus" (kept-live
+exception for rows already active). `--dry-run` reads the database and
+makes no Voyage calls.
+
+**The run.** First real run wrote 103 of 197 rows, then one Supabase write
+failed (`fetch failed`). Nothing was left half-written and re-running was
+safe; the second run finished the other 93 with no retries. Result: 200
+active, all Approved, all with 1024-dim embeddings, HC-1 carrying its new
+text. The 12-category reference embeddings were regenerated in the same
+session (12 entries, each 1024-dim).
+
+## The 200-row taxonomy file — validation and resolution
+
+The file arrived structurally clean (200 rows, no duplicate Norm IDs, no
+missing fields, 12 categories, prefixes ED/DR/MN/TR/NB/CS). It carried a 9th
+"Grounding Check" column: 159 rows read "Cultural consensus — needs a real
+client case", 41 "Search-verified", all marked Approved. Nothing was
+synced while that contradiction stood. The founder then stated that he had
+reviewed all 200 individually, the column was cleared, and the sync gate
+(above) was left in place for the future. Cost of clearing it: the specific
+citations on the 41 search-verified rows are gone.
+
+When the new file replaced the old one, a dry run showed 200 eligible and 0
+held back. Three live rows (WP-1, HL-1, JS-1) were kept active by the
+exception before that; HC-1 was re-embedded because its text had genuinely
+changed.
+
+## Debrief calibration, fallback and hardening
+
+With 200 entries a single similarity cutoff stopped separating clear from
+vague cases, so thresholds were recalibrated from a 16-description test:
+
+| Case type | Observed top similarity |
+|---|---|
+| 12 clear cases (one per category) | 0.535 to 0.699, except housing at 0.348 |
+| 2 vague descriptions | 0.427 and 0.473 |
+| Unrelated (cat vaccinations / Victoria sponge) | 0.297 / 0.195 |
+
+Set **0.50 confident / 0.30 floor**. A needless follow-up costs one turn; a
+confident wrong answer costs trust, so the line leans strict. The cat
+question still only fails because `entry_applies` says false, which is why
+that check stays. End-to-end test (6 descriptions, with follow-ups): both
+vague cases ended `no_match` or a follow-up, never a confident answer;
+unrelated ones ended `no_match`; bill-split matched MN-3 first time.
+
+Replay of the 11 older `debrief_gaps` rows against the 200 entries: 1 matched
+on a first call, 9 asked a follow-up, 1 `no_match`; scores were all higher
+than when logged. A second replay of 5 borderline cases with an invented
+follow-up answer: 4 of 5 matched correctly (HC-8, WP-2, WP-17, WP-1).
+
+**Ranking miss and fix.** The 5th (a landlord-tap case) tied HL-15 and HL-1
+at 0.477, HL-15 sorted first, Claude declined it, and the route only ever
+asked about the top result, so the user got `no_match` with the right entry
+beside it. Fix: when the top candidate is declined, try up to 3 candidates
+at or above the floor and within `FALLBACK_MARGIN = 0.03` of the top. The
+margin rests on one tie (HL-1 was 0.027 below, a greetings case 0.033 below
+and correctly excluded), so treat it as provisional.
+
+**Malformed output.** One 502 in testing: Claude said an entry applied but
+left out a required field, and once fallbacks existed a bad reply on any
+candidate would have ended the request. Now `entry_applies` must be a
+boolean and, when true, all four answer fields must be non-empty strings;
+retry once, then skip to the next candidate; if nothing applied and one was
+skipped, return a friendly 503 and write **no** gap row. Tested with a mocked
+Anthropic API (malformed once, malformed twice then valid, malformed
+throughout).
+
+**`debrief_gaps` hygiene.** Test rows (cat, sponge, vague test, post-office
+queue) were deleted after listing every row and asking for a yes. Two real
+rows appeared from the live site on 4 Oct (a "can't make friends" and a
+salary-raise case). The raise case would now match via the fallback; the
+friends case is a real taxonomy gap.
+
+## `situations[]` stored chip labels, not categories
+
+Onboarding saved the chip text ("Work", "Housing") into `users.situations`,
+and scoring looked it up by that text, so renaming a chip would silently
+stop matching existing users. Fixed to store the full canonical category
+name everywhere (scoring, sector rule, practice URL param), chips unchanged
+on screen. Seven rows existed; five needed converting. Checked by running the full
+role x time-in-UK x situation grid (312 combinations): no bonus ever reaches
+a new category. Cheap to fix with a handful of users; much dearer later.
+
+## Practice — second round of live bugs
+
+- **Feedback bar covering the screen on phones.** After the earlier fixes,
+  the bar still took about two thirds of a small screen because its button
+  squeezed the explanation into a narrow column. Now stacked below the `sm`
+  breakpoint (icon and verdict, full-width text, full-width button, norm ID)
+  with tighter padding, and after an answer the page scrolls so the **chosen
+  option** and the bar are both visible. Measured across every scenario and
+  option: worst case 34% of the screen at 375x667, 36% at 360x640, 43.5% at
+  320x568. The earlier "73%" figure had been measured at 320x568 by mistake.
+- **Option shuffling, reveal-on-wrong, transparency** — as above, unchanged.
+
+## Practice pipeline: scenarios from a workbook
+
+Hand-written scenarios (6, written early by Claude, never reviewed until
+Kianoush read them) were replaced by `data/chat_british_scenarios.xlsx` and
+an import script. Validated against a deliberately broken copy: duplicate ID,
+category mismatch, missing field, unknown norm, identical answers and invalid
+status are each reported with a row number. `--include-draft` is dev-only and
+makes the next build fail so drafts can't ship. Sessions draw 5 at random;
+the old per-scenario titles were dropped (each heading now shows the
+category). Debrief's "Practice this norm" now passes `?norm=<id>`.
+
+The workbook is separate from the taxonomy workbook on purpose: both are
+binary files and two people editing one causes conflicts. Its **Review
+state** column (24 read individually, 96 bulk-approved) is the honest record
+of how approved each row is.
+
+## Design passes
+
+Two restrained passes ("quietly British"): racing green accent for brand
+decoration only; double rules; banded category cards; perforated stamp edge
+on the home hero card only (CSS mask; a solid offset shadow showed through
+the perforations and had to be lightened); rail-ticket recap; 12 redrawn
+icons (three needed a second draw after a 2x review: housing read as one
+building, the neighbours hedge looked like an arch, the job-search clip hit
+the header lines; transport and healthcare icons were revised after the screenshot review); a hand-written margin note on the hero (placed beside the label at
+1024px and above so it never covers text); a six-row field guide using
+verbatim taxonomy text (WP-17, HC-4, HL-1, SO-8, DR-2, CS-1); herringbone on
+the closing band; favicon, apple icon, 1200x630 share images; per-page
+titles and canonical URLs. At 375, the nav only wrapped at 360 and below, so
+only that was fixed ("Start" replaces "Get started" below `sm`).
+
+## Domain and certificate incident
+
+`www.chatbritish.ai` was added in Railway to make `www` work. The plan allows
+**one** custom domain, so the new entry took the only slot and the main
+domain lost its certificate: Chrome showed `NET::ERR_CERT_COMMON_NAME_INVALID`
+on both addresses and the site was effectively down until Amiro removed
+`www` and re-added `chatbritish.ai` (valid Let's Encrypt certificate,
+expiring 3 Jan 2027, auto-renews). A code redirect from `www` to the main
+domain exists but does nothing while `www` isn't attached. The two `www`
+DNS records in Hostinger should be deleted. Don't touch `ALIAS @` or
+`TXT _railway-verify`. All email records (MX, SPF, DKIM CNAMEs, DMARC,
+autoconfig/autodiscover) belong to Hostinger mail and must stay.
+
+## Claude Code login (local machine)
+
+`/login` completed in the browser ("You're all set up") but the terminal kept
+asking, then returned `OAuth error: Request failed with status code 403`.
+Known token-handoff bug reports exist, and the 403 fits the same network
+cause as Voyage, but the cause was never isolated. Cursor worked normally
+afterwards, so it didn't block anything; don't spend time on it unless it
+recurs.
 
 ---
 
-## Open technical items (engineering-only; see CLAUDE.md for product/business open items)
+## Open technical items (engineering-only; see CLAUDE.md for the rest)
 
-- [ ] Confirm the 12-category expansion CLI prompt actually landed and
-      passed its sanity checks — handed off, not yet confirmed
-- [ ] Onboarding upsert failure — root cause still not directly observed
-- [ ] Struggle-classification floor (0.30) — revisit once real usage/volume
-      exists, same as debrief's thresholds
-- [ ] Norm ID references ("Based on norm WP-1-...") — still a dead-end
-      reference, decision deferred
-- [ ] Batch-rebrand remaining docx files (executive summary, etc.)
+- [ ] Real-phone verification of the latest deploys (Debrief, onboarding,
+      Practice, favicon, share preview)
+- [ ] Voyage payment method (rate limit), Anthropic monthly spend cap
+- [ ] Delete the two stale `www` DNS records in Hostinger
+- [ ] Debrief thresholds and the 0.03 fallback margin: revisit with real
+      usage. Trim `[debrief-debug]` logging so it never prints users' text.
+- [ ] Struggle-classification floor (0.30): revisit with real usage
+- [ ] Onboarding upsert failure: root cause never directly observed
+- [ ] `og:title` and `twitter:title` still show the home title on every page
+- [ ] Self-host fonts (Google Fonts loads send visitors' IPs to Google)
+- [ ] "Based on norm…" dead-end reference; practice question titles (needs a
+      Title column in the scenarios workbook)
+- [ ] Delete merged branches after the live checks pass
+- [ ] Batch-rebrand remaining Word files
