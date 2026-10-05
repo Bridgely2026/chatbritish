@@ -5,13 +5,13 @@ const title = "Chat British \u2014 Speak the language. Understand the culture. B
 const description =
   "Chat British turns the unwritten rules of British communication into something you can actually learn \u2014 practice before it happens, diagnosis after.";
 
-// Absolute URLs for the share image need a base. Set NEXT_PUBLIC_SITE_URL in
-// the deploy environment; without it, metadataBase is left out and Next falls
-// back to its own default.
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+// Absolute URLs for the share image need a base. NEXT_PUBLIC_SITE_URL wins when
+// set; otherwise fall back to the production domain so share images never
+// point at localhost.
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://chatbritish.ai";
 
 export const metadata: Metadata = {
-  ...(siteUrl ? { metadataBase: new URL(siteUrl) } : {}),
+  metadataBase: new URL(siteUrl),
   title,
   description,
   openGraph: { title, description, type: "website" },
