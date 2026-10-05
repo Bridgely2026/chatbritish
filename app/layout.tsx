@@ -12,9 +12,12 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://chatbritish.ai";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title,
+  title: { default: title, template: "%s \u2014 Chat British" },
   description,
-  openGraph: { title, description, type: "website" },
+  // "./" resolves to each page's own path, so every route gets a
+  // self-referential canonical and a matching og:url.
+  alternates: { canonical: "./" },
+  openGraph: { title, description, type: "website", url: "./" },
   twitter: { card: "summary_large_image", title, description },
 };
 
