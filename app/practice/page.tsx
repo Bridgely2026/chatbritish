@@ -13,6 +13,7 @@ import {
   shuffle,
   type Scenario,
 } from "@/lib/scenarios";
+import { getSeen, recordAnswer } from "@/lib/seen";
 import { getStreak, incrementStreak } from "@/lib/streak";
 
 type View = "picker" | "session" | "recap";
@@ -47,7 +48,7 @@ function PracticeContent() {
   // This session's draw: up to SESSION_LENGTH random scenarios from the
   // category, fixed for the session so the progress bar and recap match it.
   const [sessionScenarios, setSessionScenarios] = useState<Scenario[]>(() =>
-    initialCategory ? drawSession(initialCategory, handoffScenario) : []
+    initialCategory ? drawSession(initialCategory, handoffScenario, getSeen()) : []
   );
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -137,7 +138,7 @@ function PracticeContent() {
     setBarVisible(false);
     setNoteCategory(null);
     setView("session");
-    const draw = drawSession(category);
+    const draw = drawSession(category, undefined, getSeen());
     setSessionScenarios(draw);
     setShuffledOptions(draw[0] ? shuffle(draw[0].options) : []);
   }
@@ -149,6 +150,9 @@ function PracticeContent() {
     setSelected(i);
     if (opt.correct) setCorrectCount((c) => c + 1);
     setLastAnswer({ correct: opt.correct, feedback: opt.feedback, normId: scenario.normId });
+    // Recorded per answer, not at the recap, so a session quit midway still
+    // shapes the next draw.
+    recordAnswer(scenario.id, opt.correct);
     requestAnimationFrame(() => setBarVisible(true));
   }
 
@@ -242,7 +246,7 @@ function PracticeContent() {
         : ratio === 0
           ? "Worth another look — everyone needs a few passes at these."
           : "Good start — a couple worth revisiting when you're ready.";
-    const normIds = sessionScenarios.map((s) => s.normId).join(", ");
+    const missedAny = correctCount < total;
 
     return (
       <div className="mx-auto max-w-xl px-6 py-16">
@@ -273,9 +277,7 @@ function PracticeContent() {
             <div className="mx-2 border-t-2 border-dashed border-line" aria-hidden="true" />
             <div className="space-y-1 pt-4">
               <p className="text-sm text-muted">🔥 {streak} day streak</p>
-              <p className="text-xs text-muted">
-                Practiced: <span className="font-mono">{normIds}</span>
-              </p>
+              {missedAny && <p className="text-sm text-muted">The ones you missed will come back first.</p>}
             </div>
           </div>
         </div>

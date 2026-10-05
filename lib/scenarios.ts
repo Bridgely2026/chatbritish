@@ -4,6 +4,7 @@
 
 import { CATEGORY_LABELS, type CategoryCode, type NormEntry } from "./mock-data";
 import { generatedIncludesDraft, generatedScenarios } from "./scenarios-generated";
+import type { SeenMap } from "./seen";
 
 export type ScenarioOption = { text: string; correct: boolean; feedback: string };
 
@@ -57,9 +58,20 @@ export function getScenarioForNorm(normId: string): Scenario | undefined {
   return matches.length > 0 ? shuffle(matches)[0] : undefined;
 }
 
-// Up to SESSION_LENGTH scenarios from the category, in random order. With
+// Up to SESSION_LENGTH scenarios from the category. With `seen` (this
+// browser's answer history), slots fill in tiers, shuffled within each:
+// never seen, then last answered wrong, then the rest least recently seen
+// first. Without it (storage unavailable), a plain random draw. With
 // `first`, that scenario leads and the rest of the session is drawn around it.
-export function drawSession(category: string, first?: Scenario): Scenario[] {
-  const others = shuffle(getScenariosByCategory(category).filter((s) => s.id !== first?.id));
-  return first ? [first, ...others].slice(0, SESSION_LENGTH) : others.slice(0, SESSION_LENGTH);
+export function drawSession(category: string, first?: Scenario, seen?: SeenMap | null): Scenario[] {
+  const pool = shuffle(getScenariosByCategory(category).filter((s) => s.id !== first?.id));
+  const ordered = seen
+    ? [
+        ...pool.filter((s) => !seen[s.id]),
+        ...pool.filter((s) => seen[s.id] && !seen[s.id].correct),
+        // Stable sort keeps the shuffle as the tiebreak for equal timestamps.
+        ...pool.filter((s) => seen[s.id]?.correct).sort((a, b) => seen[a.id].at - seen[b.id].at),
+      ]
+    : pool;
+  return first ? [first, ...ordered].slice(0, SESSION_LENGTH) : ordered.slice(0, SESSION_LENGTH);
 }
