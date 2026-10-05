@@ -356,7 +356,8 @@ recurs.
 - [ ] Onboarding upsert failure: root cause never directly observed
 - [ ] `og:title` and `twitter:title` still show the home title on every page
 - [ ] Self-host fonts (Google Fonts loads send visitors' IPs to Google)
-- [ ] "Based on norm…" dead-end reference; practice question titles (needs a
-      Title column in the scenarios workbook)
+- [ ] Practice question titles (needs a Title column in the scenarios
+      workbook). The "Based on norm…" line was removed from the Practice
+      feedback bar and the Debrief answer card (the ID stays in the data).
 - [ ] Delete merged branches after the live checks pass
 - [ ] Batch-rebrand remaining Word files

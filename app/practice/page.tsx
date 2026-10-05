@@ -62,9 +62,7 @@ function PracticeContent() {
   const [shuffledOptions, setShuffledOptions] = useState<Scenario["options"]>(() =>
     sessionScenarios[0] ? shuffle(sessionScenarios[0].options) : []
   );
-  const [lastAnswer, setLastAnswer] = useState<{ correct: boolean; feedback: string; normId: string } | null>(
-    null
-  );
+  const [lastAnswer, setLastAnswer] = useState<{ correct: boolean; feedback: string } | null>(null);
   const [barVisible, setBarVisible] = useState(false);
 
   // The feedback bar is `fixed inset-x-0 bottom-0`, so it's out of document
@@ -149,7 +147,7 @@ function PracticeContent() {
     if (!opt) return;
     setSelected(i);
     if (opt.correct) setCorrectCount((c) => c + 1);
-    setLastAnswer({ correct: opt.correct, feedback: opt.feedback, normId: scenario.normId });
+    setLastAnswer({ correct: opt.correct, feedback: opt.feedback });
     // Recorded per answer, not at the recap, so a session quit midway still
     // shapes the next draw.
     recordAnswer(scenario.id, opt.correct);
@@ -389,7 +387,7 @@ function PracticeContent() {
           } ${lastAnswer.correct ? "border-sage bg-sage-light" : "border-brick bg-brick-light"}`}
         >
           {/* Below sm the layout stacks (icon + verdict, explanation, full-width
-              button, norm ID) so the explanation gets the full width; a
+              button) so the explanation gets the full width; a
               side-by-side button squeezed it into a column tall enough to
               cover most of a phone screen. From sm up it's side by side. */}
           <div className="mx-auto grid max-w-2xl grid-cols-[auto_1fr] items-center gap-x-3 px-6 py-3 sm:grid-cols-[auto_1fr_auto] sm:items-start sm:gap-x-4 sm:py-5">
@@ -417,9 +415,6 @@ function PracticeContent() {
             >
               {currentIndex + 1 < sessionScenarios.length ? "Next question" : "See results"}
             </button>
-            <p className="col-span-2 row-start-4 mt-2 text-xs text-muted sm:col-span-1 sm:col-start-2 sm:row-start-3">
-              Based on norm <span className="font-mono">{lastAnswer.normId}</span>
-            </p>
           </div>
         </div>
       )}

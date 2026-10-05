@@ -26,7 +26,7 @@
 - **Feature 3 (debrief):** real RAG pipeline (Supabase pgvector + Voyage + Claude), now matching against **all 200 approved entries**. Two independent confidence signals: retrieval thresholds **0.50 (confident) / 0.30 (floor)**, plus the `entry_applies` generation check. If the top candidate is declined, up to 3 further candidates within **0.03** of the top similarity are tried before `no_match`. A malformed Claude response is retried once, then skipped; if nothing applies and one was skipped, the user gets a friendly error (503) and **no** gap row. Unmatched/declined cases are logged to `debrief_gaps` with a `decline_reason`. Deliberately a bounded diagnostic tool, not a chatbot.
 - **Design ("quietly British"):** Fraunces + Work Sans on paper/ink/brick/sage, plus **racing green** (#1E4D3A) as a brand-only accent (never for answer states). Double rules, banded category cards, a perforated stamp edge on the home hero card only, 12 redrawn line icons of everyday objects, a hand-written red-pen margin note on the hero, a six-row "field guide" (verbatim taxonomy text), herringbone on the closing band, favicon and 1200×630 share images. No landmarks, flags, crowns, red boxes, or "Made in Britain" claims (the product was built outside the UK).
 - **Metadata:** per-page titles ("Start your profile — Chat British", "Practice — Chat British", "Debrief — Chat British"), canonical URLs per page, `metadataBase` falls back to `https://chatbritish.ai` if `NEXT_PUBLIC_SITE_URL` is unset (it was unset at build time on Railway).
-- **Norm ID references** ("Based on norm WP-1-…") are still a dead-end reference (no norm library). Decision deferred.
+- **Norm ID references:** the "Based on norm…" line was removed from the Practice feedback bar and the Debrief answer card (the ID stays in the data).
 
 ---
 
@@ -161,7 +161,7 @@ Low confidence → one follow-up, never a guess. Retrieval-confident but inappro
 - [ ] Revisit thresholds with real usage; trim `[debrief-debug]` logging
 - [ ] Debrief "save to my log" and the spaced follow-up nudge
 - [ ] Public glossary/SEO pipeline (now more viable with 200 entries); og:title per page; self-hosted fonts
-- [ ] Decide on the "Based on norm…" dead-end reference and whether practice questions need titles (a Title column)
+- [ ] Decide whether practice questions need titles (a Title column). The "Based on norm…" line was removed from the Practice feedback bar and the Debrief answer card (the ID stays in the data).
 - [ ] Optional: register `chatbritish.co.uk` (cheap; blocks squatters) and redirect it to `.ai`; `www` needs a higher Railway plan or registrar forwarding
 - [ ] When there's a paid tier: account claiming at payment, Google OAuth as an additional login
 - [ ] Delete merged branches once the live checks pass
