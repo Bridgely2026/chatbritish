@@ -24,6 +24,11 @@ body {
     @apply text-xs font-medium uppercase tracking-[0.12em];
   }
 
+  /* Practice hides the footer during a question; see app/practice/page.tsx. */
+  body[data-practice-question] .site-footer {
+    display: none;
+  }
+
   /* Printed double rule: two hairlines with a small gap. */
   .rule-double {
     @apply h-[5px] border-y border-racing;
