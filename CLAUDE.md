@@ -25,7 +25,7 @@
   - **Authorship, stated plainly:** all 120 scenarios were drafted by Claude from approved taxonomy entries (setup from the entry's example, right answer from its Good Response, wrong answers from the misreadings it warns about, feedback restating "What It Actually Means"; legal and statistical details deliberately left out). The workbook's **Review state** column records the truth: **24 rows** (the original 6 and the first 18) were read and approved individually by Kianoush; **96 rows** were accepted in bulk by him with item-by-item review pending. 15 of those 96 are flagged "Spot-check first". The founder-approves-everything rule is preserved by that record, not by pretending all 120 were read.
 - **Feature 3 (debrief):** real RAG pipeline (Supabase pgvector + Voyage + Claude), now matching against **all 200 approved entries**. Two independent confidence signals: retrieval thresholds **0.50 (confident) / 0.30 (floor)**, plus the `entry_applies` generation check. If the top candidate is declined, up to 3 further candidates within **0.03** of the top similarity are tried before `no_match`. A malformed Claude response is retried once, then skipped; if nothing applies and one was skipped, the user gets a friendly error (503) and **no** gap row. Unmatched/declined cases are logged to `debrief_gaps` with a `decline_reason`. Deliberately a bounded diagnostic tool, not a chatbot.
 - **Design ("quietly British"):** Fraunces + Work Sans on paper/ink/brick/sage, plus **racing green** (#1E4D3A) as a brand-only accent (never for answer states). Double rules, banded category cards, a perforated stamp edge on the home hero card only, 12 redrawn line icons of everyday objects, a hand-written red-pen margin note on the hero, a six-row "field guide" (verbatim taxonomy text), herringbone on the closing band, favicon and 1200×630 share images. No landmarks, flags, crowns, red boxes, or "Made in Britain" claims (the product was built outside the UK).
-- **Metadata:** per-page titles ("Start your profile — Chat British", "Practice — Chat British", "Debrief — Chat British"), canonical URLs per page, `metadataBase` falls back to `https://chatbritish.ai` if `NEXT_PUBLIC_SITE_URL` is unset (it was unset at build time on Railway).
+- **Metadata:** per-page titles ("Start your profile — Chat British", "Practice — Chat British", "Debrief — Chat British"), canonical URLs per page, `metadataBase` falls back to `https://chatbritish.ai` if `NEXT_PUBLIC_SITE_URL` is unset (it was unset at build time on Railway). A sitewide footer (wordmark, Privacy, Contact to support@chatbritish.ai, a not-advice line, © year) and a placeholder /privacy page (noindex) are live. The real privacy notice is still to be written and published; until then don't promote the site to clients or on Instagram.
 - **Norm ID references:** the "Based on norm…" line was removed from the Practice feedback bar and the Debrief answer card (the ID stays in the data).
 
 ---
@@ -139,9 +139,8 @@ Low confidence → one follow-up, never a guess. Retrieval-confident but inappro
 ## Open items / next steps
 
 **Needs Amiro (only he can do these):**
-- [ ] **Phone checks of the latest deploys** (Debrief leaking-tap landlord matches; a vague Debrief asks a follow-up; a money struggle ranks Money & transactions; Practice shows 12 green cards with 10 scenarios each and a 5-question session; no "Bridgely" text; favicon and WhatsApp share preview using a never-shared link such as `https://chatbritish.ai/?v=3`)
+- [ ] **Phone checks of the latest deploys** (Debrief leaking-tap landlord matches; a vague Debrief asks a follow-up; a money struggle ranks Money & transactions; Practice shows 12 green cards with 10 scenarios each and a 5-question session; no "Bridgely" text; favicon and WhatsApp share preview using a never-shared link such as `https://chatbritish.ai/?v=3`; the footer shows on the home page, picker and recap, is hidden while a Practice question is on screen; Contact opens a mail draft to support@chatbritish.ai; /privacy loads and says the notice is being finalised)
 - [ ] Add a payment method to Voyage (see costs)
-- [ ] In Hostinger DNS, delete the two stale `www` records (`CNAME www` → `73fk74lm.up.railway.app`, `TXT _railway-verify.www`); keep `ALIAS @` and `TXT _railway-verify`
 - [ ] Confirm who the registrant of `chatbritish.ai` is (should be Kianoush or the new company, not a personal account of Amiro)
 - [ ] Say who made the two real Debriefs logged on the live site on 4 Oct (if neither Amiro nor Kianoush, a real user is on the site and a privacy notice becomes urgent)
 
@@ -149,7 +148,7 @@ Low confidence → one follow-up, never a guess. Retrieval-confident but inappro
 - [ ] Read the 15 "Spot-check first" scenarios, then the rest at his pace, and flip Review state as he goes
 - [ ] Confirm approval of the new public text: page titles, the margin note "i.e. probably not.", the field guide and its six rows (CS-1 is 163 characters; WP-17's phrase carries a trailing comma in the spreadsheet)
 - [ ] The five taxonomy gaps above; the AB-2 "(not the letter)" detail
-- [ ] A short privacy notice is needed before promoting the site (it collects free text and optional email; fonts load from Google). Not a lawyer's advice — have the wording checked.
+- [ ] A short privacy notice is needed before promoting the site (it collects free text and optional email; fonts load from Google). Not a lawyer's advice — have the wording checked. A draft exists; before publishing it needs the code audit and Kianoush's decisions on controller, retention, an under-18 rule and email consent.
 
 **Endorsement (critical path):**
 - [ ] Business Plan (UKES template), CV, Financial Plan — none started. Start with the CV; collect his teaching history, qualifications, years coaching, client numbers, Instagram reach, testimonials
@@ -164,4 +163,3 @@ Low confidence → one follow-up, never a guess. Retrieval-confident but inappro
 - [ ] Decide whether practice questions need titles (a Title column). The "Based on norm…" line was removed from the Practice feedback bar and the Debrief answer card (the ID stays in the data).
 - [ ] Optional: register `chatbritish.co.uk` (cheap; blocks squatters) and redirect it to `.ai`; `www` needs a higher Railway plan or registrar forwarding
 - [ ] When there's a paid tier: account claiming at payment, Google OAuth as an additional login
-- [ ] Delete merged branches once the live checks pass

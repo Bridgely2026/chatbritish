@@ -329,7 +329,7 @@ on both addresses and the site was effectively down until Amiro removed
 `www` and re-added `chatbritish.ai` (valid Let's Encrypt certificate,
 expiring 3 Jan 2027, auto-renews). A code redirect from `www` to the main
 domain exists but does nothing while `www` isn't attached. The two `www`
-DNS records in Hostinger should be deleted. Don't touch `ALIAS @` or
+DNS records in Hostinger have been deleted; `www` no longer resolves. Don't touch `ALIAS @` or
 `TXT _railway-verify`. All email records (MX, SPF, DKIM CNAMEs, DMARC,
 autoconfig/autodiscover) belong to Hostinger mail and must stay.
 
@@ -361,12 +361,23 @@ recurs.
 
 ---
 
+## Footer and privacy stub
+
+A sitewide footer and a noindex /privacy placeholder are live. The footer is
+hidden while a Practice question is on screen, because it sat under the fixed
+feedback bar and hid its disclaimer. The branch had uncommitted work from an
+earlier session; check the diff of leftover work before building on it. The
+live check on 5-6 Oct confirmed: valid Let's Encrypt certificate to 3 Jan
+2027, all four pages 200 with correct titles and canonicals, no 'bridgely' or
+'Based on norm' in the live code.
+
+---
+
 ## Open technical items (engineering-only; see CLAUDE.md for the rest)
 
 - [ ] Real-phone verification of the latest deploys (Debrief, onboarding,
       Practice, favicon, share preview)
 - [ ] Voyage payment method (rate limit), Anthropic monthly spend cap
-- [ ] Delete the two stale `www` DNS records in Hostinger
 - [ ] Debrief thresholds and the 0.03 fallback margin: revisit with real
       usage. Trim `[debrief-debug]` logging so it never prints users' text.
 - [ ] Struggle-classification floor (0.30): revisit with real usage
@@ -376,5 +387,4 @@ recurs.
 - [ ] Practice question titles (needs a Title column in the scenarios
       workbook). The "Based on norm…" line was removed from the Practice
       feedback bar and the Debrief answer card (the ID stays in the data).
-- [ ] Delete merged branches after the live checks pass
 - [ ] Batch-rebrand remaining Word files
