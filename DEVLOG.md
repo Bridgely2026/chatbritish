@@ -43,6 +43,9 @@ Standing rules learned this session:
   domain incident below).
 - When an agent says a prompt's job doesn't exist in the repo, believe it:
   a prompt that was corrected before it was sent never ran.
+- On this Mac curl's normal name lookup can time out while `dig` answers,
+  so use `curl -4`. Its openssl is LibreSSL 3.3.6 with no `-ext` option, so
+  read a certificate through curl or Python instead.
 
 ---
 

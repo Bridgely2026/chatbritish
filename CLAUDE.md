@@ -146,7 +146,7 @@ Low confidence → one follow-up, never a guess. Retrieval-confident but inappro
 
 **Needs Kianoush:**
 - [ ] Read the 15 "Spot-check first" scenarios, then the rest at his pace, and flip Review state as he goes
-- [ ] Confirm approval of the new public text: page titles, the margin note "i.e. probably not.", the field guide and its six rows (CS-1 is 163 characters; WP-17's phrase carries a trailing comma in the spreadsheet)
+- [ ] Confirm approval of the new public text: page titles, the margin note "i.e. probably not.", the field guide and its six rows (CS-1 is 163 characters; WP-17's phrase carries a trailing comma in the spreadsheet), and the footer's not-advice line
 - [ ] The five taxonomy gaps above; the AB-2 "(not the letter)" detail
 - [ ] A short privacy notice is needed before promoting the site (it collects free text and optional email; fonts load from Google). Not a lawyer's advice — have the wording checked. A draft exists; before publishing it needs the code audit and Kianoush's decisions on controller, retention, an under-18 rule and email consent.
 
@@ -163,3 +163,9 @@ Low confidence → one follow-up, never a guess. Retrieval-confident but inappro
 - [ ] Decide whether practice questions need titles (a Title column). The "Based on norm…" line was removed from the Practice feedback bar and the Debrief answer card (the ID stays in the data).
 - [ ] Optional: register `chatbritish.co.uk` (cheap; blocks squatters) and redirect it to `.ai`; `www` needs a higher Railway plan or registrar forwarding
 - [ ] When there's a paid tier: account claiming at payment, Google OAuth as an additional login
+
+**Parked ideas (considered, not built):**
+- PWA: an installable shell (manifest and icons, no service worker) is about an afternoon of work. Parked. iPhone has no install prompt. Push notifications for a follow-up nudge would need a service worker and are a much bigger job. Avoid page-caching service workers: we deploy often and they can serve stale pages.
+- Voice: dry, understated wording in the feedback bar and onboarding copy, and a 'what they said / what they meant' ledger on Debrief answers. Proposed in the design discussion, not built.
+- More Practice scenarios: about 80 taxonomy entries (6 or 7 per category) have no scenario yet, so the pool could reach about 200. Hold until Kianoush has read the 15 spot-check rows.
+- A self-service 'delete my data' button, because a user can't tell us their anonymous id; a 'tell us what's missing' link on the Debrief no-match screen; an About page once the CV exists.
