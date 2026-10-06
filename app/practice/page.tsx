@@ -74,6 +74,18 @@ function PracticeContent() {
   const feedbackBarRef = useRef<HTMLDivElement>(null);
   const [feedbackBarHeight, setFeedbackBarHeight] = useState(0);
 
+  // The fixed feedback bar would sit over the sitewide footer at the bottom
+  // of a question, so the footer is hidden while a question is on screen and
+  // shown on the picker and recap (see body[data-practice-question] in
+  // globals.css).
+  useEffect(() => {
+    if (view !== "session") return;
+    document.body.dataset.practiceQuestion = "";
+    return () => {
+      delete document.body.dataset.practiceQuestion;
+    };
+  }, [view]);
+
   const [streak, setStreak] = useState(0);
   useEffect(() => {
     setStreak(getStreak());
