@@ -125,12 +125,14 @@ function PracticeContent() {
     const margin = 12;
     const rect = option.getBoundingClientRect();
     const visibleBottom = window.innerHeight - barHeight - margin;
+    // The nav is sticky, so the visible area starts below it, not at 0.
+    const visibleTop = (document.querySelector("header")?.getBoundingClientRect().bottom ?? 0) + margin;
     let delta = 0;
     if (rect.bottom > visibleBottom) {
       // Scroll down until the option clears the bar, but never past its top.
-      delta = Math.min(rect.bottom - visibleBottom, rect.top - margin);
-    } else if (rect.top < margin) {
-      delta = rect.top - margin;
+      delta = Math.min(rect.bottom - visibleBottom, rect.top - visibleTop);
+    } else if (rect.top < visibleTop) {
+      delta = rect.top - visibleTop;
     }
     if (delta !== 0) window.scrollTo({ top: window.scrollY + delta, behavior: "smooth" });
     // `selected` changes in the same update as lastAnswer, so it's covered.
@@ -196,7 +198,7 @@ function PracticeContent() {
     return (
       <div className="mx-auto max-w-xl px-6 py-16">
         <div className="flex items-center justify-between">
-          <p className="eyebrow text-brick">Practice</p>
+          <p className="eyebrow text-primary">Practice</p>
           {streakLine}
         </div>
 
@@ -204,7 +206,7 @@ function PracticeContent() {
         <h1 className="mt-3 font-display text-2xl font-medium text-ink">Choose a category</h1>
 
         {noteCategory && (
-          <p className="mt-4 eyebrow text-brick">
+          <p className="mt-4 eyebrow text-primary">
             We don&apos;t have practice scenarios for {noteCategory} yet — pick another to get started
           </p>
         )}
@@ -218,12 +220,12 @@ function PracticeContent() {
                 type="button"
                 disabled={disabled}
                 onClick={() => !disabled && startSession(category)}
-                className={`flex flex-col border text-left transition ${
-                  disabled ? "cursor-not-allowed border-line bg-white/30" : "border-line bg-white/60 hover:border-ink"
+                className={`flex flex-col overflow-hidden rounded-lg border text-left transition ${
+                  disabled ? "cursor-not-allowed border-line bg-white/50" : "border-line bg-white hover:shadow-md"
                 }`}
               >
-                {/* Coming-soon cards get a muted band instead of racing. */}
-                <p className={`eyebrow px-4 py-2.5 text-paper ${disabled ? "bg-muted" : "bg-racing"}`}>{category}</p>
+                {/* Coming-soon cards get a muted band instead of primary. */}
+                <p className={`eyebrow px-4 py-2.5 text-white ${disabled ? "bg-muted" : "bg-primary"}`}>{category}</p>
                 <div className="flex flex-1 items-start gap-4 p-4">
                   <CategoryIcon
                     category={category}
@@ -231,14 +233,14 @@ function PracticeContent() {
                   />
                   <div>
                     <p className="text-sm text-muted">{CATEGORY_BLURBS[category]}</p>
-                    <p className={`mt-3 eyebrow ${disabled ? "text-muted" : "text-brick"}`}>
+                    <p className={`mt-3 eyebrow ${disabled ? "text-muted" : "text-primary"}`}>
                       {disabled
                         ? "No scenarios yet — coming soon"
                         : `${count} scenario${count === 1 ? "" : "s"}`}
                     </p>
                   </div>
                 </div>
-                <div className={`h-0.5 ${disabled ? "bg-line" : "bg-brick"}`} aria-hidden="true" />
+                <div className={`h-0.5 ${disabled ? "bg-line" : "bg-primary"}`} aria-hidden="true" />
               </button>
             );
           })}
@@ -261,16 +263,16 @@ function PracticeContent() {
     return (
       <div className="mx-auto max-w-xl px-6 py-16">
         <div className="flex items-center justify-between">
-          <p className="eyebrow text-brick">Practice</p>
+          <p className="eyebrow text-primary">Practice</p>
           {streakLine}
         </div>
 
         {/* Rail-ticket stub: score above the tear line, record below it. The
             notches are masks, so the outline is a drop-shadow on the wrapper. */}
         <div className="cut-outline mt-6">
-          <div className="ticket-top bg-[#fbf9f4]">
-            <div className="flex min-h-[2.25rem] items-center bg-racing px-6 py-2.5">
-              {activeCategory && <p className="eyebrow text-paper">{activeCategory}</p>}
+          <div className="ticket-top bg-white">
+            <div className="flex min-h-[2.25rem] items-center bg-primary px-6 py-2.5">
+              {activeCategory && <p className="eyebrow text-white">{activeCategory}</p>}
             </div>
             <div className="px-6 pb-6 pt-5">
               <h1 className="font-display text-2xl font-medium text-ink">Session complete</h1>
@@ -283,7 +285,7 @@ function PracticeContent() {
               <p className="mt-3 text-muted">{message}</p>
             </div>
           </div>
-          <div className="ticket-stub bg-[#fbf9f4] px-6 pb-5">
+          <div className="ticket-stub bg-white px-6 pb-5">
             <div className="mx-2 border-t-2 border-dashed border-line" aria-hidden="true" />
             <div className="space-y-1 pt-4">
               <p className="text-sm text-muted">🔥 {streak} day streak</p>
@@ -296,14 +298,14 @@ function PracticeContent() {
           <button
             type="button"
             onClick={practiceAnotherCategory}
-            className="w-full bg-brick px-6 py-3 sm:w-auto text-sm font-medium text-paper transition hover:bg-brick-dark"
+            className="btn-primary w-full sm:w-auto"
           >
             Practice another category
           </button>
           <button
             type="button"
             onClick={restartCategory}
-            className="w-full border border-line px-6 py-3 sm:w-auto text-sm font-medium text-ink transition hover:border-ink"
+            className="btn-secondary w-full sm:w-auto"
           >
             Back to this category
           </button>
@@ -317,12 +319,12 @@ function PracticeContent() {
   return (
     <div className="mx-auto max-w-xl px-6 py-16">
       <div className="flex items-center justify-between">
-        <p className="eyebrow text-brick">Practice</p>
+        <p className="eyebrow text-primary">Practice</p>
         {streakLine}
       </div>
 
       {activeCategory && prioritizedCategory === activeCategory && (
-        <p className="mt-2 eyebrow text-brick">
+        <p className="mt-2 eyebrow text-primary">
           Prioritized for you: {activeCategory}
         </p>
       )}
@@ -332,7 +334,7 @@ function PracticeContent() {
           <div
             key={i}
             className={`h-1.5 flex-1 rounded-full ${
-              i < currentIndex ? "bg-ink" : i === currentIndex ? "bg-ink/40" : "bg-line"
+              i < currentIndex ? "bg-primary" : i === currentIndex ? "bg-primary/40" : "bg-line"
             }`}
           />
         ))}
@@ -342,7 +344,7 @@ function PracticeContent() {
       <h1 className="mt-4 font-display text-2xl font-medium text-ink">{scenario.category}</h1>
 
       <div
-        className="mt-8 border border-line bg-white/60 p-6"
+        className="mt-8 rounded-lg border border-line bg-white p-6"
         // Reserves room for the fixed feedback bar below once it's shown, so
         // the last option never ends up hidden behind it — see
         // feedbackBarHeight's ResizeObserver setup above. 112px matches the
@@ -365,12 +367,12 @@ function PracticeContent() {
                 }}
                 onClick={() => choose(i)}
                 disabled={selected !== null}
-                className={`flex w-full items-center gap-3 border p-4 text-left text-sm transition ${
+                className={`flex w-full items-center gap-3 rounded-lg border p-4 text-left text-sm transition ${
                   showState && opt.correct
                     ? "border-sage bg-sage-light text-ink"
                     : showState && isChosen && !opt.correct
                       ? "border-brick bg-brick-light text-ink"
-                      : "border-line bg-white text-ink hover:border-ink disabled:hover:border-line"
+                      : "border-line bg-white text-ink hover:border-primary disabled:hover:border-line"
                 }`}
               >
                 <span
@@ -404,7 +406,7 @@ function PracticeContent() {
               cover most of a phone screen. From sm up it's side by side. */}
           <div className="mx-auto grid max-w-2xl grid-cols-[auto_1fr] items-center gap-x-3 px-6 py-3 sm:grid-cols-[auto_1fr_auto] sm:items-start sm:gap-x-4 sm:py-5">
             <span
-              className={`col-start-1 row-start-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-paper sm:row-span-3 ${
+              className={`col-start-1 row-start-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white sm:row-span-3 ${
                 lastAnswer.correct ? "bg-sage" : "bg-brick"
               }`}
             >
@@ -423,7 +425,7 @@ function PracticeContent() {
             <button
               type="button"
               onClick={goToNextOrRecap}
-              className="col-span-2 row-start-3 mt-3 w-full bg-brick px-6 py-2.5 text-sm font-medium text-paper transition hover:bg-brick-dark sm:col-span-1 sm:col-start-3 sm:row-span-3 sm:row-start-1 sm:mt-0 sm:w-auto sm:self-center sm:py-3"
+              className="col-span-2 row-start-3 mt-3 w-full rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-white transition hover:bg-primary-dark sm:col-span-1 sm:col-start-3 sm:row-span-3 sm:row-start-1 sm:mt-0 sm:w-auto sm:self-center sm:py-3"
             >
               {currentIndex + 1 < sessionScenarios.length ? "Next question" : "See results"}
             </button>
@@ -436,7 +438,7 @@ function PracticeContent() {
 
 export default function PracticePage() {
   return (
-    <div className="min-h-screen bg-paper">
+    <div className="min-h-screen bg-canvas">
       <Nav />
       <Suspense fallback={null}>
         <PracticeContent />

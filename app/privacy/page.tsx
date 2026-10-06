@@ -10,14 +10,14 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-paper">
+    <div className="min-h-screen bg-canvas">
       <Nav />
       <div className="mx-auto max-w-xl px-6 py-16">
         <h1 className="font-display text-2xl font-medium text-ink">Privacy notice</h1>
         <p className="mt-4 leading-relaxed text-muted">
           We&apos;re finalising our privacy notice and will publish it here. In the meantime, if you have a
           question about your information, email{" "}
-          <a href="mailto:support@chatbritish.ai" className="text-ink underline underline-offset-4">
+          <a href="mailto:support@chatbritish.ai" className="font-medium text-primary underline underline-offset-4">
             support@chatbritish.ai
           </a>
           .

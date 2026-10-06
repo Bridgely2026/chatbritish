@@ -9,12 +9,12 @@ html {
 }
 
 body {
-  background-color: #f5f1e7;
+  background-color: #fbfaf7;
   color: #1c2733;
 }
 
 :focus-visible {
-  outline: 2px solid #a63a2e;
+  outline: 2px solid #1f3a5f;
   outline-offset: 2px;
 }
 
@@ -24,6 +24,19 @@ body {
     @apply text-xs font-medium uppercase tracking-[0.12em];
   }
 
+  /* Buttons and links. Primary: filled, 44px tall. Secondary: outlined, same
+     height. The focus ring comes from :focus-visible above (2px primary,
+     2px offset); on a primary background, add focus-visible:outline-white. */
+  .btn-primary {
+    @apply inline-flex min-h-[44px] items-center justify-center rounded-lg bg-primary px-6 py-3 text-sm font-medium text-white transition hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-primary;
+  }
+  .btn-secondary {
+    @apply inline-flex min-h-[44px] items-center justify-center rounded-lg border border-primary bg-white px-6 py-2.5 text-sm font-medium text-primary transition hover:bg-sky disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white;
+  }
+  .link {
+    @apply font-medium text-primary underline-offset-4 hover:underline;
+  }
+
   /* Practice hides the footer during a question; see app/practice/page.tsx. */
   body[data-practice-question] .site-footer {
     display: none;
@@ -31,7 +44,7 @@ body {
 
   /* Printed double rule: two hairlines with a small gap. */
   .rule-double {
-    @apply h-[5px] border-y border-racing;
+    @apply h-[5px] border-y border-primary;
   }
 
   /* Perforated stamp edge. Four hole patterns (top, bottom, left, right) are
@@ -58,8 +71,8 @@ body {
   /* Hairline outline that follows a masked shape (applied to a wrapper, since
      a mask would clip the element's own border and shadow). */
   .cut-outline {
-    filter: drop-shadow(1px 0 0 #d9d2c0) drop-shadow(-1px 0 0 #d9d2c0) drop-shadow(0 1px 0 #d9d2c0)
-      drop-shadow(0 -1px 0 #d9d2c0);
+    filter: drop-shadow(1px 0 0 #dde1e6) drop-shadow(-1px 0 0 #dde1e6) drop-shadow(0 1px 0 #dde1e6)
+      drop-shadow(0 -1px 0 #dde1e6);
   }
 
   /* Rail-ticket halves: semicircular notches where the two halves meet. */
@@ -86,8 +99,8 @@ body {
 }
 
 @layer components {
-  /* Faint herringbone weave for the dark closing band: 3% white lines over
-     ink (HSL lightness 15.5% -> 18%), so text contrast is barely affected. */
+  /* Faint herringbone weave for the primary closing band: 3% white lines.
+     White text stays at 10.5:1 over the lightest point (11.5:1 without it). */
   .tweed {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12'%3E%3Cpath d='M0 6 6 0M0 12 6 6M6 0l6 6M6 6l6 6' stroke='%23fff' stroke-opacity='.03'/%3E%3C/svg%3E");
   }

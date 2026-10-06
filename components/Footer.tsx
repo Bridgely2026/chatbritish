@@ -3,11 +3,11 @@ import Link from "next/link";
 const CONTACT_HREF = "mailto:support@chatbritish.ai?subject=Chat%20British";
 
 // Sitewide footer, mirroring the nav: the same double rule (above here rather
-// than below), the wordmark a size down, and muted type (5.2:1 on paper).
+// than below), the wordmark a size down, and muted type (5.5:1 on canvas).
 // Links get a 44px-tall tap area; the row wraps on narrow phones.
 export default function Footer() {
   return (
-    <footer className="site-footer bg-paper">
+    <footer className="site-footer bg-canvas">
       <div className="rule-double" aria-hidden="true" />
       <div className="mx-auto max-w-5xl px-6 pb-8 pt-4 text-sm text-muted">
         <div className="flex flex-wrap items-center justify-between gap-x-6">
@@ -18,10 +18,10 @@ export default function Footer() {
             Chat British
           </Link>
           <nav aria-label="Footer" className="flex flex-wrap items-center gap-x-6">
-            <Link href="/privacy" className="inline-flex min-h-[44px] items-center hover:text-ink">
+            <Link href="/privacy" className="inline-flex min-h-[44px] items-center underline-offset-4 hover:text-primary hover:underline">
               Privacy
             </Link>
-            <a href={CONTACT_HREF} className="inline-flex min-h-[44px] items-center hover:text-ink">
+            <a href={CONTACT_HREF} className="inline-flex min-h-[44px] items-center underline-offset-4 hover:text-primary hover:underline">
               Contact
             </a>
           </nav>

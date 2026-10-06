@@ -91,10 +91,10 @@ export default function DebriefPage() {
       : "/practice";
 
   return (
-    <div className="min-h-screen bg-paper">
+    <div className="min-h-screen bg-canvas">
       <Nav />
       <div className="mx-auto max-w-xl px-6 py-16">
-        <p className="eyebrow text-brick">Debrief</p>
+        <p className="eyebrow text-primary">Debrief</p>
         <h1 className="mt-2 font-display text-2xl font-medium text-ink">What happened?</h1>
         <p className="mt-3 text-muted">
           Describe a moment that confused you — in your own words. No need to know what category it
@@ -109,7 +109,7 @@ export default function DebriefPage() {
                 onChange={(e) => setDescription(e.target.value)}
                 rows={4}
                 placeholder="e.g. My landlord said he'd 'sort it when he gets a chance' about the broken boiler and it's been three weeks"
-                className="w-full border border-line bg-white/60 p-4 pr-12 text-sm text-ink placeholder:text-muted/70 focus:border-ink"
+                className="w-full rounded-lg border border-field bg-white p-4 pr-12 text-sm text-ink placeholder:text-muted/70 focus:border-primary"
               />
               <button
                 type="button"
@@ -122,7 +122,7 @@ export default function DebriefPage() {
             <button
               type="submit"
               disabled={loading || !description.trim()}
-              className="mt-4 bg-brick px-6 py-3 text-sm font-medium text-paper transition hover:bg-brick-dark disabled:cursor-not-allowed disabled:opacity-40"
+              className="btn-primary mt-4"
             >
               {loading ? "Thinking…" : "Explain this"}
             </button>
@@ -132,21 +132,21 @@ export default function DebriefPage() {
         {phase.kind === "follow_up" && (
           <form
             onSubmit={(e) => handleFollowUpSubmit(e, phase.question)}
-            className="mt-10 border border-line bg-white/60 p-6"
+            className="mt-10 rounded-lg border border-line bg-white p-6"
           >
-            <p className="eyebrow text-brick">One quick check</p>
+            <p className="eyebrow text-primary">One quick check</p>
             <p className="mt-2 text-sm leading-relaxed text-ink">{phase.question}</p>
             <textarea
               value={followUpAnswer}
               onChange={(e) => setFollowUpAnswer(e.target.value)}
               rows={3}
               placeholder="Your answer"
-              className="mt-4 w-full border border-line bg-white p-3 text-sm text-ink placeholder:text-muted/70 focus:border-ink"
+              className="mt-4 w-full rounded-lg border border-field bg-white p-3 text-sm text-ink placeholder:text-muted/70 focus:border-primary"
             />
             <button
               type="submit"
               disabled={loading || !followUpAnswer.trim()}
-              className="mt-4 bg-brick px-6 py-3 text-sm font-medium text-paper transition hover:bg-brick-dark disabled:cursor-not-allowed disabled:opacity-40"
+              className="btn-primary mt-4"
             >
               {loading ? "Thinking…" : "Send"}
             </button>
@@ -154,19 +154,19 @@ export default function DebriefPage() {
         )}
 
         {error && (
-          <div className="mt-6 border border-brick bg-brick/10 p-4">
+          <div className="mt-6 rounded-lg border border-brick bg-brick/10 p-4">
             <p className="text-sm text-ink">{error}</p>
           </div>
         )}
 
         {phase.kind === "no_match" && (
-          <div className="mt-10 border border-line bg-white/60 p-6">
-            <p className="eyebrow text-brick">No close match yet</p>
+          <div className="mt-10 rounded-lg border border-line bg-white p-6">
+            <p className="eyebrow text-primary">No close match yet</p>
             <p className="mt-2 text-sm leading-relaxed text-ink">{phase.message}</p>
             <button
               type="button"
               onClick={startOver}
-              className="mt-6 text-xs font-medium text-ink underline underline-offset-4"
+              className="link mt-6 text-xs"
             >
               Try describing it differently
             </button>
@@ -174,7 +174,7 @@ export default function DebriefPage() {
         )}
 
         {phase.kind === "matched" && (
-          <div className="mt-10 border border-line bg-white/60 p-6">
+          <div className="mt-10 rounded-lg border border-line bg-white p-6">
             {matchedCategory && <p className="text-xs text-muted">{matchedCategory}</p>}
 
             <Field label="Surface signal" value={phase.result.surface_signal} italic />
@@ -182,19 +182,19 @@ export default function DebriefPage() {
             <Field label="Suggested response" value={phase.result.suggested_response} />
 
             <div className="mt-6 flex flex-wrap items-center gap-4 border-t border-line pt-5">
-              <Link href={practiceHref} className="bg-ink px-4 py-2 text-xs font-medium text-paper hover:bg-ink/90">
+              <Link href={practiceHref} className="btn-primary px-4 py-2 text-xs">
                 Practice this norm
               </Link>
               <button
                 onClick={() => setSaved(true)}
-                className="text-xs font-medium text-ink underline underline-offset-4"
+                className="link text-xs"
               >
                 {saved ? "Saved to your log" : "Save to my log"}
               </button>
               <button
                 type="button"
                 onClick={startOver}
-                className="text-xs font-medium text-ink underline underline-offset-4"
+                className="link text-xs"
               >
                 Describe another moment
               </button>
@@ -209,7 +209,7 @@ export default function DebriefPage() {
 function Field({ label, value, italic }: { label: string; value: string; italic?: boolean }) {
   return (
     <div className="mt-4">
-      <p className="eyebrow text-brick">{label}</p>
+      <p className="eyebrow text-primary">{label}</p>
       <p className={`mt-1 text-sm leading-relaxed text-ink ${italic ? "font-display italic" : ""}`}>{value}</p>
     </div>
   );
