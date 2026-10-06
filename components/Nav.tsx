@@ -14,6 +14,11 @@ export default function Nav() {
             <span className="sm:hidden">Start</span>
             <span className="hidden sm:inline">Get started</span>
           </Link>
+          {/* From sm up only: below 640px the row has no room for a fourth item
+              without wrapping (it's ~2px from the edge at 320 already). */}
+          <Link href="/#how-it-works" className="hidden underline-offset-4 hover:text-primary hover:underline sm:inline">
+            How it works
+          </Link>
           <Link href="/practice" className="underline-offset-4 hover:text-primary hover:underline">
             Practice
           </Link>

@@ -9,7 +9,7 @@ type CategoryIconProps = {
 // Drawn on a 48-unit grid so small details (chimney pots, coin edges) survive
 // at the ~44px the picker renders them; currentColor lets the card state
 // (muted when disabled) carry through.
-const SHARED_PROPS: SVGProps<SVGSVGElement> = {
+export const SHARED_PROPS: SVGProps<SVGSVGElement> = {
   viewBox: "0 0 48 48",
   fill: "none",
   stroke: "currentColor",
