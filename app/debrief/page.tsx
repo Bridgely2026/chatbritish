@@ -183,7 +183,7 @@ export default function DebriefPage() {
 
             <div className="mt-6 flex flex-wrap items-center gap-4 border-t border-line pt-5">
               <Link href={practiceHref} className="btn-primary px-4 py-2 text-xs">
-                Practice this norm
+                Practise this norm
               </Link>
               <button
                 onClick={() => setSaved(true)}

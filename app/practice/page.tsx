@@ -300,7 +300,7 @@ function PracticeContent() {
             onClick={practiceAnotherCategory}
             className="btn-primary w-full sm:w-auto"
           >
-            Practice another category
+            Practise another category
           </button>
           <button
             type="button"
