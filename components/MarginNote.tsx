@@ -1,4 +1,5 @@
-// A red-pen annotation, as if a teacher marked the card. Decorative only: the
+// A red-pen annotation, as if a teacher marked the card. The one decorative
+// use of brick (see tailwind.config.ts). Decorative only: the
 // card already says the same thing in text, so it's hidden from assistive tech.
 export default function MarginNote({ children, className = "" }: { children: string; className?: string }) {
   return (

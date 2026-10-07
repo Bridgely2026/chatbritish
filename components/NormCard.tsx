@@ -7,7 +7,7 @@ import MarginNote from "@/components/MarginNote";
 // offset shadow is lighter than the plain card's, since a solid ink shadow
 // shows through the perforations as a heavy dotted chain.
 //
-// `annotation` adds a red-pen margin note. From lg up it sits beside the
+// `annotation` adds a pen margin note. From lg up it sits beside the
 // "What it actually means" label, running over the inner frame into the
 // perforated margin; it stays inside the card because the stamp mask would
 // clip anything past the edge. Below lg the card is too narrow for that
@@ -30,7 +30,7 @@ export default function NormCard({
       <p className="mt-4 font-display text-lg italic text-ink">{entry.surfaceMarkers}</p>
       <div className={`mt-4 space-y-1 ${annotation ? "lg:mt-7" : ""}`}>
         <div className="relative">
-          <p className="eyebrow text-brick">What it actually means</p>
+          <p className="eyebrow text-primary">What it actually means</p>
           {annotation && (
             <MarginNote className="absolute -right-4 bottom-[3px] hidden -rotate-[4deg] lg:inline-block">
               {annotation}
@@ -44,7 +44,7 @@ export default function NormCard({
 
   if (!stamp) {
     return (
-      <div className="w-full max-w-md border border-line bg-white/60 p-6 shadow-[4px_4px_0_#1C2733]">{content}</div>
+      <div className="w-full max-w-md rounded-lg border border-line bg-white p-6">{content}</div>
     );
   }
 
@@ -53,10 +53,10 @@ export default function NormCard({
       <div
         style={{
           filter:
-            "drop-shadow(1px 0 0 #d9d2c0) drop-shadow(-1px 0 0 #d9d2c0) drop-shadow(0 1px 0 #d9d2c0) drop-shadow(0 -1px 0 #d9d2c0) drop-shadow(3px 3px 0 rgba(28, 39, 51, 0.22))",
+            "drop-shadow(1px 0 0 #dde1e6) drop-shadow(-1px 0 0 #dde1e6) drop-shadow(0 1px 0 #dde1e6) drop-shadow(0 -1px 0 #dde1e6) drop-shadow(3px 3px 0 rgba(31, 58, 95, 0.22))",
         }}
       >
-        <div className="stamp-edge bg-[#fbf9f4] p-3">
+        <div className="stamp-edge bg-white p-3">
           <div className="border border-line p-5">{content}</div>
         </div>
       </div>

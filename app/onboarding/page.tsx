@@ -55,8 +55,10 @@ function Chip({
       onClick={onClick}
       title={title}
       aria-pressed={selected}
-      className={`border px-4 py-2 text-sm transition ${
-        selected ? "border-ink bg-ink text-paper" : "border-line bg-white/50 text-ink hover:border-ink"
+      className={`rounded-lg border px-4 py-2 text-sm transition ${
+        selected
+          ? "border-primary bg-primary text-white"
+          : "border-line bg-white text-ink hover:border-primary hover:shadow-md"
       }`}
     >
       {children}
@@ -216,7 +218,7 @@ export default function OnboardingPage() {
 
   if (startingPoint) {
     return (
-      <div className="min-h-screen bg-paper">
+      <div className="min-h-screen bg-canvas">
         <Nav />
         <div className="mx-auto max-w-xl px-6 py-16">
           <h1 className="font-display text-3xl font-medium text-ink">Here&rsquo;s where we&rsquo;ll start</h1>
@@ -224,8 +226,8 @@ export default function OnboardingPage() {
 
           <div className="mt-8 grid gap-3 sm:grid-cols-3">
             {startingPoint.rankedCategories.map((category, i) => (
-              <div key={category} className="border border-line bg-white/60 p-4">
-                <p className="eyebrow text-brick">Priority {i + 1}</p>
+              <div key={category} className="rounded-lg border border-line bg-white p-4">
+                <p className="eyebrow text-primary">Priority {i + 1}</p>
                 <p className="mt-1 text-sm text-ink">{category}</p>
               </div>
             ))}
@@ -244,7 +246,7 @@ export default function OnboardingPage() {
               const situationsParam = encodeURIComponent(situations.join(","));
               router.push(`/practice?categories=${categories}&situations=${situationsParam}`);
             }}
-            className="mt-10 bg-brick px-6 py-3 text-sm font-medium text-paper transition hover:bg-brick-dark"
+            className="btn-primary mt-10"
           >
             Start practicing
           </button>
@@ -254,10 +256,10 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-paper">
+    <div className="min-h-screen bg-canvas">
       <Nav />
       <div className="mx-auto max-w-xl px-6 py-16">
-        <p className="eyebrow text-brick">
+        <p className="eyebrow text-primary">
           Step {step + 1} of {TOTAL_STEPS}
         </p>
         <div className="mt-4 flex gap-1.5">
@@ -265,7 +267,7 @@ export default function OnboardingPage() {
             <div
               key={i}
               className={`h-1.5 flex-1 rounded-full ${
-                i < step ? "bg-ink" : i === step ? "bg-ink/40" : "bg-line"
+                i < step ? "bg-primary" : i === step ? "bg-primary/40" : "bg-line"
               }`}
             />
           ))}
@@ -359,7 +361,7 @@ export default function OnboardingPage() {
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
                   placeholder="e.g. Manchester"
-                  className="mt-3 w-full border border-line bg-white/60 p-3 text-sm text-ink placeholder:text-muted/70 focus:border-ink"
+                  className="mt-3 w-full rounded-lg border border-field bg-white p-3 text-sm text-ink placeholder:text-muted/70 focus:border-primary"
                 />
               </div>
 
@@ -373,7 +375,7 @@ export default function OnboardingPage() {
                   onChange={(e) => setStruggle(e.target.value)}
                   rows={3}
                   placeholder="e.g. I never know if my manager is actually saying yes or no"
-                  className="mt-3 w-full border border-line bg-white/60 p-3 text-sm text-ink placeholder:text-muted/70 focus:border-ink"
+                  className="mt-3 w-full rounded-lg border border-field bg-white p-3 text-sm text-ink placeholder:text-muted/70 focus:border-primary"
                 />
               </div>
 
@@ -406,7 +408,7 @@ export default function OnboardingPage() {
                   placeholder="you@example.com"
                   aria-invalid={!emailValid}
                   aria-describedby={!emailValid ? "email-error" : undefined}
-                  className="mt-3 w-full border border-line bg-white/60 p-3 text-sm text-ink placeholder:text-muted/70 focus:border-ink"
+                  className="mt-3 w-full rounded-lg border border-field bg-white p-3 text-sm text-ink placeholder:text-muted/70 focus:border-primary"
                 />
                 {!emailValid && (
                   <p id="email-error" className="mt-2 text-xs text-brick">
@@ -418,12 +420,12 @@ export default function OnboardingPage() {
           )}
 
           {saveFailed && (
-            <div role="alert" className="border border-brick/40 bg-white/60 p-4 text-sm text-ink">
+            <div role="alert" className="rounded-lg border border-brick/40 bg-white p-4 text-sm text-ink">
               <p>We couldn&rsquo;t save your answers just now. Your answers are still here, so you can try again.</p>
               <button
                 type="button"
                 onClick={continueWithoutSaving}
-                className="mt-2 text-sm text-brick underline underline-offset-2 hover:text-brick-dark"
+                className="link mt-2 text-sm"
               >
                 Continue without saving
               </button>
@@ -436,7 +438,7 @@ export default function OnboardingPage() {
                 type="button"
                 onClick={() => setStep(step - 1)}
                 disabled={saving}
-                className="border border-line bg-white/50 px-6 py-3 text-sm font-medium text-ink transition hover:border-ink disabled:cursor-not-allowed disabled:opacity-40"
+                className="btn-secondary"
               >
                 Back
               </button>
@@ -445,7 +447,7 @@ export default function OnboardingPage() {
               <button
                 type="submit"
                 disabled={!canProceed || saving || !authChecked}
-                className="bg-brick px-6 py-3 text-sm font-medium text-paper transition hover:bg-brick-dark disabled:cursor-not-allowed disabled:opacity-40"
+                className="btn-primary"
               >
                 {!authChecked ? "Preparing…" : saving ? "Saving…" : saveFailed ? "Try again" : "See my starting point"}
               </button>
@@ -454,7 +456,7 @@ export default function OnboardingPage() {
                 type="button"
                 onClick={() => setStep(step + 1)}
                 disabled={!canProceed}
-                className="bg-brick px-6 py-3 text-sm font-medium text-paper transition hover:bg-brick-dark disabled:cursor-not-allowed disabled:opacity-40"
+                className="btn-primary"
               >
                 Next
               </button>

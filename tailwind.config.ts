@@ -5,19 +5,31 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        paper: "#F5F1E7",
+        // Page background; cards and panels sit on it in white.
+        canvas: "#FBFAF7",
         ink: "#1C2733",
+        // Brand colour: buttons, links, eyebrow labels, rules, card bands.
+        primary: "#1F3A5F",
+        "primary-dark": "#172D49",
+        // Secondary-button hover and other light brand tints.
+        sky: "#EAF1F8",
+        // Decorative only: never text, never a border on a light background.
+        amber: "#F2A93B",
+        // Brick and sage are reserved for answer states (wrong / correct) and
+        // error messages, with one decorative exception: the red-pen margin
+        // note on the home hero is brick.
         brick: "#A63A2E",
-        "brick-dark": "#8A2F25",
         "brick-light": "#F0DAD5",
         sage: "#4B6C5E",
         "sage-light": "#DCE5DF",
-        muted: "#5B6670",
-        line: "#D9D2C0",
-        // Brand decoration only (rules, card bands, ticket band) — never
-        // feedback states, links or buttons. No light variant: sage-light
-        // stays reserved for correct answers.
-        racing: "#1E4D3A",
+        // #5B6773 was proposed, but it (like the old #5B6670) fell under 4.5:1
+        // on the wrong-answer feedback bar (brick-light). This passes on
+        // canvas, white, sky, brick-light and sage-light.
+        muted: "#56626E",
+        // Light neutral for card borders and hairlines.
+        line: "#DDE1E6",
+        // Text-input borders: an input needs a visible edge, so 3:1 on white.
+        field: "#858F99",
       },
       fontFamily: {
         display: ["Fraunces", "Georgia", "serif"],

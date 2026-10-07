@@ -26,7 +26,7 @@ const fieldGuide = FIELD_GUIDE_NORM_IDS.map((id) => taxonomy.find((e) => e.normI
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-paper">
+    <div className="min-h-screen bg-canvas">
       <Nav />
 
       {/* Hero */}
@@ -44,13 +44,10 @@ export default function LandingPage() {
             Practice before it happens. Get a straight answer after it already has.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-4">
-            <Link
-              href="/onboarding"
-              className="bg-brick px-6 py-3 text-sm font-medium text-paper transition hover:bg-brick-dark"
-            >
+            <Link href="/onboarding" className="btn-primary">
               Start your profile
             </Link>
-            <Link href="/debrief" className="text-sm font-medium text-ink underline underline-offset-4">
+            <Link href="/debrief" className="link text-sm">
               Try the debrief tool
             </Link>
           </div>
@@ -63,7 +60,7 @@ export default function LandingPage() {
       <SectionDivider />
 
       {/* Three features */}
-      <section className="bg-white/40">
+      <section className="bg-white">
         <div className="mx-auto max-w-5xl px-6 py-20">
           <h2 className="font-display text-2xl font-medium text-ink">Two moments. One method.</h2>
           <p className="mt-3 max-w-prose text-muted">
@@ -106,7 +103,7 @@ export default function LandingPage() {
               className="grid gap-2 border-b border-line py-5 sm:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] sm:gap-x-10"
             >
               <dt>
-                <span className="eyebrow block text-brick">{row.category}</span>
+                <span className="eyebrow block text-primary">{row.category}</span>
                 <span className="mt-1.5 block font-display text-lg italic text-ink">&ldquo;{row.phrase}&rdquo;</span>
               </dt>
               <dd className="text-sm leading-relaxed text-muted sm:pt-6">{row.meaning}</dd>
@@ -114,7 +111,7 @@ export default function LandingPage() {
           ))}
         </dl>
         <p className="mt-8">
-          <Link href="/debrief" className="text-sm font-medium text-ink underline underline-offset-4">
+          <Link href="/debrief" className="link text-sm">
             Try the debrief tool
           </Link>
         </p>
@@ -143,15 +140,12 @@ export default function LandingPage() {
       <SectionDivider />
 
       {/* CTA */}
-      <section className="tweed bg-ink">
+      <section className="tweed bg-primary">
         <div className="mx-auto flex max-w-5xl flex-col items-start gap-6 px-6 py-16 md:flex-row md:items-center md:justify-between">
-          <h2 className="font-display text-2xl font-medium text-paper">
+          <h2 className="font-display text-2xl font-medium text-white">
             Stop guessing what people mean.
           </h2>
-          <Link
-            href="/onboarding"
-            className="bg-paper px-6 py-3 text-sm font-medium text-ink transition hover:bg-white"
-          >
+          <Link href="/onboarding" className="btn-secondary focus-visible:outline-white">
             Start your profile
           </Link>
         </div>
@@ -163,7 +157,7 @@ export default function LandingPage() {
 function Feature({ label, title, body }: { label: string; title: string; body: string }) {
   return (
     <div>
-      <p className="eyebrow text-brick">{label}</p>
+      <p className="eyebrow text-primary">{label}</p>
       <h3 className="mt-2 font-display text-xl font-medium text-ink">{title}</h3>
       <p className="mt-2 text-sm leading-relaxed text-muted">{body}</p>
     </div>
@@ -173,7 +167,7 @@ function Feature({ label, title, body }: { label: string; title: string; body: s
 // Double rule with a small centred diamond, between home sections.
 function SectionDivider() {
   return (
-    <div aria-hidden="true" className="flex items-center gap-3 text-racing">
+    <div aria-hidden="true" className="flex items-center gap-3 text-primary">
       <div className="rule-double flex-1" />
       <svg viewBox="0 0 10 10" className="h-2.5 w-2.5 shrink-0">
         <path d="M5 .5 9.5 5 5 9.5.5 5Z" fill="currentColor" />
