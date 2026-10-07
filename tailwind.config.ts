@@ -16,7 +16,8 @@ const config: Config = {
         // Decorative only: never text, never a border on a light background.
         amber: "#F2A93B",
         // Brick and sage are reserved for answer states (wrong / correct) and
-        // error messages. Nothing decorative uses them.
+        // error messages, with one decorative exception: the red-pen margin
+        // note on the home hero is brick.
         brick: "#A63A2E",
         "brick-light": "#F0DAD5",
         sage: "#4B6C5E",
