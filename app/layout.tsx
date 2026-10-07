@@ -4,7 +4,7 @@ import "./globals.css";
 
 const title = "Chat British \u2014 Speak the language. Understand the culture. Belong.";
 const description =
-  "Chat British turns the unwritten rules of British communication into something you can actually learn \u2014 practice before it happens, diagnosis after.";
+  "Chat British turns the unwritten rules of British communication into something you can actually learn \u2014 practise before it happens, diagnosis after.";
 
 // Absolute URLs for the share image need a base. NEXT_PUBLIC_SITE_URL wins when
 // set; otherwise fall back to the production domain so share images never

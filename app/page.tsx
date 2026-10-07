@@ -75,7 +75,7 @@ export default function LandingPage() {
           <p className="mt-6 max-w-prose text-lg leading-relaxed text-muted">
             Chat British teaches the unwritten rules of British communication — the hedges, the
             understatements, the &ldquo;let&rsquo;s see how it goes&rdquo; that actually means no.
-            Practice before it happens. Get a straight answer after it already has.
+            Practise before it happens. Get a straight answer after it already has.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-4">
             <Link href="/onboarding" className="btn-primary">
@@ -148,8 +148,8 @@ export default function LandingPage() {
             image={{
               src: "/home-debrief.webp",
               width: 654,
-              height: 712,
-              alt: "Debrief asking one follow-up question about a landlord who keeps saying he\u2019ll look into a leaking tap: is this about getting the tap repaired, or something else? The reply \u201cGetting the tap actually repaired\u201d is typed in.",
+              height: 1456,
+              alt: "A Debrief answer card on a phone, filed under Money & transactions. The surface signal is agreeing to split a group dinner bill evenly after having only a starter and water. It explains that an even split is a casual UK default and that raising it isn\u2019t inappropriate, and suggests saying \u201cI only had a starter and water, would you mind if I paid a bit less?\u201d Below are the buttons Practise this norm, Save to my log and Describe another moment.",
             }}
             href="/debrief"
             cta="Try Debrief"
