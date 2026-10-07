@@ -346,9 +346,11 @@ export async function POST(request: NextRequest) {
   }
   const { supabase, anthropic } = clients;
 
-  const textToEmbed = followUp
-    ? `${description}\n\nFollow-up Q: ${followUp.question}\nA: ${followUp.answer}`
-    : description;
+  // Retrieval embeds only what the user wrote. The follow-up question is
+  // Claude's, and it can name other topics as alternatives ("a referencing
+  // check or ending your tenancy?"), which pulled those entries above the
+  // right one. Claude still sees the question in the generation step.
+  const textToEmbed = followUp ? `${description}\n\n${followUp.answer}` : description;
 
   let queryEmbedding: number[];
   try {
