@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chat British: landing page mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --canvas:#FBFAF7; --surface:#FFFFFF; --ink:#1C2733; --muted:#56626E;
+  --primary:#1F3A5F; --primary-dark:#172D49; --onprimary:#FFFFFF;
+  --sky:#EAF1F8; --line:#D8DEE5; --amber:#F2A93B; --amber-tint:#FCEBCB;
+  --sage-tint:#DDE6E0; --brick:#A63A2E; --link:#1F3A5F; --band:#1F3A5F; --bubble:#EAF1F8;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --canvas:#0E1621; --surface:#152233; --ink:#E7ECF2; --muted:#A3AEBC;
+    --primary:#7FA6DA; --primary-dark:#6C95CB; --onprimary:#0E1621;
+    --sky:#142538; --line:#2B3C52; --amber-tint:#3A2E17; --sage-tint:#1B2B27;
+    --brick:#E58A7B; --link:#9DBCE6; --bubble:#223652;
+  }
+}
+:root[data-theme="dark"]{
+  --canvas:#0E1621; --surface:#152233; --ink:#E7ECF2; --muted:#A3AEBC;
+  --primary:#7FA6DA; --primary-dark:#6C95CB; --onprimary:#0E1621;
+  --sky:#142538; --line:#2B3C52; --amber-tint:#3A2E17; --sage-tint:#1B2B27;
+  --brick:#E58A7B; --link:#9DBCE6; --bubble:#223652;
+}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 72px);scroll-behavior:smooth}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--canvas);color:var(--ink);font-family:'Work Sans',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:17px;line-height:1.6;-webkit-text-size-adjust:100%}
+h1,h2,h3{font-family:'Fraunces',Georgia,'Times New Roman',serif;font-weight:600;line-height:1.12;margin:0;letter-spacing:-.01em}
+p{margin:0}
+a{color:var(--link)}
+img,svg{max-width:100%}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+:focus-visible{outline:3px solid var(--primary);outline-offset:3px;border-radius:4px}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:46px;padding:0 22px;border-radius:8px;border:1.5px solid transparent;font:600 16px/1 'Work Sans',system-ui,sans-serif;text-decoration:none;cursor:pointer;transition:background-color .15s,color .15s,border-color .15s}
+.btn-primary{background:var(--primary);color:var(--onprimary)}
+.btn-primary:hover{background:var(--primary-dark)}
+.btn-secondary{background:transparent;color:var(--link);border-color:var(--primary)}
+.btn-secondary:hover{background:var(--sky)}
+.btn-sm{min-height:40px;padding:0 16px;font-size:15px}
+.btn-light{background:#fff;color:#1F3A5F}
+.btn-light:hover{background:#EAF1F8}
+.btn-ghost-light{background:transparent;color:#fff;border-color:rgba(255,255,255,.7)}
+.btn-ghost-light:hover{background:rgba(255,255,255,.12)}
+.btn-wa{background:#0E6B3A;color:#fff}
+.btn-wa:hover{background:#0B5A31}
+.btn-li{background:#0A66C2;color:#fff}
+.btn-li:hover{background:#0857A6}
+.btn svg{width:20px;height:20px;flex:none}
+.on-band :focus-visible,.band :focus-visible{outline-color:#fff}
+
+.flag{display:inline-block;width:24px;height:12px;vertical-align:-1px;border-radius:2px;box-shadow:0 0 0 1px rgba(0,0,0,.18);flex:none}
+.ph{display:inline-block;background:var(--amber);color:#1C2733;font:600 11px/1 'Work Sans',sans-serif;padding:4px 8px;border-radius:999px;vertical-align:middle;margin-right:6px}
+
+/* mockup notice */
+.notice{background:var(--amber);color:#1C2733;font-size:14px;line-height:1.4;padding:8px 24px;text-align:center}
+
+/* header */
+header.site{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--canvas);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;gap:28px;min-height:68px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);font:600 21px/1 'Fraunces',Georgia,serif}
+nav.links{display:flex;gap:26px;margin-left:auto}
+nav.links a{color:var(--muted);text-decoration:none;font-size:16px;padding:10px 0}
+nav.links a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:5px}
+.m-menu{display:none;position:relative;margin-left:auto}
+.m-menu summary{list-style:none;cursor:pointer;min-height:40px;display:inline-flex;align-items:center;padding:0 14px;border:1.5px solid var(--line);border-radius:8px;color:var(--ink);font-weight:500;font-size:15px}
+.m-menu summary::-webkit-details-marker{display:none}
+.m-menu div{position:absolute;right:0;top:48px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px;min-width:200px;box-shadow:0 12px 30px rgba(0,0,0,.12)}
+.m-menu a{display:block;padding:12px 14px;color:var(--ink);text-decoration:none;border-radius:6px}
+.m-menu a:hover{background:var(--sky)}
+
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) 520px;gap:40px;align-items:center;padding-top:64px;padding-bottom:44px}
+.hero .tag{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:15px;margin-bottom:22px}
+.hero h1{font-size:clamp(2.2rem,4.5vw,3.4rem);text-wrap:balance}
+.hero h1 span{display:block}
+.hero .lead{margin-top:22px;max-width:30em;color:var(--muted);font-size:18px}
+.hero .cta{display:flex;flex-wrap:wrap;gap:14px;margin-top:30px}
+.hero .fine{margin-top:16px;color:var(--muted);font-size:15px}
+
+.collage{position:relative;min-height:590px}
+.stamp{position:absolute;left:0;top:50px;width:252px;transform:rotate(-3deg);background:var(--surface);padding:22px;border-radius:4px;box-shadow:0 0 0 7px var(--surface),0 0 0 8px var(--line),0 18px 40px rgba(20,35,55,.14)}
+.stamp .id{display:flex;justify-content:space-between;gap:12px;font:500 12px/1.3 ui-monospace,Menlo,monospace;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:12px}
+.stamp q{display:block;font:italic 500 19px/1.35 'Fraunces',Georgia,serif;quotes:none}
+.stamp .means{margin-top:14px;font-size:14.5px;line-height:1.5}
+.stamp .means b{display:block;color:var(--brick);font-size:13px;margin-bottom:2px}
+.note{position:absolute;left:8px;top:336px;font:600 30px/1 'Caveat',cursive;color:var(--brick);transform:rotate(-5deg);white-space:nowrap}
+.note svg{display:block;margin:2px 0 0 4px}
+
+/* device mockups (always light, regardless of page theme) */
+.collage .phone{position:absolute;right:0;top:0}
+.phone{width:274px;background:#0F1722;border-radius:40px;padding:9px;box-shadow:0 26px 50px rgba(15,23,34,.28)}
+.screen{position:relative;height:552px;border-radius:32px;overflow:hidden;background:#FBFAF7;color:#1C2733;font:400 12.5px/1.45 'Work Sans',system-ui,sans-serif}
+.screen.short{height:436px}
+.screen .top{display:flex;justify-content:space-between;align-items:center;padding:16px 16px 8px}
+.screen .top b{font:600 13px/1 'Fraunces',Georgia,serif}
+.screen .top span{color:#56626E;font-size:11.5px}
+.screen .cat{background:#1F3A5F;color:#fff;padding:7px 16px;font-size:12px;font-weight:500}
+.screen .body{padding:14px 16px}
+.screen .prompt{font:italic 500 14.5px/1.3 'Fraunces',Georgia,serif;margin:10px 0 10px}
+.opt{display:flex;gap:9px;align-items:flex-start;border:1px solid #D8DEE5;background:#fff;border-radius:6px;padding:8px 10px;margin-bottom:8px}
+.opt i{flex:none;width:18px;height:18px;border-radius:50%;border:1px solid #B9C2CC;font:500 10.5px/16px 'Work Sans',sans-serif;text-align:center;font-style:normal;color:#56626E}
+.opt.bad{background:#F2DAD5;border-color:#A63A2E}.opt.bad i{border-color:#A63A2E;color:#A63A2E}
+.opt.good{background:#DDE6E0;border-color:#4F7264}.opt.good i{border-color:#4F7264;color:#3E5A4E}
+.fb{position:absolute;left:0;right:0;bottom:0;background:#F2DAD5;border-top:1px solid #A63A2E;padding:11px 16px 16px}
+.fb .h{display:flex;align-items:center;gap:8px;color:#A63A2E;font-weight:600;font-size:13px;margin-bottom:3px}
+.fb .h u{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#A63A2E;text-decoration:none}
+.fb .h u svg{width:11px;height:11px}
+.fb p{font-size:12px;color:#3d4955}
+.fb .next{display:block;margin-top:9px;background:#1F3A5F;color:#fff;border-radius:6px;text-align:center;padding:9px 0;font-weight:600;font-size:12.5px}
+.ticket{margin:14px 16px;background:#fff;border:1px solid #D8DEE5;position:relative}
+.ticket .tb{background:#1F3A5F;color:#fff;padding:7px 14px;font-size:12px;font-weight:500}
+.ticket .tm{padding:14px}
+.ticket .tm h4{margin:0 0 10px;font:600 18px/1.1 'Fraunces',Georgia,serif}
+.ticket .sc{font:600 38px/1 'Fraunces',Georgia,serif}.ticket .sc small{font:400 14px 'Work Sans',sans-serif;color:#56626E}
+.ticket .msg{margin-top:8px;color:#56626E}
+.ticket .tear{border-top:2px dashed #D8DEE5;margin:0 10px;position:relative}
+.ticket .tear::before,.ticket .tear::after{content:"";position:absolute;top:-10px;width:18px;height:18px;border-radius:50%;background:#FBFAF7;border:1px solid #D8DEE5}
+.ticket .tear::before{left:-20px}.ticket .tear::after{right:-20px}
+.ticket .stub{padding:12px 14px 14px;color:#56626E}
+.ticket .stub b{color:#1C2733}
+.pbtn{display:block;margin:8px 16px 0;text-align:center;border-radius:6px;padding:9px 0;font-weight:600;font-size:12.5px;border:1.5px solid #1F3A5F;color:#1F3A5F;background:#fff}
+.pbtn.fill{background:#1F3A5F;color:#fff}
+
+.browser{background:#fff;color:#1C2733;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 22px 44px rgba(20,35,55,.16);font:400 14px/1.5 'Work Sans',system-ui,sans-serif}
+.browser .chrome{display:flex;align-items:center;gap:7px;padding:10px 14px;background:#EEF1F4;border-bottom:1px solid #D8DEE5}
+.browser .chrome i{width:10px;height:10px;border-radius:50%;background:#C5CCD4}
+.browser .url{margin-left:10px;flex:1;background:#fff;border-radius:6px;padding:4px 12px;color:#56626E;font-size:12.5px}
+.browser .cols{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.browser .left{padding:20px;border-right:1px solid #E3E8ED;background:#FBFAF7}
+.browser .right{padding:20px}
+.browser label{display:block;font-weight:600;font-size:13.5px;margin-bottom:8px}
+.browser .ta{background:#fff;border:1.5px solid #858F99;border-radius:6px;padding:11px 12px;min-height:118px;font-size:14px}
+.browser .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.browser .chip{border:1px solid #D8DEE5;background:#fff;border-radius:999px;padding:5px 12px;font-size:12.5px;color:#1F3A5F}
+.browser .go{display:inline-block;margin-top:14px;background:#1F3A5F;color:#fff;border-radius:6px;padding:10px 18px;font-weight:600;font-size:14px}
+.browser .ans small{color:#56626E;font-size:12.5px}
+.browser .ans h4{margin:2px 0 12px;font:600 21px/1.15 'Fraunces',Georgia,serif}
+.browser .ans dl{margin:0}.browser .ans dt{font-weight:600;font-size:12.5px;color:#1F3A5F;margin-top:11px}
+.browser .ans dd{margin:2px 0 0;font-size:14px}
+.browser .ans dd q{font-family:'Fraunces',Georgia,serif;font-style:italic;quotes:none}
+
+/* stats */
+.proof{border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-top:8px}
+.proof .wrap{display:grid;grid-template-columns:repeat(4,1fr)}
+.proof .wrap > div{padding:22px 20px;border-left:1px solid var(--line)}
+.proof .wrap > div:first-child{border-left:0;padding-left:0}
+.proof .wrap > div b{display:block;font:600 30px/1.1 'Fraunces',Georgia,serif}
+.proof span{color:var(--muted);font-size:15px}
+
+section.s{padding:84px 0}
+.head{max-width:36em;margin-bottom:38px}
+.head h2{font-size:clamp(1.9rem,3.6vw,2.6rem)}
+.head p{margin-top:14px;color:var(--muted);font-size:18px}
+
+/* founder */
+.founder{display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center}
+.video{position:relative;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:#1F3A5F;color:#fff;box-shadow:0 20px 44px rgba(20,35,55,.2)}
+.video .poster{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:26px;background:#1F3A5F}
+.video .poster h3{font-size:clamp(1.4rem,2.6vw,2rem);max-width:12em;color:#fff}
+.video .poster p{margin-top:6px;color:#C9D6E8;font-size:15px}
+.video .play{position:absolute;right:26px;top:26px;width:76px;height:76px;border-radius:50%;border:0;background:#fff;color:#1F3A5F;display:grid;place-items:center;cursor:pointer;box-shadow:0 0 0 8px rgba(255,255,255,.22)}
+.video .play:hover{background:#EAF1F8}
+.video .play svg{width:30px;height:30px;margin-left:4px}
+.video .dur{position:absolute;left:26px;top:26px;background:rgba(0,0,0,.35);color:#fff;font-size:13px;padding:3px 9px;border-radius:5px}
+.video .after{display:none;position:absolute;inset:0;padding:30px;background:#14263F;color:#fff;align-content:center;font-size:16px}
+.video.on .after{display:grid}
+.video.on .poster,.video.on .play,.video.on .dur{display:none}
+.founder h2{font-size:clamp(1.8rem,3.3vw,2.4rem)}
+.founder p{margin-top:14px;color:var(--muted)}
+.facts{display:grid;gap:10px;margin:22px 0;padding:0;list-style:none}
+.facts li{display:flex;gap:12px;align-items:baseline;padding-top:10px;border-top:1px solid var(--line)}
+.facts b{font:600 22px/1 'Fraunces',Georgia,serif;min-width:96px}
+
+/* situations */
+.sit{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
+.sc-card{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.sc-card .art{aspect-ratio:16/10;display:block;width:100%}
+.sc-card .t{padding:18px 20px 22px;display:flex;flex-direction:column;gap:6px;flex:1}
+.sc-card h3{font-size:22px}
+.sc-card p{color:var(--muted);font-size:15.5px}
+.sc-card .btn{margin-top:auto;align-self:flex-start}
+.sc-card .t .btn{margin-top:12px}
+.sit-foot{margin-top:30px;display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.sit-foot span{color:var(--muted)}
+
+/* tour */
+.tour{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;padding:34px 0}
+.tour.flip .vis{order:2}
+.tour h3{font-size:clamp(1.7rem,3vw,2.2rem)}
+.tour p{margin-top:14px;color:var(--muted);font-size:18px}
+.tour ul{margin:20px 0 26px;padding:0;list-style:none;display:grid;gap:10px}
+.tour li{padding-left:28px;position:relative}
+.tour li::before{content:"";position:absolute;left:0;top:.62em;width:14px;height:7px;border-left:2.5px solid var(--primary);border-bottom:2.5px solid var(--primary);transform:rotate(-45deg) translateY(-50%)}
+.vis{display:flex;justify-content:center}
+.vis.wide{display:block}
+.tint{background:var(--sky)}
+
+/* ledger */
+.ledger{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.ledger th{background:var(--sky);text-align:left;font-weight:600;font-size:14px;padding:12px 18px}
+.ledger td{padding:16px 18px;border-top:1px solid var(--line);vertical-align:top;font-size:15.5px}
+.ledger td:first-child{font:italic 500 18px/1.3 'Fraunces',Georgia,serif;width:34%}
+.coach{display:grid;grid-template-columns:.8fr 1.2fr;gap:56px;align-items:start}
+.coach h2{font-size:clamp(1.8rem,3.3vw,2.4rem)}
+.coach p{margin-top:14px;color:var(--muted)}
+
+/* faq */
+.faq{max-width:760px}
+.faq details{border-bottom:1px solid var(--line)}
+.faq summary{list-style:none;cursor:pointer;padding:20px 40px 20px 0;font:600 19px/1.3 'Fraunces',Georgia,serif;position:relative}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";position:absolute;right:6px;top:18px;font:400 28px/1 'Work Sans',sans-serif;color:var(--primary)}
+.faq details[open] summary::after{content:"\2212"}
+.faq details p{padding:0 40px 22px 0;color:var(--muted)}
+
+/* band + footer */
+.band{background:var(--band);color:#fff;padding:76px 0}
+.band .wrap{display:flex;flex-wrap:wrap;gap:28px;align-items:center;justify-content:space-between}
+.band h2{font-size:clamp(1.8rem,3.4vw,2.5rem);max-width:11em;color:#fff}
+.band .acts{display:flex;flex-wrap:wrap;gap:14px}
+footer.site{padding:56px 0 40px;border-top:1px solid var(--line)}
+.fgrid{display:grid;grid-template-columns:1.2fr .8fr 1fr;gap:44px}
+.fgrid h4{margin:0 0 14px;font:600 15px/1 'Work Sans',sans-serif;color:var(--ink)}
+.fgrid ul{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.fgrid li a{display:inline-block;padding:7px 0;color:var(--muted);text-decoration:none}
+.fgrid li a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+.tagline{margin-top:12px;color:var(--muted);max-width:19em}
+.social{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.mail{color:var(--muted);margin-top:4px}
+.mail a{color:var(--link)}
+.legal{margin-top:40px;padding-top:22px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:space-between;color:var(--muted);font-size:14.5px}
+.legal p{max-width:44em}
+
+@media (max-width:980px){
+  .hero{grid-template-columns:1fr;gap:34px;padding-top:44px}
+  .collage{min-height:0;display:flex;flex-direction:column;align-items:center;gap:34px}
+  .collage .phone{position:relative;right:auto;top:auto}
+  .stamp{position:relative;left:auto;top:auto;width:min(100%,380px)}
+  .note{position:relative;left:auto;top:auto;align-self:flex-start;margin:-12px 0 0 8%}
+  .founder,.tour,.coach{grid-template-columns:1fr;gap:34px}
+  .tour.flip .vis{order:0}
+  .sit{grid-template-columns:repeat(2,1fr)}
+  .fgrid{grid-template-columns:1fr 1fr}
+  .fgrid > :first-child{grid-column:1 / -1}
+}
+@media (max-width:760px){
+  nav.links,.bar > .btn{display:none}
+  .m-menu{display:block}
+  .proof .wrap{grid-template-columns:1fr 1fr}
+  .proof .wrap > div:nth-child(3){border-left:0;padding-left:0}
+  .proof .wrap > div:nth-child(n+3){border-top:1px solid var(--line)}
+  section.s{padding:60px 0}
+  .browser .cols{grid-template-columns:1fr}
+  .browser .left{border-right:0;border-bottom:1px solid #E3E8ED}
+  .ledger td:first-child{width:auto}
+  .ledger thead{display:none}
+  .ledger tr,.ledger td{display:block}
+  .ledger tr{border-top:1px solid var(--line);padding:14px 18px}
+  .ledger td{border:0;padding:0}
+  .ledger td + td{margin-top:6px;color:var(--muted)}
+}
+@media (max-width:560px){
+  .wrap{padding-left:18px;padding-right:18px}
+  .sit{grid-template-columns:1fr}
+  .fgrid{grid-template-columns:1fr}
+  .hero .cta .btn{flex:1 1 100%}
+  .band .acts .btn{flex:1 1 100%}
+  .video .play{width:62px;height:62px;right:18px;top:18px}
+  .video .poster{padding:18px}
+  .video .dur{left:18px;top:18px}
+}
+
+/* help assistant */
+.help-fab{position:fixed;right:max(18px,env(safe-area-inset-right,0px));bottom:max(18px,env(safe-area-inset-bottom,0px));z-index:40;display:inline-flex;align-items:center;gap:10px;min-height:54px;padding:0 20px 0 16px;border-radius:999px;border:0;background:var(--primary);color:var(--onprimary);font:600 16px/1 'Work Sans',system-ui,sans-serif;cursor:pointer;box-shadow:0 10px 28px rgba(15,35,60,.35)}
+.help-fab:hover{background:var(--primary-dark)}
+.help-fab svg{width:22px;height:22px;flex:none}
+.help-panel{position:fixed;right:max(18px,env(safe-area-inset-right,0px));bottom:calc(max(18px,env(safe-area-inset-bottom,0px)) + 68px);z-index:41;width:380px;max-height:min(620px,calc(100vh - 120px));display:none;flex-direction:column;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:16px;box-shadow:0 24px 60px rgba(15,35,60,.35);overflow:hidden}
+.help-panel.open{display:flex}
+.hp-head{background:var(--band);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px}
+.hp-head b{font:600 17px/1.2 'Fraunces',Georgia,serif;display:block}
+.hp-head small{display:block;color:#C9D6E8;font-size:12.5px;font-weight:400}
+.hp-close{margin-left:auto;width:40px;height:40px;border-radius:8px;border:0;background:transparent;color:#fff;cursor:pointer;display:grid;place-items:center}
+.hp-close:hover{background:rgba(255,255,255,.14)}
+.hp-close svg{width:18px;height:18px}
+.hp-msgs{padding:16px;overflow:auto;display:flex;flex-direction:column;gap:12px;flex:1;min-height:200px}
+.m{max-width:88%;padding:10px 13px;border-radius:14px;font-size:15px;line-height:1.5}
+.m.bot{background:var(--bubble);align-self:flex-start;border-bottom-left-radius:4px}
+.m.me{background:var(--primary);color:var(--onprimary);align-self:flex-end;border-bottom-right-radius:4px}
+.m .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.hp-chips{display:flex;flex-wrap:wrap;gap:6px 8px;padding:0 16px 10px}
+.hp-chip{border:1px solid var(--line);background:var(--surface);color:var(--link);border-radius:999px;min-height:36px;padding:0 13px;font:500 13.5px/1 'Work Sans',system-ui,sans-serif;cursor:pointer}
+.hp-chip:hover{background:var(--sky)}
+.hp-in{display:flex;gap:8px;padding:10px 12px 4px;border-top:1px solid var(--line)}
+.hp-in input{flex:1;min-width:0;min-height:44px;border:1.5px solid #858F99;border-radius:8px;padding:0 12px;font:400 15px 'Work Sans',system-ui,sans-serif;background:var(--surface);color:var(--ink)}
+.hp-in .btn{min-height:44px}
+.hp-note{padding:0 14px 10px;font-size:12.5px;color:var(--muted)}
+.hp-hand{padding:10px 14px 12px;border-top:1px solid var(--line);background:var(--canvas);display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13.5px;color:var(--muted)}
+.hp-hand span{margin-right:auto}
+.hp-hand .btn{min-height:40px;padding:0 12px;font-size:14px}
+@media (max-width:560px){.help-panel{left:12px;right:12px;width:auto;bottom:calc(max(12px,env(safe-area-inset-bottom,0px)) + 68px);max-height:calc(100vh - 100px)}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="uk" viewBox="0 0 60 30">
+    <clipPath id="uk-s"><path d="M0,0 v30 h60 v-30 z"/></clipPath>
+    <clipPath id="uk-t"><path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z"/></clipPath>
+    <g clip-path="url(#uk-s)">
+      <path d="M0,0 v30 h60 v-30 z" fill="#012169"/>
+      <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/>
+      <path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#uk-t)" stroke="#C8102E" stroke-width="4"/>
+      <path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/>
+      <path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/>
+    </g>
+  </symbol>
+  <symbol id="wa" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.5l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8c.1.2 2 3.2 5 4.5 1.9.8 2.6.8 3.5.7a3 3 0 0 0 2-1.4 2.4 2.4 0 0 0 .2-1.4c-.1-.1-.3-.2-.5-.3z"/></symbol>
+  <symbol id="li" viewBox="0 0 24 24"><path fill="currentColor" d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9.8h4V21H3zM9.5 9.8h3.8v1.6h.1c.5-1 1.8-1.9 3.7-1.9 4 0 4.7 2.6 4.7 6V21h-4v-4.9c0-1.2 0-2.7-1.6-2.7s-1.9 1.3-1.9 2.6V21h-4z"/></symbol>
+</svg>
+
+<div class="notice"><strong>Design mockup for review.</strong> Items marked <span class="ph" style="margin:0 2px">Placeholder</span> need real content. Figures and quotes come from the live site. Press the Help button (bottom right) to try the assistant; its replies here are canned.</div>
+
+<header class="site">
+  <div class="wrap bar">
+    <a class="brand" href="#top"><svg class="flag" aria-hidden="true"><use href="#uk"/></svg>Chat British</a>
+    <nav class="links" aria-label="Main">
+      <a href="#how">How it works</a><a href="#practice">Practice</a><a href="#debrief">Debrief</a><a href="#about">About</a><a href="#contact">Contact</a>
+    </nav>
+    <a class="btn btn-primary btn-sm" href="#start">Get started</a>
+    <details class="m-menu"><summary>Menu</summary><div><a href="#how">How it works</a><a href="#practice">Practice</a><a href="#debrief">Debrief</a><a href="#about">About</a><a href="#contact">Contact</a><a href="#start" class="btn btn-primary btn-sm" style="margin-top:6px">Get started</a></div></details>
+  </div>
+</header>
+
+<main id="top">
+<div class="wrap hero">
+  <div>
+    <p class="tag"><svg class="flag" aria-hidden="true"><use href="#uk"/></svg>A guide to how Britain really communicates</p>
+    <h1><span>You understood every word.</span><span>You still missed what they meant.</span></h1>
+    <p class="lead">Chat British teaches the unwritten rules of British communication: the hedges, the understatements, the “let's see how it goes” that actually means no. Practise before it happens. Get a straight answer after it already has.</p>
+    <div class="cta" id="start">
+      <a class="btn btn-primary" href="#start">Start your profile</a>
+      <a class="btn btn-secondary" href="#debrief">Try the debrief tool</a>
+    </div>
+    <p class="fine">No account needed. It takes two minutes.</p>
+  </div>
+
+  <div class="collage" aria-label="Examples from the product">
+    <div class="stamp">
+      <div class="id"><span>WP-1 indirect refusal</span><span>Workplace</span></div>
+      <q>“I'll think about it” / “let me get back to you” / “I'll keep it in mind”</q>
+      <p class="means"><b>What it actually means</b>Likely a soft no, or at minimum “not convinced yet”, not genuine active consideration.</p>
+    </div>
+    <div class="note" aria-hidden="true">i.e. probably not.
+      <svg width="150" height="12" viewBox="0 0 150 12"><path d="M3 8 C30 2, 60 11, 90 5 S135 4, 147 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+    </div>
+    <div class="phone">
+      <div class="screen" role="img" aria-label="A Practice question about a manager who says a promotion is something we can look at. The chosen answer is marked wrong, the right answer is highlighted, and the feedback explains it is a deferral, not a promise.">
+        <div class="top"><b>Chat British</b><span>4 day streak</span></div>
+        <div class="cat">Workplace</div>
+        <div class="body">
+          <div>You ask your manager about a promotion. She says, “It's definitely something we can look at.” No date is mentioned.</div>
+          <div class="prompt">What do you do?</div>
+          <div class="opt bad"><i>1</i><span>Take it as a near-term commitment and wait.</span></div>
+          <div class="opt good"><i>2</i><span>Ask to set a date to revisit it, and what she'd want to see from you before then.</span></div>
+          <div class="opt"><i>3</i><span>Drop the subject so you don't seem pushy.</span></div>
+        </div>
+        <div class="fb">
+          <div class="h"><u><svg viewBox="0 0 12 12"><path d="M2 2 L10 10 M10 2 L2 10" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></u>Not quite</div>
+          <p>It's a deferral, not a promise. With no date attached, nothing is actually in motion.</p>
+          <span class="next">Next</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="proof"><div class="wrap">
+  <div><b>200</b><span>communication norms</span></div>
+  <div><b>12</b><span>everyday situations</span></div>
+  <div><b>120</b><span>practice scenarios</span></div>
+  <div><b>Every norm</b><span>reviewed by a working coach</span></div>
+</div></div>
+
+<section class="s" id="about"><div class="wrap founder">
+  <div class="video" id="video">
+    <div class="poster"><h3>Meet the coach behind Chat British</h3><p>Kianoush, founder</p></div>
+    <span class="dur">1:30</span>
+    <button class="play" aria-label="Play the founder introduction"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4 L20 12 L6 20 Z" fill="currentColor"/></svg></button>
+    <div class="after" role="status"><p><span class="ph">Placeholder</span>The founder's video plays here. It loads from YouTube or Vimeo only after someone presses play, so nothing is sent to the video provider before then.</p></div>
+  </div>
+  <div>
+    <h2>Why a coach built this</h2>
+    <p><span class="ph">Placeholder</span>Two sentences in Kianoush's own words about what he saw in his 1:1 sessions that software could scale.</p>
+    <ul class="facts">
+      <li><b>About 50</b><span>current coaching clients</span></li>
+      <li><b>12,000</b><span>followers on Instagram</span></li>
+      <li><b><span class="ph" style="margin:0">Placeholder</span></b><span>years coaching cultural communication</span></li>
+    </ul>
+    <a class="btn btn-secondary" href="#about">Read his story</a>
+  </div>
+</div></section>
+
+<section class="s tint" id="situations"><div class="wrap">
+  <div class="head"><h2>Where it helps</h2><p>Twelve everyday situations, each with practice scenarios and plain explanations.</p></div>
+  <div class="sit">
+    <article class="sc-card">
+      <svg class="art" viewBox="0 0 320 200" role="img" aria-label="Illustration: a laptop with a speech bubble and a mug on a desk"><rect width="320" height="200" fill="#EAF1F8"/><g fill="#fff" stroke="#1F3A5F" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"><path d="M22 168 H298" fill="none"/><rect x="92" y="78" width="136" height="76" rx="6"/><path d="M76 154 H244 L234 166 H86 Z"/><path d="M110 100 H200 M110 116 H170 M110 132 H190" fill="none"/><path d="M196 22 h78 a10 10 0 0 1 10 10 v26 a10 10 0 0 1 -10 10 h-44 l-16 14 v-14 h-18 a10 10 0 0 1 -10 -10 v-26 a10 10 0 0 1 10 -10z"/><circle cx="222" cy="45" r="3" fill="#1F3A5F"/><circle cx="240" cy="45" r="3" fill="#1F3A5F"/><circle cx="258" cy="45" r="3" fill="#1F3A5F"/><path d="M258 126 h34 v28 a8 8 0 0 1 -8 8 h-18 a8 8 0 0 1 -8 -8z"/><path d="M292 134 h5 a7 7 0 0 1 0 14 h-5" fill="none"/></g></svg>
+      <div class="t"><h3>Workplace</h3><p>Meetings, managers, colleagues</p><a class="btn btn-secondary btn-sm" href="#start">Practise</a></div>
+    </article>
+    <article class="sc-card">
+      <svg class="art" viewBox="0 0 320 200" role="img" aria-label="Illustration: a row of terraced houses with chimneys"><rect width="320" height="200" fill="#FCEBCB"/><g fill="#fff" stroke="#1F3A5F" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"><path d="M22 168 H298" fill="none"/><path d="M36 86 L72 54 H248 L284 86 Z"/><rect x="98" y="30" width="16" height="26"/><rect x="206" y="30" width="16" height="26"/><rect x="46" y="86" width="228" height="82"/><path d="M122 86 V168 M198 86 V168" fill="none"/><rect x="73" y="124" width="22" height="44"/><rect x="149" y="124" width="22" height="44"/><rect x="225" y="124" width="22" height="44"/><rect x="70" y="96" width="28" height="22"/><rect x="146" y="96" width="28" height="22"/><rect x="222" y="96" width="28" height="22"/></g></svg>
+      <div class="t"><h3>Housing and landlords</h3><p>Repairs, notices, flatmates</p><a class="btn btn-secondary btn-sm" href="#start">Practise</a></div>
+    </article>
+    <article class="sc-card">
+      <svg class="art" viewBox="0 0 320 200" role="img" aria-label="Illustration: an appointment card with a clock"><rect width="320" height="200" fill="#DDE6E0"/><g fill="#fff" stroke="#1F3A5F" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"><rect x="60" y="34" width="200" height="132" rx="10"/><path d="M60 68 H260" fill="none"/><path d="M82 51 v14 M75 58 h14" fill="none"/><path d="M84 94 H168 M84 112 H150 M84 130 H160" fill="none"/><circle cx="214" cy="116" r="26"/><path d="M214 116 V99 M214 116 L227 123" fill="none"/></g></svg>
+      <div class="t"><h3>Healthcare</h3><p>GPs, appointments, NHS process</p><a class="btn btn-secondary btn-sm" href="#start">Practise</a></div>
+    </article>
+    <article class="sc-card">
+      <svg class="art" viewBox="0 0 320 200" role="img" aria-label="Illustration: two mugs and a biscuit on a table"><rect width="320" height="200" fill="#EAF1F8"/><g fill="#fff" stroke="#1F3A5F" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"><path d="M22 168 H298" fill="none"/><path d="M60 104 h58 v38 a14 14 0 0 1 -14 14 h-30 a14 14 0 0 1 -14 -14z"/><path d="M118 112 h8 a11 11 0 0 1 0 22 h-8" fill="none"/><path d="M202 104 h58 v38 a14 14 0 0 1 -14 14 h-30 a14 14 0 0 1 -14 -14z"/><path d="M260 112 h8 a11 11 0 0 1 0 22 h-8" fill="none"/><path d="M80 90 c-6 -10 6 -14 0 -26 M98 90 c-6 -10 6 -14 0 -26 M222 90 c-6 -10 6 -14 0 -26 M240 90 c-6 -10 6 -14 0 -26" fill="none"/><circle cx="160" cy="150" r="14"/><circle cx="155" cy="147" r="1.6" fill="#1F3A5F"/><circle cx="164" cy="146" r="1.6" fill="#1F3A5F"/><circle cx="160" cy="155" r="1.6" fill="#1F3A5F"/></g></svg>
+      <div class="t"><h3>Social life</h3><p>Invitations, small talk, everyday norms</p><a class="btn btn-secondary btn-sm" href="#start">Practise</a></div>
+    </article>
+    <article class="sc-card">
+      <svg class="art" viewBox="0 0 320 200" role="img" aria-label="Illustration: a twelve-sided pound coin and a receipt"><rect width="320" height="200" fill="#FCEBCB"/><g fill="#fff" stroke="#1F3A5F" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"><polygon points="174.0,111.0 159.0,137.0 133.0,152.0 103.0,152.0 77.0,137.0 62.0,111.0 62.0,81.0 77.0,55.0 103.0,40.0 133.0,40.0 159.0,55.0 174.0,81.0"/><circle cx="118" cy="96" r="40" fill="none"/><path d="M206 36 h66 v118 l-8 -6 -8 6 -8 -6 -8 6 -8 -6 -8 6 -8 -6 -8 6 z"/><path d="M220 60 H258 M220 78 H250 M220 96 H258 M220 114 H244" fill="none"/></g><text x="118" y="112" text-anchor="middle" font-family="Fraunces,Georgia,serif" font-weight="600" font-size="52" fill="#1F3A5F">£</text></svg>
+      <div class="t"><h3>Money</h3><p>Bills, payments, tipping</p><a class="btn btn-secondary btn-sm" href="#start">Practise</a></div>
+    </article>
+    <article class="sc-card">
+      <svg class="art" viewBox="0 0 320 200" role="img" aria-label="Illustration: a bus stop sign and the front of a bus"><rect width="320" height="200" fill="#1F3A5F"/><g fill="#fff" stroke="#fff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"><path d="M22 170 H298" fill="none"/><path d="M62 170 V40" fill="none"/><rect x="62" y="40" width="66" height="40" rx="4" fill="#1F3A5F"/><rect x="72" y="50" width="46" height="20" rx="3" fill="#fff" stroke="none"/><path d="M84 66 h22" stroke="#1F3A5F" stroke-width="2.5" fill="none"/><rect x="164" y="64" width="116" height="92" rx="10" stroke="#1F3A5F" stroke-width="3"/><rect x="176" y="76" width="92" height="38" rx="5" fill="#EAF1F8" stroke="#1F3A5F"/><circle cx="192" cy="134" r="7" fill="#F2A93B" stroke="#1F3A5F"/><circle cx="252" cy="134" r="7" fill="#F2A93B" stroke="#1F3A5F"/><path d="M176 148 H268" stroke="#1F3A5F" fill="none"/><rect x="178" y="154" width="18" height="14" fill="#1F3A5F" stroke="none"/><rect x="248" y="154" width="18" height="14" fill="#1F3A5F" stroke="none"/></g></svg>
+      <div class="t"><h3>Transport and commuting</h3><p>Trains, buses, driving</p><a class="btn btn-secondary btn-sm" href="#start">Practise</a></div>
+    </article>
+  </div>
+  <div class="sit-foot"><a class="btn btn-primary" href="#start">See all 12 situations</a><span>Education, dating, neighbours, shopping and more.</span></div>
+</div></section>
+
+<section class="s" id="how"><div class="wrap">
+  <div class="head"><h2>How it works</h2><p>Two moments, one method. Everything comes from the same library of reviewed norms.</p></div>
+
+  <div class="tour" id="practice">
+    <div class="vis"><div class="phone"><div class="screen short" role="img" aria-label="A Practice recap styled as a rail ticket: 3 out of 5 correct, a 4 day streak, and a note that missed questions come back first.">
+      <div class="top"><b>Chat British</b><span>4 day streak</span></div>
+      <div class="ticket">
+        <div class="tb">Dating and relationships</div>
+        <div class="tm"><h4>Session complete</h4><div class="sc">3 <small>/ 5 correct</small></div><div class="msg">Good start. A couple are worth revisiting when you're ready.</div></div>
+        <div class="tear"></div>
+        <div class="stub"><b>4 day streak</b><br>The ones you missed will come back first.</div>
+      </div>
+      <span class="pbtn fill">Practise another category</span>
+      <span class="pbtn">Back to this category</span>
+    </div></div></div>
+    <div>
+      <h3>Practise before it happens</h3>
+      <p>Short, tap-based scenarios built from real British situations. Wrong answers show you the right one, and the questions you miss come back first.</p>
+      <ul><li>Five questions a session, about two minutes</li><li>A streak to keep you coming back</li><li>New questions first, so it never feels repetitive</li></ul>
+      <a class="btn btn-primary" href="#start">Start practising</a>
+    </div>
+  </div>
+
+  <div class="tour flip" id="debrief">
+    <div class="vis wide"><div class="browser" role="img" aria-label="The Debrief tool: a description of a group dinner bill on the left, and an explanation on the right with what was said, what it means and what to say.">
+      <div class="chrome"><i></i><i></i><i></i><span class="url">chatbritish.ai/debrief</span></div>
+      <div class="cols">
+        <div class="left">
+          <label>What happened?</label>
+          <div class="ta">At a group dinner we agreed to split the bill evenly, but I only had a starter and water, and I don't know if I'm allowed to say anything.</div>
+          <div class="row"><span class="chip">Group bill split</span><span class="chip">Promotion, no date</span><span class="chip">“Let's take that offline”</span></div>
+          <span class="go">Explain it</span>
+        </div>
+        <div class="right ans">
+          <small>Money and transactions</small>
+          <h4>Splitting the bill evenly</h4>
+          <dl>
+            <dt>What was said</dt><dd><q>“Shall we just split it evenly?”</q></dd>
+            <dt>What it means</dt><dd>A casual default, not a rule. It's normal to say lightly that you had less.</dd>
+            <dt>What you could say</dt><dd><q>“I only had a starter. Would you mind if I paid a bit less?”</q></dd>
+          </dl>
+        </div>
+      </div>
+    </div></div>
+    <div>
+      <h3>Debrief after it happens</h3>
+      <p>Describe a confusing moment in your own words. Chat British finds the closest norm, explains what was really meant, and gives you something you could say next.</p>
+      <ul><li>Matched against 200 reviewed norms</li><li>If nothing fits, it says so instead of guessing</li><li>No account needed</li></ul>
+      <a class="btn btn-primary" href="#debrief">Try Debrief</a>
+    </div>
+  </div>
+</div></section>
+
+<section class="s tint"><div class="wrap coach">
+  <div>
+    <h2>Built on real coaching, not guesses</h2>
+    <p>Every norm in the library is reviewed by a working cultural-communication coach: the same methodology behind years of 1:1 sessions, now built into software instead of replaced by it.</p>
+    <p>Nothing gets published without review. The library grows the same way it always has: one grounded, specific case at a time.</p>
+  </div>
+  <table class="ledger"><thead><tr><th>What they say</th><th>What it means</th></tr></thead><tbody>
+    <tr><td>“Let's take that offline”</td><td>This isn't necessarily dismissive. It can protect a sensitive point from being aired publicly, but it does require the person to actively follow up.</td></tr>
+    <tr><td>“Try the pharmacy first”</td><td>This is a standard, expected referral for minor issues, not the surgery deflecting or downgrading the concern.</td></tr>
+    <tr><td>“I'll see what I can do”</td><td>Often means low priority unless followed up. Not necessarily a refusal, but not a commitment either.</td></tr>
+  </tbody></table>
+</div></section>
+
+<section class="s"><div class="wrap">
+  <div class="head"><h2>Questions</h2></div>
+  <div class="faq">
+    <details><summary>Is Chat British free?</summary><p>Chat British is free to use while we're in early access.</p></details>
+    <details><summary>Is Debrief a chatbot?</summary><p>No. Debrief matches what you describe against our library of norms and explains the closest one. If nothing fits, it says so.</p></details>
+    <details><summary>Where do the explanations come from?</summary><p>Every norm in the library is reviewed by a working cultural-communication coach.</p></details>
+    <details><summary>Is this advice?</summary><p>No. Chat British explains how people commonly communicate in Britain. It isn't legal, medical or financial advice.</p></details>
+  </div>
+</div></section>
+</main>
+
+<section class="band" id="contact"><div class="wrap">
+  <h2>Stop guessing what people mean.</h2>
+  <div class="acts">
+    <a class="btn btn-light" href="#start">Start your profile</a>
+    <a class="btn btn-ghost-light" href="#footer-contact"><svg aria-hidden="true"><use href="#wa"/></svg>Message us on WhatsApp</a>
+  </div>
+</div></section>
+
+<footer class="site" id="footer-contact"><div class="wrap">
+  <div class="fgrid">
+    <div>
+      <a class="brand" href="#top"><svg class="flag" style="width:28px;height:14px" aria-hidden="true"><use href="#uk"/></svg>Chat British</a>
+      <p class="tagline">Speak the language. Understand the culture. Belong.</p>
+    </div>
+    <div>
+      <h4>Explore</h4>
+      <ul><li><a href="#practice">Practice</a></li><li><a href="#debrief">Debrief</a></li><li><a href="#how">How it works</a></li><li><a href="#about">About</a></li><li><a href="#top">Privacy</a></li></ul>
+    </div>
+    <div>
+      <h4>Talk to us</h4>
+      <div class="social">
+        <a class="btn btn-wa btn-sm" href="#footer-contact"><svg aria-hidden="true"><use href="#wa"/></svg>WhatsApp</a>
+        <a class="btn btn-li btn-sm" href="#footer-contact"><svg aria-hidden="true"><use href="#li"/></svg>LinkedIn</a>
+        <p class="mail"><a href="#footer-contact">support@chatbritish.ai</a><br><span class="ph" style="margin-top:8px">Placeholder</span>WhatsApp number and LinkedIn page to confirm</p>
+      </div>
+    </div>
+  </div>
+  <div class="legal"><p>Chat British explains how people commonly communicate in Britain. It isn't legal, medical or financial advice.</p><p>© 2026 Chat British</p></div>
+</div></footer>
+
+<script>
+(function(){
+  var v=document.getElementById('video');
+  if(!v) return;
+  var b=v.querySelector('.play');
+  if(b) b.addEventListener('click',function(){ v.classList.add('on'); });
+})();
+</script>
+
+<button class="help-fab" id="helpFab" aria-expanded="false" aria-controls="helpPanel"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" d="M4 5h16v11H11l-5 4v-4H4z"/><path d="M8 9.5h8M8 12.5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Help</button>
+<section class="help-panel" id="helpPanel" role="dialog" aria-label="Chat British help assistant">
+  <div class="hp-head"><div><b>Chat British Help</b><small>Automated assistant</small></div><button class="hp-close" id="helpClose" aria-label="Close help"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2 L10 10 M10 2 L2 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg></button></div>
+  <div class="hp-msgs" id="helpMsgs" aria-live="polite">
+    <div class="m bot">Hi, I'm the Chat British help assistant. I can explain how Practice and Debrief work. If you want to know what a phrase really means, Debrief is the place.</div>
+  </div>
+  <div class="hp-chips" id="helpChips">
+    <button class="hp-chip" data-q="How does Practice work?">How does Practice work?</button>
+    <button class="hp-chip" data-q="What is Debrief?">What is Debrief?</button>
+    <button class="hp-chip" data-q="Is it free?">Is it free?</button>
+    <button class="hp-chip" data-q="I have another question">Something else</button>
+  </div>
+  <form class="hp-in" id="helpForm"><input id="helpInput" type="text" maxlength="300" placeholder="Ask a question" aria-label="Ask a question"><button class="btn btn-primary btn-sm" type="submit">Send</button></form>
+  <div class="hp-note">Automated. Please don't share personal details.</div>
+  <div class="hp-hand"><span>Prefer a person?</span><a class="btn btn-secondary btn-sm" href="#footer-contact">Email</a><a class="btn btn-wa btn-sm" href="#footer-contact"><svg aria-hidden="true"><use href="#wa"/></svg>WhatsApp</a></div>
+</section>
+<script>
+(function(){
+  var fab=document.getElementById('helpFab'),panel=document.getElementById('helpPanel'),msgs=document.getElementById('helpMsgs');
+  var A={
+    "How does Practice work?":["Practice gives you five short scenarios at a time from the situation you pick. Wrong answers show you the right one, and the questions you miss come back first.","<a class='btn btn-primary btn-sm' href='#start'>Start practising</a>"],
+    "What is Debrief?":["Describe a confusing moment in your own words. Debrief finds the closest norm in our reviewed library and explains what was really meant. If nothing fits, it says so.","<a class='btn btn-primary btn-sm' href='#debrief'>Try Debrief</a>"],
+    "Is it free?":["Chat British is free to use while we're in early access.","<a class='btn btn-primary btn-sm' href='#start'>Start your profile</a>"],
+    "other":["I can't help with that one here, but a person can. Email us or message us on WhatsApp.","<a class='btn btn-secondary btn-sm' href='#footer-contact'>Email support</a><a class='btn btn-wa btn-sm' href='#footer-contact'>WhatsApp</a>"]
+  };
+  function add(cls,html){var d=document.createElement('div');d.className='m '+cls;d.innerHTML=html;msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;return d;}
+  function ask(q){
+    add('me',q.replace(/[<>&]/g,''));
+    var a=A[q]||A.other;
+    add('bot',a[0]+"<div class='acts'>"+a[1]+"</div>");
+  }
+  function set(open){panel.classList.toggle('open',open);fab.setAttribute('aria-expanded',open?'true':'false');if(open){document.getElementById('helpInput').focus({preventScroll:true});}}
+  fab.addEventListener('click',function(){set(!panel.classList.contains('open'));});
+  document.getElementById('helpClose').addEventListener('click',function(){set(false);fab.focus();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&panel.classList.contains('open')){set(false);fab.focus();}});
+  document.getElementById('helpChips').addEventListener('click',function(e){var b=e.target.closest('.hp-chip');if(b)ask(b.getAttribute('data-q'));});
+  document.getElementById('helpForm').addEventListener('submit',function(e){e.preventDefault();var i=document.getElementById('helpInput');var v=i.value.trim();if(!v)return;i.value='';ask(v);});
+})();
+</script>
+</body>
+</html>

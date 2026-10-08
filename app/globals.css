@@ -1,4 +1,5 @@
-@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Work+Sans:wght@400;500;600&family=Caveat:wght@600&display=swap");
+/* Fonts are self-hosted through next/font in app/layout.tsx (no request to
+   Google from the browser); tailwind.config.ts reads their CSS variables. */
 
 @tailwind base;
 @tailwind components;
@@ -36,6 +37,43 @@ body {
   .link {
     @apply font-medium text-primary underline-offset-4 hover:underline;
   }
+  /* For a primary (navy) background: a white button and an outlined one. */
+  .btn-light {
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2.5 rounded-lg bg-white px-6 py-3 text-sm font-medium text-primary transition hover:bg-sky;
+  }
+  .btn-ghost {
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2.5 rounded-lg border border-white/70 bg-transparent px-6 py-2.5 text-sm font-medium text-white transition hover:bg-white/10;
+  }
+  /* Contact buttons in the services' own colours; white text is 6.7:1 on the
+     WhatsApp green and 5.7:1 on the LinkedIn blue. */
+  .btn-whatsapp {
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2.5 rounded-lg bg-[#0E6B3A] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#0B5A31];
+  }
+  .btn-linkedin {
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2.5 rounded-lg bg-[#0A66C2] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#0857A6];
+  }
+  /* Focus ring on navy backgrounds. */
+  .on-dark :focus-visible {
+    outline-color: #fff;
+  }
+
+  /* Page container: 1120px wide, 24px gutters (18px below 560px), never
+     narrower than the safe-area inset on a phone in landscape. */
+  .wrap {
+    @apply mx-auto w-full max-w-[1120px];
+    padding-left: max(24px, env(safe-area-inset-left, 0px));
+    padding-right: max(24px, env(safe-area-inset-right, 0px));
+  }
+  @media (max-width: 559px) {
+    .wrap {
+      padding-left: max(18px, env(safe-area-inset-left, 0px));
+      padding-right: max(18px, env(safe-area-inset-right, 0px));
+    }
+  }
+  /* Vertical rhythm between home sections: 84px, 60px below 760px. */
+  .section-y {
+    @apply py-[60px] min-[760px]:py-[84px];
+  }
 
   /* Practice hides the footer during a question; see app/practice/page.tsx. */
   body[data-practice-question] .site-footer {
@@ -45,27 +83,6 @@ body {
   /* Printed double rule: two hairlines with a small gap. */
   .rule-double {
     @apply h-[5px] border-y border-primary;
-  }
-
-  /* Perforated stamp edge. Four hole patterns (top, bottom, left, right) are
-     intersected; `round` fits a whole number of holes along each side. Holes
-     bite at most --stamp-r into the box, so content needs padding > --stamp-r. */
-  .stamp-edge {
-    --stamp-r: 5px;
-    --stamp-gap: 16px;
-    --stamp-hole: #0000 var(--stamp-r), #000 calc(var(--stamp-r) + 0.5px);
-    -webkit-mask:
-      radial-gradient(circle at 50% 0, var(--stamp-hole)) 0 0 / var(--stamp-gap) 100% round no-repeat,
-      radial-gradient(circle at 50% 100%, var(--stamp-hole)) 0 0 / var(--stamp-gap) 100% round no-repeat,
-      radial-gradient(circle at 0 50%, var(--stamp-hole)) 0 0 / 100% var(--stamp-gap) no-repeat round,
-      radial-gradient(circle at 100% 50%, var(--stamp-hole)) 0 0 / 100% var(--stamp-gap) no-repeat round;
-    -webkit-mask-composite: source-in;
-    mask:
-      radial-gradient(circle at 50% 0, var(--stamp-hole)) 0 0 / var(--stamp-gap) 100% round no-repeat,
-      radial-gradient(circle at 50% 100%, var(--stamp-hole)) 0 0 / var(--stamp-gap) 100% round no-repeat,
-      radial-gradient(circle at 0 50%, var(--stamp-hole)) 0 0 / 100% var(--stamp-gap) no-repeat round,
-      radial-gradient(circle at 100% 50%, var(--stamp-hole)) 0 0 / 100% var(--stamp-gap) no-repeat round;
-    mask-composite: intersect;
   }
 
   /* Hairline outline that follows a masked shape (applied to a wrapper, since
