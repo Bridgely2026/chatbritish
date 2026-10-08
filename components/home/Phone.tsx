@@ -104,7 +104,7 @@ export function RecapScreen() {
         <div className="px-3.5 pb-3.5 pt-3 text-muted">
           <b className="font-semibold text-ink">4 day streak</b>
           <br />
-          The ones you missed will come back first.
+          The ones you missed will come back.
         </div>
       </div>
       <span className="mx-4 mt-2 block rounded-md border-[1.5px] border-primary bg-primary py-[9px] text-center text-[12.5px] font-semibold text-white">
