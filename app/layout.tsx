@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Caveat, Fraunces, Work_Sans } from "next/font/google";
 import Footer from "@/components/Footer";
+import HelpAssistant from "@/components/HelpAssistant";
+import { helpAssistantEnabled } from "@/lib/help-assistant-config";
 import "./globals.css";
 
 const title = "Chat British \u2014 Speak the language. Understand the culture. Belong.";
@@ -43,6 +45,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="font-sans antialiased">
         {children}
         <Footer />
+        {helpAssistantEnabled && <HelpAssistant />}
       </body>
     </html>
   );
