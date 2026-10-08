@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import Anthropic from "@anthropic-ai/sdk";
+import { logError } from "@/lib/log-error";
 
 // Real RAG pipeline for Debrief: embed the user's description (+ an optional
 // follow-up), retrieve the closest taxonomy entries via pgvector, and either
@@ -180,8 +181,8 @@ async function embedQuery(text: string): Promise<number[]> {
     body: JSON.stringify({ input: [text], model: VOYAGE_MODEL, input_type: "query" }),
   });
   if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(`Voyage embeddings request failed (${res.status}): ${body}`);
+    // The status only: Voyage's response body isn't kept, so it can't be logged.
+    throw Object.assign(new Error("Voyage embeddings request failed"), { name: "VoyageError", status: res.status });
   }
   const data = await res.json();
   return data.data[0].embedding;
@@ -280,7 +281,7 @@ async function generateWithRetry(
       return await generateGroundedAnswer(anthropic, description, followUp, entry);
     } catch (err) {
       if (!(err instanceof MalformedOutputError)) throw err;
-      console.warn(`Malformed Claude output for ${entry.norm_id} (attempt ${attempt}):`, err.message);
+      logError("[debrief] malformed Claude output", err);
     }
   }
   return null;
@@ -308,7 +309,7 @@ async function logGap(
     if (error) throw error;
   } catch (err) {
     // Don't fail the user-facing response just because logging the gap failed.
-    console.error("Failed to log debrief gap:", err);
+    logError("[debrief] failed to log gap", err);
   }
 }
 
@@ -338,7 +339,7 @@ export async function POST(request: NextRequest) {
   try {
     clients = getClients();
   } catch (err) {
-    console.error("Debrief route is misconfigured:", err);
+    logError("[debrief] misconfigured", err);
     return NextResponse.json(
       { status: "error", message: "The debrief service isn't set up correctly yet." },
       { status: 500 }
@@ -356,7 +357,7 @@ export async function POST(request: NextRequest) {
   try {
     queryEmbedding = await embedQuery(textToEmbed);
   } catch (err) {
-    console.error("Voyage embedding request failed:", err);
+    logError("[debrief] Voyage embedding failed", err);
     return NextResponse.json(
       { status: "error", message: "Couldn't process that description right now. Please try again." },
       { status: 502 }
@@ -372,7 +373,7 @@ export async function POST(request: NextRequest) {
     if (error) throw error;
     matches = (data ?? []) as MatchRow[];
   } catch (err) {
-    console.error("Supabase match_taxonomy_entries call failed:", err);
+    logError("[debrief] match_taxonomy_entries failed", err);
     return NextResponse.json(
       { status: "error", message: "Couldn't look that up right now. Please try again." },
       { status: 502 }
@@ -401,7 +402,7 @@ export async function POST(request: NextRequest) {
       const question = await generateFollowUpQuestion(anthropic, description, matches.slice(0, 3));
       return NextResponse.json({ status: "needs_follow_up", question });
     } catch (err) {
-      console.error("Claude follow-up generation failed:", err);
+      logError("[debrief] Claude follow-up failed", err);
       return NextResponse.json(
         { status: "error", message: "Couldn't come up with a follow-up question right now. Please try again." },
         { status: 502 }
@@ -451,7 +452,7 @@ export async function POST(request: NextRequest) {
     await logGap(supabase, { description, followUp, top, topSimilarity, declineReason: "entry_did_not_apply" });
     return NextResponse.json({ status: "no_match", message: NO_MATCH_MESSAGE });
   } catch (err) {
-    console.error("Claude grounded generation failed:", err);
+    logError("[debrief] Claude grounded generation failed", err);
     return NextResponse.json(
       { status: "error", message: "Couldn't put together an answer right now. Please try again." },
       { status: 502 }

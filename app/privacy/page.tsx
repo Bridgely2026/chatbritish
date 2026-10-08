@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import DeleteMyData from "@/components/DeleteMyData";
 import Nav from "@/components/Nav";
 
 // Placeholder until the real notice is written. Kept out of search results.
@@ -22,6 +23,7 @@ export default function PrivacyPage() {
           </a>
           .
         </p>
+        <DeleteMyData />
       </div>
     </div>
   );

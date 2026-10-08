@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import Link from "next/link";
+import PrivacyNote from "@/components/PrivacyNote";
 import Nav from "@/components/Nav";
 import { taxonomy } from "@/lib/mock-data";
 import { hasScenarioForNorm } from "@/lib/scenarios";
@@ -28,7 +29,6 @@ export default function DebriefPage() {
   const [phase, setPhase] = useState<Phase>({ kind: "form" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
 
   async function callDebrief(followUp?: FollowUp) {
     setLoading(true);
@@ -63,7 +63,6 @@ export default function DebriefPage() {
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!description.trim() || loading) return;
-    setSaved(false);
     callDebrief();
   }
 
@@ -78,7 +77,6 @@ export default function DebriefPage() {
     setDescription("");
     setFollowUpAnswer("");
     setError(null);
-    setSaved(false);
   }
 
   const matchedCategory =
@@ -109,6 +107,7 @@ export default function DebriefPage() {
                 onChange={(e) => setDescription(e.target.value)}
                 rows={4}
                 placeholder="e.g. My landlord said he'd 'sort it when he gets a chance' about the broken boiler and it's been three weeks"
+                aria-describedby="debrief-privacy"
                 className="w-full rounded-lg border border-field bg-white p-4 pr-12 text-sm text-ink placeholder:text-muted/70 focus:border-primary"
               />
               <button
@@ -119,6 +118,7 @@ export default function DebriefPage() {
                 🎤
               </button>
             </div>
+            <PrivacyNote id="debrief-privacy">What you write is sent to our AI providers to find a match.</PrivacyNote>
             <button
               type="submit"
               disabled={loading || !description.trim()}
@@ -185,12 +185,6 @@ export default function DebriefPage() {
               <Link href={practiceHref} className="btn-primary px-4 py-2 text-xs">
                 Practise this norm
               </Link>
-              <button
-                onClick={() => setSaved(true)}
-                className="link text-xs"
-              >
-                {saved ? "Saved to your log" : "Save to my log"}
-              </button>
               <button
                 type="button"
                 onClick={startOver}

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Nav from "@/components/Nav";
 import { CATEGORY_LABELS, ROLES, SITUATIONS, computeStartingPoint } from "@/lib/mock-data";
+import PrivacyNote from "@/components/PrivacyNote";
 import { ensureAnonymousUserId, getSupabaseBrowser } from "@/lib/supabase-browser";
 
 const TIME_IN_UK = ["Just arrived", "Under 1 year", "1–3 years", "3+ years"];
@@ -375,8 +376,10 @@ export default function OnboardingPage() {
                   onChange={(e) => setStruggle(e.target.value)}
                   rows={3}
                   placeholder="e.g. I never know if my manager is actually saying yes or no"
+                  aria-describedby="struggle-privacy"
                   className="mt-3 w-full rounded-lg border border-field bg-white p-3 text-sm text-ink placeholder:text-muted/70 focus:border-primary"
                 />
+                <PrivacyNote id="struggle-privacy">We use what you write to personalise what you see.</PrivacyNote>
               </div>
 
               <fieldset>
@@ -407,9 +410,12 @@ export default function OnboardingPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   aria-invalid={!emailValid}
-                  aria-describedby={!emailValid ? "email-error" : undefined}
+                  aria-describedby={!emailValid ? "email-privacy email-error" : "email-privacy"}
                   className="mt-3 w-full rounded-lg border border-field bg-white p-3 text-sm text-ink placeholder:text-muted/70 focus:border-primary"
                 />
+                <PrivacyNote id="email-privacy">
+                  Optional. We&apos;ll only use it to tell you about courses that might suit you, and you can ask us to stop at any time.
+                </PrivacyNote>
                 {!emailValid && (
                   <p id="email-error" className="mt-2 text-xs text-brick">
                     That doesn&rsquo;t look like an email address — fix it or leave it blank.
