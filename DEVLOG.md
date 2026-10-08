@@ -323,6 +323,9 @@ the closing band; favicon, apple icon, 1200x630 share images; per-page
 titles and canonical URLs. At 375, the nav only wrapped at 360 and below, so
 only that was fixed ("Start" replaces "Get started" below `sm`).
 
+The palette described here (racing green, paper) was replaced on 7 Oct; see
+"Design refresh, home page and Debrief follow-up fix" below.
+
 ## Domain and certificate incident
 
 `www.chatbritish.ai` was added in Railway to make `www` work. The plan allows
@@ -376,6 +379,81 @@ live check on 5-6 Oct confirmed: valid Let's Encrypt certificate to 3 Jan
 
 ---
 
+## Design refresh, home page and Debrief follow-up fix (7 Oct 2026)
+
+Three merges to main, each deployed with Railway reporting success:
+`cab0a77` (Debrief fix), `d04e03f` (design refresh), `5f80c56` (home page).
+The live site was checked with `curl -4` afterwards: `#how-it-works`, the
+"Questions" FAQ, the proof strip and `#1F3A5F` in the CSS are all present.
+
+**Debrief: retrieval ignores Claude's follow-up question.** After a
+follow-up, the route used to embed `description + "Follow-up Q: …" + answer`.
+Claude's question can name other topics as alternatives ("a referencing
+check or ending your tenancy?"), which pulled those entries above the right
+one. Retrieval now embeds `description + answer` only; Claude still sees the
+question in the generation step. Regression run (dev server, ~25 s apart):
+leaking tap, greetings, cat vaccination and Victoria sponge passed earlier;
+bill split MN-3 0.669, promotion WP-2 0.627, "take that offline" WP-17
+0.521 on the first call; "I'll see what I can do" asked a follow-up (WP-1
+0.419) and matched WP-1 at 0.450 after the answer.
+- **GP lesson:** the first GP wording described a *receptionist* saying
+  "not urgent". HC-8 ranked top (0.608) but Claude correctly said it didn't
+  apply, because HC-8 is the GP's own wait-and-see. Reworded as the GP
+  saying it ("come back in two weeks if it hasn't settled"), it matched
+  HC-8 at 0.579 first time. A high similarity with `entry_applies: false`
+  can be the check working, not a bug; read the entry before blaming the
+  route.
+- **Testing without writing gap rows:** a temporary one-line early `return`
+  at the top of `logGap()`, tagged `TEMP-NO-GAP`, with a `debrief_gaps` row
+  count before and after (15 and 15). It was removed before committing and
+  `logGap()` diffed identical to main's. Never commit with that tag present.
+- The leaking-tap test row from 6 Oct was deleted from `debrief_gaps`
+  (exactly one matching row); the table now has 14 rows.
+- The Supabase MCP connector returned "You do not have permission" on this
+  project. Small read-only scripts using `node --env-file=.env.local` and
+  `@supabase/supabase-js` with the service-role key worked instead.
+
+**Design refresh (design-startup-1).** Navy primary `#1F3A5F` (with
+`primary-dark`, `sky`), canvas `#FBFAF7`, amber decorative only, `field` for
+input borders (3:1), `muted` darkened to `#56626E` so it passes 4.5:1 on
+every background including the wrong-answer bar; racing green, paper and
+brick-dark removed. Shared `.btn-primary` / `.btn-secondary` / `.link`;
+sticky nav (Practice auto-scroll measures from below it); icons and share
+images recoloured with the same layouts. Brick and sage are answer states
+and errors only, except the hero's red-pen margin note, which was moved
+from navy to brick (6.43:1 on white, 6.16:1 on canvas) and is named as the
+one exception in `tailwind.config.ts`.
+
+**Home page (design-startup-2).** Proof strip (counts generated from
+Approved rows at build time), How it works (`#how-it-works`, three steps,
+`components/StepIcon.tsx`), Practice and Debrief cards with real 375px
+screenshots via `next/image` (width/height set, lazy), FAQ with native
+`<details>`. The "How it works" nav link shows from `sm` up only; below
+640px it pushed the page sideways. "Practise" became the verb in four
+places (hero, "Practise this norm", "Practise another category", meta
+description); onboarding's lowercase "practice"/"practicing" was left alone.
+- **Debrief screenshot:** replaced the leaking-tap follow-up screen with a
+  real answer card. The bill-split sentence scored MN-3 0.592 on retrieval
+  alone, then one real request matched MN-3. The first capture had the
+  Next.js dev-mode "N" badge over a button; it was re-shot by having
+  Playwright return the same response (`page.route`) with
+  `nextjs-portal{display:none}`, so no second real request was made.
+  `public/home-debrief.webp` is 654×1456, 84.6 KB (`cwebp -q 82`).
+- **Page checks** (production build, Playwright from the gstack install):
+  one h1, no sideways scroll at 320/360/375/640/768/1280, nav on one line,
+  CLS 0, both images load. Screenshots and `v7-report.json` are in
+  `~/Desktop/chatbritish-design-screens/v7`.
+
+All three working branches were safe-deleted locally and on origin after
+checking their tips were in main; only `main` remains.
+
+**Fonts are now self-hosted** with `next/font/google` (in `app/layout.tsx`,
+from the redesign-1 branch): Fraunces, Work Sans and Caveat are downloaded
+at build time and served from our own domain, so visitors' browsers no
+longer request anything from fonts.googleapis.com or fonts.gstatic.com.
+
+---
+
 ## Open technical items (engineering-only; see CLAUDE.md for the rest)
 
 - [ ] Real-phone verification of the latest deploys (Debrief, onboarding,
@@ -386,7 +464,6 @@ live check on 5-6 Oct confirmed: valid Let's Encrypt certificate to 3 Jan
 - [ ] Struggle-classification floor (0.30): revisit with real usage
 - [ ] Onboarding upsert failure: root cause never directly observed
 - [ ] `og:title` and `twitter:title` still show the home title on every page
-- [ ] Self-host fonts (Google Fonts loads send visitors' IPs to Google)
 - [ ] Practice question titles (needs a Title column in the scenarios
       workbook). The "Based on norm…" line was removed from the Practice
       feedback bar and the Debrief answer card (the ID stays in the data).
