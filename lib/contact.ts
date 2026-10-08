@@ -16,3 +16,8 @@ export const whatsappHref = whatsappDigits
 
 const linkedinUrl = (process.env.NEXT_PUBLIC_LINKEDIN_URL ?? "").trim();
 export const linkedinHref = /^https:\/\//.test(linkedinUrl) ? linkedinUrl : null;
+
+// The Help assistant's WhatsApp button uses a shorter prefilled message.
+export const whatsappHelpHref = whatsappDigits
+  ? `https://wa.me/${whatsappDigits}?text=${encodeURIComponent("Hi Chat British")}`
+  : null;

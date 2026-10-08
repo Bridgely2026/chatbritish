@@ -75,8 +75,10 @@ body {
     @apply py-[60px] min-[760px]:py-[84px];
   }
 
-  /* Practice hides the footer during a question; see app/practice/page.tsx. */
-  body[data-practice-question] .site-footer {
+  /* Practice hides the footer and the Help button during a question; see
+     app/practice/page.tsx. */
+  body[data-practice-question] .site-footer,
+  body[data-practice-question] .help-assistant {
     display: none;
   }
 
