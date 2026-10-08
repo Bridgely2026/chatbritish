@@ -516,13 +516,102 @@ script using the service-role key, printing counts and column names only.
 
 ---
 
+## Landing-page redesign (8 Oct 2026)
+
+The approved design is an HTML mockup kept as a reference in
+`docs/mockups/chat-british-landing-mockup.html`; it isn't served or
+imported. It was ported to React components on the site's tokens and
+Tailwind setup (`e8da066`, `384ae01`), without touching Practice, Debrief,
+onboarding or their logic.
+- **Fonts moved to `next/font`** (Fraunces, Work Sans, Caveat): the old
+  Google Fonts `@import` was itself a third-party request on every page, so
+  the page couldn't pass "no third-party requests on load" without it.
+  Sitewide, same fonts, no new dependency.
+- **Header on the home page only** (`components/home/SiteHeader.tsx`);
+  Practice measures `Nav.tsx` to keep answers clear of it, so the other
+  pages keep that. Feedback-bar heights were measured before and after and
+  are identical (149.5 / 168.75 px at 375 and 360, 110.5 px at 1280).
+- **Real data, not copies:** counts, the WP-1 stamp card (category plus the
+  first three quoted Surface Markers phrases; no norm ID), the SC-WP-2-a
+  phone and the WP-17 / HC-4 / HL-1 ledger are read from the generated data.
+- **Anchors:** How it works is `#how`, with a hidden `#how-it-works` span
+  so old links (and the live check) still land on it.
+- **Practise buttons** on the six situation cards use
+  `/practice?categories=<category>`: Practice has no `?category=`, but it
+  already reads the onboarding `?categories=` list and opens a session in
+  the first category with scenarios.
+- **Optional pieces render nothing until configured:** the founder section
+  (video facade, no request to YouTube before a click), WhatsApp and
+  LinkedIn buttons.
+- Removed `NormCard`, `StepIcon`, the stamp-edge CSS and the two old
+  screenshots (`public/home-*.webp`). Checks: one h1, CLS 0, no text under
+  4.5:1, focus visible, no sideways scroll at 1280/390/375/360. Screenshots
+  in `~/Desktop/chatbritish-design-screens/v9`.
+
+## Help assistant (8 Oct 2026)
+
+Built behind `NEXT_PUBLIC_HELP_ASSISTANT` and merged, **off**
+(`70f43c7`, `a2e911e`, `f506d46`). `/api/assistant` calls
+`claude-haiku-4-5-20251001` with the filled knowledge pack as the system
+prompt and a forced `reply` tool (`text` plus one `action`); the build
+fails on open `[CONFIRM`/`[DECIDE` markers or unfilled `{{…}}` (proved by
+temporarily appending each to a copy of the pack).
+- **The 23 pack test questions** were run against the real route. First
+  run: 4 ("what does … mean") added a hint at the meaning; 14 (visa)
+  echoed "visa"; 13 pointed to "a housing adviser or solicitor"; 19 said
+  "we take privacy seriously"; 22 answered from outside the pack. Fixes: a
+  tool-description line ("Never hint at what a phrase means, even briefly;
+  send the person to Debrief."), two pack additions (the day-streak
+  sentence and the no-security-claims bullet); 13 and the echoed "visa"
+  were accepted as fine. Rerun: all required behaviours pass (declines
+  legal, medical and immigration; no visas, prices or other businesses;
+  injection resisted; safety reply with no buttons; under 80 words).
+- **Rate limit design:** only requests that reach the model count, 6 a
+  minute and 20 per rolling 24 hours per IP, in memory, expired stamps
+  pruned; checked after validation so invalid requests don't count. The
+  three question chips answer locally from the pack (the build fails if
+  one can't be found), so they can't be used to spend the limit.
+- **Local stand-in API for the limit tests:** a small HTTP server returning
+  a fixed tool reply, with the server started with `ANTHROPIC_BASE_URL`
+  pointing at it (the SDK reads it, so no test hook in the route). It
+  counted every call: 20 succeeded with `remaining` 19 → 0, the 21st was
+  `daily_limit` with no model call, another IP was unaffected; 62 calls
+  exactly as expected.
+- **No text in logs:** each call logs one `[assistant]` line (outcome,
+  token counts, action, remaining, status); errors log the class and
+  status only. No test question appeared in any server output.
+
+## Anthropic credit incident (8 Oct 2026)
+
+The Anthropic account ran out of credit partway through the first
+assistant test run: from question 15 every call returned 400 "Your credit
+balance is too low". The same key serves Debrief, so **live Debrief was
+failing too** until credit was added, which was the fix. The route
+deliberately doesn't log error messages, so the cause was found with one
+direct API call with a neutral prompt. Follow-ups: turn on auto-reload in
+the Anthropic Console, and give the assistant its own key and workspace
+with a spend cap (`ANTHROPIC_API_KEY_ASSISTANT` is supported; not set yet).
+
+## Day streak (8 Oct 2026)
+
+`lib/streak.ts` added 1 per finished session and never reset, while the
+label said "day streak" (`1e390ae`). It now stores `{count, lastDay}` with
+the device's local date: same day unchanged, the next day +1, any gap back
+to 1; the badge is hidden at 0 and an old plain number counts as no streak.
+Tested with a mocked clock (two sessions in a day → 1, next day → 2, a
+skipped day → 1, legacy value and blocked storage don't crash). The
+"come back first" copy was untrue (unseen questions come first) and now
+says "The ones you missed will come back."
+
+---
+
 ## Open technical items (engineering-only; see CLAUDE.md for the rest)
 
 - [ ] Real-phone verification of the latest deploys (Debrief, onboarding,
       Practice, favicon, share preview)
 - [ ] Voyage payment method (rate limit), Anthropic monthly spend cap
 - [ ] Debrief thresholds and the 0.03 fallback margin: revisit with real
-      usage. Trim `[debrief-debug]` logging so it never prints users' text.
+      usage.
 - [ ] Struggle-classification floor (0.30): revisit with real usage
 - [ ] Onboarding upsert failure: root cause never directly observed
 - [ ] `og:title` and `twitter:title` still show the home title on every page
