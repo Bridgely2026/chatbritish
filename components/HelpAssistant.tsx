@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { WhatsAppIcon } from "@/components/SocialIcons";
 import { SUPPORT_MAILTO, whatsappHelpHref } from "@/lib/contact";
 import { HELP_INPUT_MAX, type HelpAction } from "@/lib/help-assistant-config";
+import type { ChipReply } from "@/lib/help-knowledge";
 
 // The Help button and chat panel. Rendered from the root layout only when
 // NEXT_PUBLIC_HELP_ASSISTANT=on. The conversation lives in React state only:
@@ -18,22 +19,28 @@ import { HELP_INPUT_MAX, type HelpAction } from "@/lib/help-assistant-config";
 type ChatMessage = { role: "user" | "assistant"; content: string; action?: HelpAction | "contact"; local?: true };
 
 const SOMETHING_ELSE = "Type your question below, or contact a person.";
+const DAILY_LIMIT =
+  "You've reached today's chat limit. For more questions, email support@chatbritish.ai and we'll reply within two working days.";
 
 const GREETING =
   "Hi, I'm the Chat British help assistant. I can explain how Practice and Debrief work. If you want to know what a phrase really means, Debrief is the place.";
 
-const CHIPS = ["How does Practice work?", "What is Debrief?", "Is it free?"];
 
 // The route accepts at most 8 messages of up to 300 characters each, so
 // longer replies are cut short in the history sent back (the full reply
 // stays on screen).
 const HISTORY_SENT = 8;
 
-export default function HelpAssistant() {
+// `chipReplies` come from the knowledge pack (lib/help-knowledge.ts), read at
+// build time by the root layout: the chips answer locally, with no model call.
+export default function HelpAssistant({ chipReplies }: { chipReplies: ChipReply[] }) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState("");
   const [loading, setLoading] = useState(false);
+  // From the route: model calls left today for this IP. Shown at 3 or fewer.
+  const [remaining, setRemaining] = useState<number | null>(null);
+  const [limitReached, setLimitReached] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -87,7 +94,7 @@ export default function HelpAssistant() {
 
   async function ask(question: string) {
     const text = question.trim().slice(0, HELP_INPUT_MAX);
-    if (!text || loading) return;
+    if (!text || loading || limitReached) return;
     const next: ChatMessage[] = [...messages, { role: "user", content: text }];
     setMessages(next);
     setDraft("");
@@ -104,13 +111,29 @@ export default function HelpAssistant() {
             .map((m) => ({ role: m.role, content: m.content.slice(0, HELP_INPUT_MAX) })),
         }),
       });
-      const data = (await res.json()) as { text?: string; action?: HelpAction };
-      reply = { role: "assistant", content: data.text || FALLBACK_TEXT, action: data.action ?? "email" };
+      const data = (await res.json()) as { text?: string; action?: HelpAction; remaining?: number; code?: string };
+      if (typeof data.remaining === "number") setRemaining(data.remaining);
+      if (data.code === "daily_limit") {
+        reply = { role: "assistant", content: DAILY_LIMIT, action: "contact", local: true };
+        setLimitReached(true);
+      } else {
+        reply = { role: "assistant", content: data.text || FALLBACK_TEXT, action: data.action ?? "email" };
+      }
     } catch {
       reply = { role: "assistant", content: FALLBACK_TEXT, action: "email" };
     }
     setMessages((m) => [...m, reply]);
     setLoading(false);
+  }
+
+  // A chip: its question and the pack's fixed answer, both local (never sent
+  // to the model, and not counted against the limit).
+  function askChip(chip: ChipReply) {
+    setMessages((m) => [
+      ...m,
+      { role: "user", content: chip.question, local: true },
+      { role: "assistant", content: chip.text, action: chip.action, local: true },
+    ]);
   }
 
   // No model call: a local reply with the contact buttons, then the input.
@@ -185,16 +208,18 @@ export default function HelpAssistant() {
             )}
           </div>
 
-          <div className="flex flex-wrap gap-x-2 gap-y-1.5 px-4 pb-2.5">
-            {CHIPS.map((chip) => (
-              <button key={chip} type="button" onClick={() => ask(chip)} disabled={loading} className={CHIP}>
-                {chip}
+          {!limitReached && (
+            <div className="flex flex-wrap gap-x-2 gap-y-1.5 px-4 pb-2.5">
+              {chipReplies.map((chip) => (
+                <button key={chip.question} type="button" onClick={() => askChip(chip)} className={CHIP}>
+                  {chip.question}
+                </button>
+              ))}
+              <button type="button" onClick={somethingElse} className={CHIP}>
+                Something else
               </button>
-            ))}
-            <button type="button" onClick={somethingElse} disabled={loading} className={CHIP}>
-              Something else
-            </button>
-          </div>
+            </div>
+          )}
 
           <form onSubmit={onSubmit} className="flex gap-2 border-t border-line px-3 pb-1 pt-2.5">
             <label htmlFor="help-input" className="sr-only">
@@ -207,14 +232,20 @@ export default function HelpAssistant() {
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               maxLength={HELP_INPUT_MAX}
+              disabled={limitReached}
               placeholder="Ask a question"
               autoComplete="off"
-              className="min-h-[44px] min-w-0 flex-1 rounded-lg border-[1.5px] border-field bg-white px-3 text-base text-ink placeholder:text-muted focus:border-primary"
+              className="min-h-[44px] min-w-0 flex-1 rounded-lg border-[1.5px] border-field bg-white px-3 text-base text-ink placeholder:text-muted focus:border-primary disabled:bg-canvas"
             />
-            <button type="submit" disabled={loading || draft.trim() === ""} className="btn-primary px-4">
+            <button type="submit" disabled={loading || limitReached || draft.trim() === ""} className="btn-primary px-4">
               Send
             </button>
           </form>
+          {!limitReached && remaining !== null && remaining <= 3 && (
+            <p className="px-3.5 pt-1 text-[12.5px] font-medium text-ink">
+              {remaining} {remaining === 1 ? "question" : "questions"} left today
+            </p>
+          )}
           <p className="px-3.5 pb-2.5 text-[12.5px] text-muted">Automated. Please don&apos;t share personal details.</p>
 
           <div className="flex flex-wrap items-center gap-2 border-t border-line bg-canvas px-3.5 pb-[max(12px,env(safe-area-inset-bottom,0px))] pt-2.5 text-[13.5px] text-muted">

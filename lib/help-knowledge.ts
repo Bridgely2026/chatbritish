@@ -43,3 +43,35 @@ function buildPack(): string {
 }
 
 export const HELP_SYSTEM_PROMPT = buildPack();
+
+// Fixed replies for the three question chips, read verbatim from the pack so
+// they make no model call and don't count towards the chat limit. The build
+// fails if the pack changes so that one can't be found.
+export type ChipReply = { question: string; text: string; action: "practice" | "debrief" | "none" };
+
+function extract(label: string, pattern: RegExp): string {
+  const match = HELP_SYSTEM_PROMPT.match(pattern)?.[1]?.trim();
+  if (!match) throw new Error(`data/help-assistant-knowledge.md: can't find the ${label} chip reply`);
+  return match;
+}
+
+export const HELP_CHIP_REPLIES: ChipReply[] = [
+  {
+    question: "How does Practice work?",
+    // Section 3's Practice paragraph, without its bold label.
+    text: extract("Practice", /\*\*Practice \(before it happens\)\.\*\* ([^\n]+)/),
+    action: "practice",
+  },
+  {
+    question: "What is Debrief?",
+    // Section 10's example reply, without its [button: ...] note.
+    text: extract("Debrief", /\*\*"What is Debrief\?"\*\* (.+?) \[button:/),
+    action: "debrief",
+  },
+  {
+    question: "Is it free?",
+    // Section 4's first sentence.
+    text: extract("free", /## 4\. Cost\s+([^\n]*?early access\.)/),
+    action: "none",
+  },
+];
