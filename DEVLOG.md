@@ -447,6 +447,11 @@ description); onboarding's lowercase "practice"/"practicing" was left alone.
 All three working branches were safe-deleted locally and on origin after
 checking their tips were in main; only `main` remains.
 
+**Fonts are now self-hosted** with `next/font/google` (in `app/layout.tsx`,
+from the redesign-1 branch): Fraunces, Work Sans and Caveat are downloaded
+at build time and served from our own domain, so visitors' browsers no
+longer request anything from fonts.googleapis.com or fonts.gstatic.com.
+
 ---
 
 ## Open technical items (engineering-only; see CLAUDE.md for the rest)
@@ -459,7 +464,6 @@ checking their tips were in main; only `main` remains.
 - [ ] Struggle-classification floor (0.30): revisit with real usage
 - [ ] Onboarding upsert failure: root cause never directly observed
 - [ ] `og:title` and `twitter:title` still show the home title on every page
-- [ ] Self-host fonts (Google Fonts loads send visitors' IPs to Google)
 - [ ] Practice question titles (needs a Title column in the scenarios
       workbook). The "Based on norm…" line was removed from the Practice
       feedback bar and the Debrief answer card (the ID stays in the data).
