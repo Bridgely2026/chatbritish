@@ -14,7 +14,7 @@ import {
   type Scenario,
 } from "@/lib/scenarios";
 import { getSeen, recordAnswer } from "@/lib/seen";
-import { getStreak, incrementStreak } from "@/lib/streak";
+import { getStreak, recordFinishedSession } from "@/lib/streak";
 
 type View = "picker" | "session" | "recap";
 
@@ -176,7 +176,7 @@ function PracticeContent() {
       setCurrentIndex((i) => i + 1);
       setSelected(null);
     } else {
-      setStreak(incrementStreak());
+      setStreak(recordFinishedSession());
       setView("recap");
     }
   }
@@ -192,7 +192,8 @@ function PracticeContent() {
     if (activeCategory) startSession(activeCategory);
   }
 
-  const streakLine = <p className="text-sm text-muted">🔥 {streak} day streak</p>;
+  // No badge at 0: a "0 day streak" reads as a scolding, not a record.
+  const streakLine = streak > 0 ? <p className="text-sm text-muted">🔥 {streak} day streak</p> : null;
 
   if (view === "picker") {
     return (
@@ -288,8 +289,8 @@ function PracticeContent() {
           <div className="ticket-stub bg-white px-6 pb-5">
             <div className="mx-2 border-t-2 border-dashed border-line" aria-hidden="true" />
             <div className="space-y-1 pt-4">
-              <p className="text-sm text-muted">🔥 {streak} day streak</p>
-              {missedAny && <p className="text-sm text-muted">The ones you missed will come back first.</p>}
+              {streak > 0 && <p className="text-sm text-muted">🔥 {streak} day streak</p>}
+              {missedAny && <p className="text-sm text-muted">The ones you missed will come back.</p>}
             </div>
           </div>
         </div>

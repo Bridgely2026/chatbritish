@@ -232,14 +232,14 @@ export default function LandingPage() {
               <div className="flex justify-center">
                 <Phone
                   height={436}
-                  label="A sample Practice recap, styled as a rail ticket: 3 out of 5 correct in Dating & relationships, a 4 day streak, and a note that the ones you missed will come back first."
+                  label="A sample Practice recap, styled as a rail ticket: 3 out of 5 correct in Dating & relationships, a 4 day streak, and a note that the ones you missed will come back."
                 >
                   <RecapScreen />
                 </Phone>
               </div>
               <TourText
                 title="Practise before it happens"
-                body="Short, tap-based scenarios built from real British situations. Wrong answers show you the right one, and the questions you miss come back first."
+                body="Short, tap-based scenarios built from real British situations. Wrong answers show you the right one, and the ones you miss come back."
                 points={[
                   "Five questions a session, about two minutes",
                   "A streak to keep you coming back",
