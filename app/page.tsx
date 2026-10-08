@@ -12,7 +12,7 @@ import SiteHeader from "@/components/home/SiteHeader";
 import SituationArt, { type SituationArtName } from "@/components/home/SituationArt";
 import { founder } from "@/content/founder";
 import { whatsappHref } from "@/lib/contact";
-import { counts, heroNorm, heroScenario, ledgerRows, numberWord, splitNormId } from "@/lib/home-data";
+import { counts, heroNorm, heroScenario, ledgerRows, numberWord } from "@/lib/home-data";
 import type { NormEntry } from "@/lib/mock-data";
 import { getScenariosByCategory } from "@/lib/scenarios";
 
@@ -111,12 +111,10 @@ export default function LandingPage() {
 
           {/* Collage: overlapping on wide screens, stacked below 980px. */}
           <div className="flex flex-col items-center gap-[34px] min-[980px]:relative min-[980px]:block min-[980px]:min-h-[590px]">
-            {/* The note follows the card's height (the verbatim text sets it),
-                so it sits just under the card rather than at a fixed offset. */}
-            <div className="w-[min(100%,380px)] min-[980px]:absolute min-[980px]:left-0 min-[980px]:top-[50px] min-[980px]:w-[252px]">
-              {heroNorm && <StampCard entry={heroNorm} />}
-              <MarginNote className="ml-[8%] mt-5 -rotate-[5deg] min-[980px]:ml-2">i.e. probably not.</MarginNote>
-            </div>
+            {heroNorm && <StampCard norm={heroNorm} />}
+            <MarginNote className="-mt-3 ml-[8%] -rotate-[5deg] self-start min-[980px]:absolute min-[980px]:left-2 min-[980px]:top-[336px] min-[980px]:m-0">
+              i.e. probably not.
+            </MarginNote>
             {heroScenario && (
               <div className="min-[980px]:absolute min-[980px]:right-0 min-[980px]:top-0">
                 <Phone
@@ -218,6 +216,8 @@ export default function LandingPage() {
 
         {/* How it works */}
         <section id="how" className="section-y scroll-mt-[72px]" aria-labelledby="how-title">
+          {/* The section's old anchor, kept so links to /#how-it-works still land here. */}
+          <span id="how-it-works" className="block scroll-mt-[72px]" aria-hidden="true" />
           <div className="wrap">
             <div className="mb-[38px] max-w-[36em]">
               <h2 id="how-title" className={H2}>
@@ -374,20 +374,17 @@ export default function LandingPage() {
 }
 
 // The hero's stamp card: one approved norm, verbatim, tilted like a stamp.
-function StampCard({ entry }: { entry: NormEntry }) {
-  const { code, slug } = splitNormId(entry.normId);
+// Wide screens: absolutely placed, as in the mockup. Below 980px it stacks.
+function StampCard({ norm }: { norm: NonNullable<typeof heroNorm> }) {
   return (
-    <div className="-rotate-3 rounded bg-white p-[22px] shadow-[0_0_0_7px_#fff,0_0_0_8px_#DDE1E6,0_18px_40px_rgba(20,35,55,0.14)]">
-      <div className="mb-3 flex justify-between gap-3 border-b border-line pb-2.5 font-mono text-xs leading-[1.3] text-muted">
-        <span>
-          {code} {slug}
-        </span>
-        <span>{entry.category}</span>
-      </div>
-      <p className="font-display text-[19px] font-medium italic leading-[1.35] text-ink">{entry.surfaceMarkers}</p>
+    <div className="w-[min(100%,380px)] -rotate-3 rounded bg-white p-[22px] min-[980px]:absolute min-[980px]:left-0 min-[980px]:top-[50px] min-[980px]:w-[252px] shadow-[0_0_0_7px_#fff,0_0_0_8px_#DDE1E6,0_18px_40px_rgba(20,35,55,0.14)]">
+      <p className="mb-3 border-b border-line pb-2.5 font-mono text-xs leading-[1.3] text-muted">{norm.category}</p>
+      <p className="font-display text-[19px] font-medium italic leading-[1.35] text-ink">
+        {norm.phrases.map((phrase) => `\u201C${phrase}\u201D`).join(" / ")}
+      </p>
       <p className="mt-3.5 text-[14.5px] leading-normal text-ink">
         <b className="mb-0.5 block text-[13px] font-semibold text-primary">What it actually means</b>
-        {entry.whatItMeans}
+        {norm.meaning}
       </p>
     </div>
   );

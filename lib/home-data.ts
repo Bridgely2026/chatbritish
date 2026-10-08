@@ -30,20 +30,24 @@ function approvedNorm(normIdPrefix: string): NormEntry | null {
   return approvedNorms.find((e) => e.normId.startsWith(`${normIdPrefix}-`)) ?? null;
 }
 
-// "WP-1-indirect-refusal-workplace" -> { code: "WP-1", slug: "indirect refusal workplace" }
-export function splitNormId(normId: string): { code: string; slug: string } {
-  const match = normId.match(/^([A-Z]+-\d+)-(.*)$/);
-  return match ? { code: match[1], slug: match[2].replace(/-/g, " ") } : { code: normId, slug: "" };
-}
-
 // The first phrase in straight or curly double quotes in Surface Markers.
 // Verbatim, so WP-17 keeps the trailing comma it has in the spreadsheet.
 function firstQuotedPhrase(surfaceMarkers: string): string | null {
   return surfaceMarkers.match(/["“]([^"”]+)["”]/)?.[1] ?? null;
 }
 
-// Hero stamp card.
-export const heroNorm = approvedNorm("WP-1");
+// All phrases in straight or curly double quotes, in order, verbatim.
+function quotedPhrases(surfaceMarkers: string): string[] {
+  return [...surfaceMarkers.matchAll(/["\u201C]([^"\u201D]+)["\u201D]/g)].map((m) => m[1]);
+}
+
+// Hero stamp card: WP-1's category, the first three quoted phrases of its
+// Surface Markers, and "What It Actually Means". Norm IDs aren't shown.
+export const heroNorm: { category: string; phrases: string[]; meaning: string } | null = (() => {
+  const entry = approvedNorm("WP-1");
+  const phrases = entry ? quotedPhrases(entry.surfaceMarkers).slice(0, 3) : [];
+  return entry && phrases.length > 0 ? { category: entry.category, phrases, meaning: entry.whatItMeans } : null;
+})();
 
 // Hero phone: one Practice question shown answered, with the first wrong
 // option chosen and the right one highlighted.
