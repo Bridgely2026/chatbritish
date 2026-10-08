@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Caveat, Fraunces, Work_Sans } from "next/font/google";
 import Footer from "@/components/Footer";
 import "./globals.css";
 
@@ -22,9 +23,23 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title, description },
 };
 
+// Self-hosted at build time by next/font, so the browser never requests
+// anything from Google. tailwind.config.ts maps the variables to font-display,
+// font-sans and font-hand.
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  axes: ["opsz"],
+  display: "swap",
+  variable: "--font-fraunces",
+});
+const workSans = Work_Sans({ subsets: ["latin"], display: "swap", variable: "--font-work-sans" });
+// Handwriting, for the red-pen margin note only.
+const caveat = Caveat({ subsets: ["latin"], weight: "600", display: "swap", variable: "--font-caveat" });
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${fraunces.variable} ${workSans.variable} ${caveat.variable}`}>
       <body className="font-sans antialiased">
         {children}
         <Footer />

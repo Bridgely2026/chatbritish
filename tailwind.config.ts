@@ -32,10 +32,10 @@ const config: Config = {
         field: "#858F99",
       },
       fontFamily: {
-        display: ["Fraunces", "Georgia", "serif"],
-        sans: ["Work Sans", "system-ui", "sans-serif"],
+        display: ["var(--font-fraunces)", "Fraunces", "Georgia", "serif"],
+        sans: ["var(--font-work-sans)", "Work Sans", "system-ui", "sans-serif"],
         // Handwriting, for the red-pen margin note only.
-        hand: ["Caveat", "cursive"],
+        hand: ["var(--font-caveat)", "Caveat", "cursive"],
       },
       maxWidth: {
         prose: "38rem",
