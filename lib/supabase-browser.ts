@@ -1,4 +1,4 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createClient, isAuthApiError, type SupabaseClient } from "@supabase/supabase-js";
 
 // Browser-side Supabase client, safe to expose: it only carries the public anon
 // key, and access to `users` is gated by RLS. Server routes keep using the
@@ -35,7 +35,21 @@ export function ensureAnonymousUserId(): Promise<string> {
       const supabase = getSupabaseBrowser();
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
       if (sessionError) throw sessionError;
-      if (sessionData.session) return sessionData.session.user.id;
+      if (sessionData.session) {
+        // The stored session can outlive its user (deleted by a cleanup job
+        // or by "Delete my data" elsewhere): check with Supabase. If the user
+        // is gone, sign in fresh below; the new session replaces the stale
+        // one. Any other failure (e.g. offline) keeps the stored session.
+        const { error: userError } = await supabase.auth.getUser();
+        const userGone =
+          isAuthApiError(userError) &&
+          (userError.status === 401 ||
+            userError.status === 403 ||
+            userError.code === "user_not_found" ||
+            userError.code === "session_not_found" ||
+            userError.code === "bad_jwt");
+        if (!userGone) return sessionData.session.user.id;
+      }
 
       const { data, error } = await supabase.auth.signInAnonymously();
       if (error) throw error;
