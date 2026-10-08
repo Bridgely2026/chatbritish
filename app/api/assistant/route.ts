@@ -26,7 +26,8 @@ const REPLY_TOOL: Anthropic.Tool = {
     "Send your reply to the person. Always use this tool. `text` is the reply itself: plain text, no links, no URLs, no markdown, at most about 80 words. " +
     "`action` adds one button under the reply: practice (Start practising), debrief (Try Debrief), email (Email support), privacy (the privacy notice)" +
     (helpWhatsappEnabled ? ", whatsapp (WhatsApp, only as the knowledge pack allows)" : "") +
-    ", or none (no button). Pick the one the knowledge pack points to, or none.",
+    ", or none (no button). Pick the one the knowledge pack points to, or none. " +
+    "Never hint at what a phrase means, even briefly; send the person to Debrief.",
   input_schema: {
     type: "object",
     properties: {
@@ -134,7 +135,8 @@ export async function POST(request: NextRequest) {
     return fallback(400);
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  // A separate key lets the assistant's spend be capped apart from Debrief's.
+  const apiKey = process.env.ANTHROPIC_API_KEY_ASSISTANT || process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     logOutcome("misconfigured", { status: 500 });
     return fallback();

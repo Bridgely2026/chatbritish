@@ -13,7 +13,11 @@ import { HELP_INPUT_MAX, type HelpAction } from "@/lib/help-assistant-config";
 // Hidden (and the panel closed) while a Practice question is on screen, using
 // the same body[data-practice-question] flag that hides the footer.
 
-type ChatMessage = { role: "user" | "assistant"; content: string; action?: HelpAction };
+// `local` marks a message written here, not by the model: it shows on
+// screen but is never sent to the route.
+type ChatMessage = { role: "user" | "assistant"; content: string; action?: HelpAction | "contact"; local?: true };
+
+const SOMETHING_ELSE = "Type your question below, or contact a person.";
 
 const GREETING =
   "Hi, I'm the Chat British help assistant. I can explain how Practice and Debrief work. If you want to know what a phrase really means, Debrief is the place.";
@@ -35,10 +39,20 @@ export default function HelpAssistant() {
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
+  // Focus goes back to the Help button after the panel has closed: on phones
+  // the button is hidden while the sheet is open, so it can't take focus
+  // until the next render.
+  const returnFocusRef = useRef(false);
   function close(returnFocus: boolean) {
+    returnFocusRef.current = returnFocus;
     setOpen(false);
-    if (returnFocus) buttonRef.current?.focus();
   }
+  useEffect(() => {
+    if (!open && returnFocusRef.current) {
+      returnFocusRef.current = false;
+      buttonRef.current?.focus();
+    }
+  }, [open]);
 
   // Escape closes the panel and returns focus to the Help button.
   useEffect(() => {
@@ -85,6 +99,7 @@ export default function HelpAssistant() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: next
+            .filter((m) => !m.local)
             .slice(-HISTORY_SENT)
             .map((m) => ({ role: m.role, content: m.content.slice(0, HELP_INPUT_MAX) })),
         }),
@@ -96,6 +111,12 @@ export default function HelpAssistant() {
     }
     setMessages((m) => [...m, reply]);
     setLoading(false);
+  }
+
+  // No model call: a local reply with the contact buttons, then the input.
+  function somethingElse() {
+    setMessages((m) => [...m, { role: "assistant", content: SOMETHING_ELSE, action: "contact", local: true }]);
+    inputRef.current?.focus({ preventScroll: true });
   }
 
   function onSubmit(e: FormEvent) {
@@ -145,7 +166,14 @@ export default function HelpAssistant() {
                 {m.content}
                 {m.role === "assistant" && m.action && m.action !== "none" && (
                   <div className="mt-2.5 flex flex-wrap gap-2">
-                    <ActionButton action={m.action} onNavigate={() => close(false)} />
+                    {m.action === "contact" ? (
+                      <>
+                        <ActionButton action="email" onNavigate={() => close(false)} />
+                        {whatsappHelpHref && <ActionButton action="whatsapp" onNavigate={() => close(false)} />}
+                      </>
+                    ) : (
+                      <ActionButton action={m.action} onNavigate={() => close(false)} />
+                    )}
                   </div>
                 )}
               </Bubble>
@@ -163,7 +191,7 @@ export default function HelpAssistant() {
                 {chip}
               </button>
             ))}
-            <button type="button" onClick={() => inputRef.current?.focus()} className={CHIP}>
+            <button type="button" onClick={somethingElse} disabled={loading} className={CHIP}>
               Something else
             </button>
           </div>
