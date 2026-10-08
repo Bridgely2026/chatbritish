@@ -39,7 +39,7 @@ const REPLY_TOOL: Anthropic.Tool = {
   },
 };
 
-type Reply = { text: string; action: HelpAction; fallback?: true };
+type Reply = { text: string; action: HelpAction; remaining?: number; fallback?: true };
 
 const FALLBACK: Reply = {
   text: "Sorry, I can't answer right now. You can email us and a person will reply.",
@@ -47,42 +47,57 @@ const FALLBACK: Reply = {
   fallback: true,
 };
 
-// Same pattern as the Debrief route: in-memory and per instance, so it resets
-// on redeploy and isn't shared between instances. Enough to stop accidental
-// hammering, not a substitute for a shared limiter under real traffic.
+// Limits per IP, counting only requests that reach the model: 6 a minute
+// and 20 in any rolling 24 hours. In memory and per instance, like the
+// Debrief route's limiter, so it resets on redeploy and isn't shared between
+// instances: enough to stop accidental hammering, not a substitute for a
+// shared limiter under real traffic.
 const MINUTE_MS = 60_000;
 const DAY_MS = 24 * 60 * 60_000;
-const MAX_PER_MINUTE = 12;
-const MAX_PER_DAY = 60;
-const SWEEP_THRESHOLD = 1000;
-const requestLog = new Map<string, number[]>();
+const MAX_PER_MINUTE = 6;
+const MAX_PER_DAY = 20;
+const modelCalls = new Map<string, number[]>();
+let lastSweep = 0;
 
+// Same IP detection as the Debrief route.
 function getClientKey(request: NextRequest): string {
   const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
   return forwarded || "unknown";
 }
 
-// True if this request is allowed (and records it). Synchronous, so
-// concurrent requests can't race past it.
-function checkRateLimit(key: string, now: number): boolean {
-  if (requestLog.size > SWEEP_THRESHOLD) {
-    for (const [k, stamps] of requestLog) {
-      if (stamps.every((t) => now - t >= DAY_MS)) requestLog.delete(k);
+// Drops stamps older than 24 hours for this IP, and, at most once a minute,
+// for every IP (removing IPs with none left).
+function recentCalls(key: string, now: number): number[] {
+  if (now - lastSweep > MINUTE_MS) {
+    lastSweep = now;
+    for (const [k, stamps] of modelCalls) {
+      const kept = stamps.filter((t) => now - t < DAY_MS);
+      if (kept.length === 0) modelCalls.delete(k);
+      else modelCalls.set(k, kept);
     }
   }
-  const today = (requestLog.get(key) ?? []).filter((t) => now - t < DAY_MS);
-  const lastMinute = today.filter((t) => now - t < MINUTE_MS).length;
-  if (today.length >= MAX_PER_DAY || lastMinute >= MAX_PER_MINUTE) {
-    requestLog.set(key, today);
-    return false;
-  }
+  const kept = (modelCalls.get(key) ?? []).filter((t) => now - t < DAY_MS);
+  if (kept.length === 0) modelCalls.delete(key);
+  else modelCalls.set(key, kept);
+  return kept;
+}
+
+// Synchronous check-and-record, so concurrent requests can't race past it.
+// Returns the calls left today after this one, or which limit was hit.
+function takeModelCall(key: string, now: number): { ok: true; remaining: number } | { ok: false; limit: "daily" | "minute" } {
+  const today = recentCalls(key, now);
+  if (today.length >= MAX_PER_DAY) return { ok: false, limit: "daily" };
+  if (today.filter((t) => now - t < MINUTE_MS).length >= MAX_PER_MINUTE) return { ok: false, limit: "minute" };
   today.push(now);
-  requestLog.set(key, today);
-  return true;
+  modelCalls.set(key, today);
+  return { ok: true, remaining: MAX_PER_DAY - today.length };
 }
 
 // Only ever logs these fields: never message text.
-function logOutcome(outcome: string, extra: { input_tokens?: number; output_tokens?: number; action?: string; status?: number } = {}) {
+function logOutcome(
+  outcome: string,
+  extra: { input_tokens?: number; output_tokens?: number; action?: string; remaining?: number; status?: number } = {}
+) {
   console.log(`[assistant] ${JSON.stringify({ outcome, ...extra })}`);
 }
 
@@ -114,14 +129,6 @@ function fallback(status = 200) {
 export async function POST(request: NextRequest) {
   if (!helpAssistantEnabled) return new NextResponse(null, { status: 404 });
 
-  if (!checkRateLimit(getClientKey(request), Date.now())) {
-    logOutcome("rate_limited", { status: 429 });
-    return NextResponse.json(
-      { ...FALLBACK, text: "You've sent a lot of questions. Please wait a minute and try again, or email us." },
-      { status: 429, headers: { "Retry-After": "60" } }
-    );
-  }
-
   let body: unknown;
   try {
     body = await request.json();
@@ -142,6 +149,20 @@ export async function POST(request: NextRequest) {
     return fallback();
   }
 
+  // Checked after validation, so only requests that would reach the model
+  // count. Over a limit: 429 and no model call.
+  const quota = takeModelCall(getClientKey(request), Date.now());
+  if (!quota.ok) {
+    logOutcome(quota.limit === "daily" ? "daily_limit" : "minute_limit", { status: 429 });
+    return quota.limit === "daily"
+      ? NextResponse.json({ code: "daily_limit" }, { status: 429 })
+      : NextResponse.json(
+          { ...FALLBACK, code: "minute_limit", text: "You're sending questions quickly. Please wait a minute and try again, or email us." },
+          { status: 429, headers: { "Retry-After": "60" } }
+        );
+  }
+  const { remaining } = quota;
+
   try {
     const anthropic = new Anthropic({ apiKey });
     const message = await anthropic.messages.create({
@@ -160,16 +181,16 @@ export async function POST(request: NextRequest) {
     const text = typeof input.text === "string" ? input.text.trim().slice(0, MAX_REPLY_CHARS) : "";
     if (message.stop_reason === "max_tokens" || text === "") {
       logOutcome("malformed", { ...usage, status: 200 });
-      return fallback();
+      return NextResponse.json({ ...FALLBACK, remaining });
     }
     const action: HelpAction = ACTIONS.includes(input.action as HelpAction) ? (input.action as HelpAction) : "none";
 
-    logOutcome("ok", { ...usage, action, status: 200 });
-    return NextResponse.json({ text, action } satisfies Reply);
+    logOutcome("ok", { ...usage, action, remaining, status: 200 });
+    return NextResponse.json({ text, action, remaining } satisfies Reply);
   } catch (err) {
     // The status and class only: an error message could quote the request.
     const status = err instanceof Anthropic.APIError ? err.status : undefined;
     logOutcome(err instanceof Anthropic.APIError ? `anthropic_error_${err.constructor.name}` : "error", { status });
-    return fallback();
+    return NextResponse.json({ ...FALLBACK, remaining });
   }
 }

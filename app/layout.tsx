@@ -3,6 +3,7 @@ import { Caveat, Fraunces, Work_Sans } from "next/font/google";
 import Footer from "@/components/Footer";
 import HelpAssistant from "@/components/HelpAssistant";
 import { helpAssistantEnabled } from "@/lib/help-assistant-config";
+import { HELP_CHIP_REPLIES } from "@/lib/help-knowledge";
 import "./globals.css";
 
 const title = "Chat British \u2014 Speak the language. Understand the culture. Belong.";
@@ -45,7 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="font-sans antialiased">
         {children}
         <Footer />
-        {helpAssistantEnabled && <HelpAssistant />}
+        {helpAssistantEnabled && <HelpAssistant chipReplies={HELP_CHIP_REPLIES} />}
       </body>
     </html>
   );
