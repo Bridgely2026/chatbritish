@@ -134,6 +134,20 @@ Also: the AB-2 scenario omits the taxonomy's "(not the letter)" detail — his c
 ### RAG robustness
 Low confidence → one follow-up, never a guess. Retrieval-confident but inappropriate → `entry_applies: false`. Fallback candidates and malformed-output handling as above. **Thresholds are judgments from a small calibration set** (12 clear cases scored 0.535+ except one at 0.348; vague cases 0.427/0.473; unrelated 0.297/0.195). The margins are thin, the 0.03 fallback margin rests on one observed tie, and `[debrief-debug]` logging stays on to tune from real use. Check that debug logs don't print users' descriptions before real clients arrive (descriptions are personal).
 
+### Privacy and data (audit and fixes, 8–9 Oct 2026)
+- **Held in Supabase:** `users` (one row per saved profile, keyed by the anonymous auth user id; free text in `struggle` and `city`, the optional `email`); `debrief_gaps` (unmatched or declined Debriefs: description, follow-up question and answer, best candidate, similarity, decline reason; **no user id and no IP**); `taxonomy_entries` (the 200 norms, no user data).
+- **Anonymous accounts are created when the onboarding page opens**, before anything is saved, so there are far more auth users than profiles (89 anonymous auth users against 10 `users` rows on 8 Oct).
+- **Sent to AI providers:** Debrief sends the description (plus the follow-up answer) to Voyage, and the description, follow-up question and answer, and the candidate or matched taxonomy entry to Anthropic (`claude-sonnet-5`). Onboarding sends the struggle text to Voyage through `/api/classify-struggle`; the profile goes from the browser straight to Supabase. Practice sends nothing. The Help assistant (off) sends the knowledge pack and the last six messages to Anthropic (`claude-haiku-4-5-20251001`) and stores nothing.
+- **No cookies, no analytics, no third-party requests on page load.** The only third-party request is onboarding's anonymous sign-in to Supabase. No Set-Cookie on any page or API route.
+- **Browser storage (localStorage only):** `chat_british_seen`, `chat_british_streak`, and the Supabase auth token (`sb-<project ref>-auth-token`).
+- **Error logs** in the Debrief and classifier routes log a fixed label, the error name and an HTTP status or error code only (`lib/log-error.ts`): never a message, response body, Postgres detail or input. The `[debrief-debug]` and `[struggle-classify]` score lines log norm ids, categories and similarities only.
+- **Rate limits** (in memory, per IP from `x-forwarded-for`): Debrief 10 a minute; `/api/classify-struggle` 15 a minute (onboarding skips that signal on a 429); Help assistant 6 a minute and 20 per rolling 24 hours; `/api/delete-my-data` 5 a minute.
+- **Debrief's "Save to my log" button was removed**: it stored nothing.
+- **Delete my data:** `POST /api/delete-my-data` (Supabase access token required) deletes the caller's `users` row and auth user. The button is at the bottom of /privacy, shown only when the browser has a session; it then clears the three storage keys. `debrief_gaps` rows can't be tied to a user, so they aren't deleted.
+- **Privacy lines at collection,** each linking "How we use your information" to /privacy: under the onboarding "what's been confusing" box, under the optional email field, and under the Debrief description box.
+- **Email:** nothing in the app sends email and there is no unsubscribe mechanism. The email line says people can ask us to stop, which today means emailing support@chatbritish.ai.
+- **A deleted anonymous user recovers quietly:** if the stored session's user no longer exists, onboarding signs in anonymously again instead of failing to save.
+
 ---
 
 ## Open items / next steps
@@ -149,6 +163,13 @@ Low confidence → one follow-up, never a guess. Retrieval-confident but inappro
 - [ ] Confirm approval of the new public text: page titles, the margin note "i.e. probably not.", the field guide and its six rows (CS-1 is 163 characters; WP-17's phrase carries a trailing comma in the spreadsheet), and the footer's not-advice line. Also the home-page text added on 7 Oct: the proof strip ("Every norm reviewed by a working coach"), the three How it works steps, the four FAQ answers, and the Debrief screenshot (a Claude-generated MN-3 answer, shown as an example). **"Chat British is free to use while we're in early access"** is a public statement about pricing; check it sits with the no-payments-until-the-visa-is-granted decision and any later paid tier.
 - [ ] The five taxonomy gaps above; the AB-2 "(not the letter)" detail
 - [ ] A short privacy notice is needed before promoting the site (it collects free text and optional email; fonts load from Google). Not a lawyer's advice — have the wording checked. A draft exists; before publishing it needs the code audit and Kianoush's decisions on controller, retention, an under-18 rule and email consent.
+
+**Privacy (before promoting the site or switching on the Help assistant):**
+- [ ] Retention jobs (pg_cron) not yet scheduled; nothing deletes `users`, `debrief_gaps` or unused anonymous auth users today
+- [x] Recovery test for deleted anonymous accounts (9 Oct): it failed at first (a 409 and "We couldn't save your answers"); fixed in `ff8b713`, so onboarding signs in fresh when the stored user is gone
+- [ ] Check in the dashboards: the Supabase project region; whether `auth.sessions` / `auth.audit_log_entries` have IP columns and hold IPs; Railway log retention; the data processing agreements (Supabase, Railway, Voyage, Anthropic)
+- [ ] Privacy notice v2: awaiting the founder's answers and a solicitor's check, then publish it in place of the /privacy stub
+- [ ] The Help assistant stays off (`NEXT_PUBLIC_HELP_ASSISTANT` unset) until the notice is live
 
 **Endorsement (critical path):**
 - [ ] Business Plan (UKES template), CV, Financial Plan — none started. Start with the CV; collect his teaching history, qualifications, years coaching, client numbers, Instagram reach, testimonials

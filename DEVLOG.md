@@ -454,6 +454,68 @@ longer request anything from fonts.googleapis.com or fonts.gstatic.com.
 
 ---
 
+## Privacy audit and fixes (8–9 Oct 2026)
+
+**Audit (read-only).** Supabase holds `users` (keyed by the anonymous auth
+user id, with free-text `struggle` and `city` and the optional `email`),
+`debrief_gaps` (free-text descriptions and follow-up answers, no user id,
+no IP) and `taxonomy_entries`. Anonymous auth users far outnumber profiles,
+because sign-in happens when the onboarding page opens. No cookies, no
+Set-Cookie, no analytics, no third-party requests on page load except
+onboarding's Supabase sign-in; localStorage holds `chat_british_seen`,
+`chat_british_streak` and the Supabase auth token. Findings that led to
+fixes: error logs printed whole error objects (a Postgres constraint
+error's details include the failing row, and Voyage error bodies were
+logged verbatim); `/api/classify-struggle` had no rate limit; Debrief's
+"Save to my log" stored nothing; no privacy information at collection; no
+way to delete one's data. Nothing sends email and there's no unsubscribe;
+there is no retention job, delete route or TTL anywhere.
+
+**The fixes (merged as `b3e8f25`), and how each was proved:**
+- **Safe error logs** (`lib/log-error.ts`): a fixed label, the error name,
+  and an HTTP status or short error code only. Voyage errors no longer keep
+  the response body. Proved with a **canary test**: a `fetch` preloaded into
+  the Next server (`NODE_OPTIONS=--import`) answered every Voyage, Anthropic
+  and Supabase call itself, returning failures whose messages, bodies and
+  Postgres "Failing row contains" details carried one canary, while each
+  request's text carried another. All eight failure paths (Voyage,
+  `match_taxonomy_entries`, follow-up, gap insert, grounded answer,
+  malformed output, misconfiguration, and the classifier) were hit; neither
+  canary appeared in stdout or stderr.
+- **Classifier rate limit** (15 a minute per IP, the Debrief pattern; 429
+  with a friendly JSON error). **Limiter test:** 15 requests 200, the 16th
+  429, another IP unaffected; real onboarding with the limit used up still
+  saved the profile, skipping the struggle signal.
+- **"Save to my log" removed** from the Debrief answer card.
+- **Privacy lines** under the onboarding struggle box, the email field and
+  the Debrief description box, linking to /privacy; no overflow at 375 or
+  360.
+- **Delete my data:** `/api/delete-my-data` verifies the caller's access
+  token with the service-role client, deletes their `users` row and auth
+  user, returns 204, 5 a minute per IP, logs nothing about the user; a
+  confirm-then-delete button on /privacy (session required) signs out and
+  clears the three storage keys. **Throwaway-user delete test:** one
+  anonymous user made through real onboarding had 1 row and an auth user;
+  after the delete, 0 rows, no auth user, `users` back to 10, localStorage
+  empty, button gone on reload. 401 without or with a bad token.
+- **Follow-up, deleted-user recovery (`ff8b713`):** after an admin delete
+  of the auth user (which cascades the `users` row), the browser kept the
+  stale session and the next onboarding save failed (409, 23503).
+  `ensureAnonymousUserId` now confirms a stored session with `getUser()`
+  and signs in again when Supabase says the user is gone. Retested: one
+  fresh sign-in, the profile saved under the new user, everything created
+  removed (users 10 -> 10, auth users 89 -> 89).
+
+**Supabase access limitation.** The Supabase MCP connector returns "You do
+not have permission" on this project, and the service-role REST API only
+reaches the `public` schema (`auth` and `cron` give HTTP 406). So the
+`auth.sessions` / `auth.audit_log_entries` IP columns, pg_cron jobs and
+Edge Functions can't be checked from here: do those in the Supabase
+dashboard. Counts were read with a small `node --env-file=.env.local`
+script using the service-role key, printing counts and column names only.
+
+---
+
 ## Open technical items (engineering-only; see CLAUDE.md for the rest)
 
 - [ ] Real-phone verification of the latest deploys (Debrief, onboarding,
