@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { logError } from "@/lib/log-error";
 import categoryReferenceEmbeddings from "@/lib/category-reference-embeddings.json";
 
 // Classifies onboarding's free-text "struggle" answer against the twelve fixed
@@ -14,6 +15,39 @@ import categoryReferenceEmbeddings from "@/lib/category-reference-embeddings.jso
 const VOYAGE_API_KEY = process.env.VOYAGE_API_KEY;
 const VOYAGE_MODEL = "voyage-3";
 
+// Same pattern as the Debrief route: in-memory and per instance, so it resets
+// on redeploy and isn't shared between instances. 15 a minute per IP.
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX_REQUESTS = 15;
+const RATE_LIMIT_SWEEP_THRESHOLD = 1000; // sweep idle IPs once the map gets this big
+
+const requestLog = new Map<string, number[]>();
+
+function getClientKey(request: NextRequest): string {
+  // The first x-forwarded-for entry is the client.
+  const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  return forwarded || "unknown";
+}
+
+// Returns true if this request is allowed (and records it). Fully
+// synchronous, so concurrent requests can't race past it.
+function checkRateLimit(key: string, now: number): boolean {
+  if (requestLog.size > RATE_LIMIT_SWEEP_THRESHOLD) {
+    for (const [k, stamps] of requestLog) {
+      if (stamps.every((t) => now - t >= RATE_LIMIT_WINDOW_MS)) requestLog.delete(k);
+    }
+  }
+
+  const recent = (requestLog.get(key) ?? []).filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
+  if (recent.length >= RATE_LIMIT_MAX_REQUESTS) {
+    requestLog.set(key, recent);
+    return false;
+  }
+  recent.push(now);
+  requestLog.set(key, recent);
+  return true;
+}
+
 type CategoryReference = { category: string; embedding: number[] };
 
 const REFERENCES = categoryReferenceEmbeddings as CategoryReference[];
@@ -28,8 +62,8 @@ async function embedQuery(text: string): Promise<number[]> {
     body: JSON.stringify({ input: [text], model: VOYAGE_MODEL, input_type: "query" }),
   });
   if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(`Voyage embeddings request failed (${res.status}): ${body}`);
+    // The status only: Voyage's response body isn't kept, so it can't be logged.
+    throw Object.assign(new Error("Voyage embeddings request failed"), { name: "VoyageError", status: res.status });
   }
   const data = await res.json();
   return data.data[0].embedding;
@@ -48,6 +82,15 @@ function cosineSimilarity(a: number[], b: number[]): number {
 }
 
 export async function POST(request: NextRequest) {
+  // Checked first, before any body parsing or Voyage call. Onboarding treats
+  // any non-OK response as "no struggle signal" and carries on.
+  if (!checkRateLimit(getClientKey(request), Date.now())) {
+    return NextResponse.json(
+      { topCategory: null, message: "Too many requests, please wait a moment and try again." },
+      { status: 429, headers: { "Retry-After": String(RATE_LIMIT_WINDOW_MS / 1000) } }
+    );
+  }
+
   try {
     if (!VOYAGE_API_KEY) {
       throw new Error("Missing required env var: VOYAGE_API_KEY");
@@ -86,7 +129,7 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     // This classification should never block onboarding submission — fail
     // gracefully with a null result instead of a 500.
-    console.error("[struggle-classify] failed:", err);
+    logError("[struggle-classify] failed", err);
     return NextResponse.json({ topCategory: null });
   }
 }
