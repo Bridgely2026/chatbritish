@@ -603,6 +603,45 @@ skipped day → 1, legacy value and blocked storage don't crash). The
 "come back first" copy was untrue (unseen questions come first) and now
 says "The ones you missed will come back."
 
+## Privacy notice published (9 Oct 2026)
+
+**Source.** The approved notice arrived untracked as
+`content/privacy-notice-v3.md`. It was renamed with a plain `mv` to
+`content/privacy-notice.md`; its SHA-256 (`f406a53a…85cc05`) was the same
+before, after, and at commit. The wording is unchanged.
+
+**Renderer.** `lib/privacy-notice.ts` reads the file at build time and
+parses only what it uses: one `#` heading, `##` headings (each gets an id
+such as `6-who-else-handles-your-information`), paragraphs (a single line
+break inside one is kept), `- ` lists and `**bold**`. No dependency was
+added. `app/privacy/page.tsx` renders the blocks as React text, so the
+wording is escaped and nothing uses `dangerouslySetInnerHTML`;
+`support@chatbritish.ai` becomes a mailto link and `ico.org.uk` links to
+https://ico.org.uk. The column is 35rem (full lines average 68.3
+characters at 1280) and headings carry a scroll margin for the sticky
+header. Metadata: title "Privacy notice", a description, canonical
+https://chatbritish.ai/privacy, and the noindex/nofollow removed. The
+"Delete my data" button is unchanged, after section 12.
+
+**Build guard.** The build fails if the file matches
+`/\[(CONFIRM|DECIDE|LAWYER|INCLUDE|PUBLISH)\b|DATE:|## ##/`. Proof: with
+`[LAWYER check]` appended, `npm run build` failed with
+"content/privacy-notice.md still has a drafting note"; the file was then
+restored from a copy and its checksum matched.
+
+**Checks** (production build, Python Playwright, true 375x667, 360x640
+and 1280x800): one h1 then h2s only; no sideways scroll; visible 2px navy
+focus on the email link and the button; lowest text contrast in the
+notice 11:1. Word for word: the markup was stripped from the file and the
+rendered text read block by block; 1,236 words each at all three sizes,
+and the diff was empty. With a mocked session (Supabase requests blocked)
+the button shows; without one it doesn't. Screenshots and
+`v12-report.json` are in `~/Desktop/chatbritish-design-screens/v12`.
+
+**Live.** Merged as `9503342`; Railway reported "Success". `curl -4
+https://chatbritish.ai/privacy`: HTTP 200, contains "Kianoush Language
+Academy Ltd" and "9 October 2026", no noindex, no "being finalised" text.
+
 ---
 
 ## Open technical items (engineering-only; see CLAUDE.md for the rest)

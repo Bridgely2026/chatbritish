@@ -26,7 +26,7 @@
 - **Feature 3 (debrief):** real RAG pipeline (Supabase pgvector + Voyage + Claude), now matching against **all 200 approved entries**. Two independent confidence signals: retrieval thresholds **0.50 (confident) / 0.30 (floor)**, plus the `entry_applies` generation check. If the top candidate is declined, up to 3 further candidates within **0.03** of the top similarity are tried before `no_match`. A malformed Claude response is retried once, then skipped; if nothing applies and one was skipped, the user gets a friendly error (503) and **no** gap row. After a follow-up, retrieval embeds only the user's own words (description + answer), not Claude's question; Claude still sees the question when generating. Unmatched/declined cases are logged to `debrief_gaps` with a `decline_reason`. Deliberately a bounded diagnostic tool, not a chatbot.
 - **Design ("quietly British"):** Fraunces + Work Sans (+ Caveat for the margin note), **self-hosted with `next/font`**, so the browser makes no request to Google. **Navy primary #1F3A5F on canvas #FBFAF7**, ink text, white cards; racing green and the perforated stamp edge are gone. **Brick (and sage) are reserved for wrong (and right) answers and errors**, with one exception: the red-pen margin note "i.e. probably not." on the home hero. Amber is decorative only. Shared button classes `.btn-primary`, `.btn-secondary`, `.btn-light`, `.btn-ghost` (plus WhatsApp and LinkedIn buttons) and `.link`. "Practise" is the verb (hero, "Practise this norm", "Practise another category", meta description); "Practice" stays the noun and product name. No landmarks, crowns, red boxes or 'Made in Britain' claims. One exception: a small Union Jack in the header, the hero tagline and the footer. **No norm IDs are shown anywhere** (the hero card shows the category only).
 - **Home page** (ported from `docs/mockups/chat-british-landing-mockup.html`, a reference only): a new sticky header on the home page only (`components/home/SiteHeader.tsx`: wordmark with the flag, How it works, Practice, Debrief, Contact, Get started; a `<details>` menu below 760px); **other pages keep `Nav.tsx`**. Sections in order: **hero collage** (live headline, lead and buttons; tagline with the flag; WP-1 stamp card with the first three quoted Surface Markers phrases; the margin note; a phone showing scenario SC-WP-2-a answered); **proof strip** (counts from Approved rows at build time, plus "Every norm reviewed by a working coach"); **founder section**, hidden until `NEXT_PUBLIC_FOUNDER_VIDEO_ID` and a bio in `content/founder.ts` are set; **six illustrated situation cards** (Practise opens `/practice?categories=…`; "See all 12 situations"); **How it works** (`#how`, with a hidden `#how-it-works` anchor; a sample recap phone and a sample Debrief browser frame, both labelled as samples); **coach section** with a ledger of WP-17, HC-4 and HL-1 read verbatim from the taxonomy; **FAQ** (the live answers); **closing band**; **footer** (sitewide: wordmark with the flag, tagline, Explore links, Talk to us with WhatsApp and LinkedIn only when set, support@chatbritish.ai, the not-advice line, © year).
-- **Metadata:** per-page titles ("Start your profile — Chat British", "Practice — Chat British", "Debrief — Chat British"), canonical URLs per page, `metadataBase` falls back to `https://chatbritish.ai` if `NEXT_PUBLIC_SITE_URL` is unset (it was unset at build time on Railway). The sitewide footer (above) and a placeholder /privacy page (noindex) are live. The real privacy notice is still to be written and published; until then don't promote the site to clients or on Instagram.
+- **Metadata:** per-page titles ("Start your profile — Chat British", "Practice — Chat British", "Debrief — Chat British"), canonical URLs per page, `metadataBase` falls back to `https://chatbritish.ai` if `NEXT_PUBLIC_SITE_URL` is unset (it was unset at build time on Railway). The sitewide footer (above) is live. **The real privacy notice is live at /privacy** (dated 9 October 2026). Source: `content/privacy-notice.md`, rendered at build time by `lib/privacy-notice.ts`; the build fails on any drafting marker; the page is indexable; the "Delete my data" button sits after section 12. Controller: Kianoush Language Academy Ltd.
 - **Norm ID references:** the "Based on norm…" line was removed from the Practice feedback bar and the Debrief answer card (the ID stays in the data).
 
 ---
@@ -145,7 +145,7 @@ Also: the AB-2 scenario omits the taxonomy's "(not the letter)" detail — his c
 | `ANTHROPIC_API_KEY_ASSISTANT` | A separate Anthropic key for the Help assistant; falls back to `ANTHROPIC_API_KEY` |
 
 ### RAG robustness
-Low confidence → one follow-up, never a guess. Retrieval-confident but inappropriate → `entry_applies: false`. Fallback candidates and malformed-output handling as above. **Thresholds are judgments from a small calibration set** (12 clear cases scored 0.535+ except one at 0.348; vague cases 0.427/0.473; unrelated 0.297/0.195). The margins are thin, the 0.03 fallback margin rests on one observed tie, and `[debrief-debug]` logging stays on to tune from real use. Check that debug logs don't print users' descriptions before real clients arrive (descriptions are personal).
+Low confidence → one follow-up, never a guess. Retrieval-confident but inappropriate → `entry_applies: false`. Fallback candidates and malformed-output handling as above. **Thresholds are judgments from a small calibration set** (12 clear cases scored 0.535+ except one at 0.348; vague cases 0.427/0.473; unrelated 0.297/0.195). The margins are thin, the 0.03 fallback margin rests on one observed tie, and `[debrief-debug]` logging stays on to tune from real use. Debug logs were confirmed not to print descriptions (privacy audit); the error logs were fixed to log labels and statuses only.
 
 ### Privacy and data (audit and fixes, 8–9 Oct 2026)
 - **Held in Supabase:** `users` (one row per saved profile, keyed by the anonymous auth user id; free text in `struggle` and `city`, the optional `email`); `debrief_gaps` (unmatched or declined Debriefs: description, follow-up question and answer, best candidate, similarity, decline reason; **no user id and no IP**); `taxonomy_entries` (the 200 norms, no user data).
@@ -161,8 +161,8 @@ Low confidence → one follow-up, never a guess. Retrieval-confident but inappro
 - **Email:** nothing in the app sends email and there is no unsubscribe mechanism. The email line says people can ask us to stop, which today means emailing support@chatbritish.ai.
 - **A deleted anonymous user recovers quietly:** if the stored session's user no longer exists, onboarding signs in anonymously again instead of failing to save.
 
-### Help assistant (built, merged, OFF)
-Built and merged, but **off**: `NEXT_PUBLIC_HELP_ASSISTANT` is not set in Railway, so there's no button and `/api/assistant` returns 404.
+### Help assistant (built, merged, ON in production)
+**On in production** (checked 9 Oct 2026 with `curl -4`): `POST /api/assistant` with an empty body returns 400, not 404, and the launcher is in the live HTML of / and /privacy, so the flag is enabled in the build Railway serves. (`GET` returns 405 either way.) When off, there's no button and `POST /api/assistant` returns 404.
 - **Model:** `claude-haiku-4-5-20251001`, low temperature, max 400 tokens, forced to reply through one tool that returns short text plus one action (practice, debrief, email, privacy, none; whatsapp only when a number is configured). The UI turns the action into a button; the model never writes URLs.
 - **Knowledge:** the founder-approved pack at `data/help-assistant-knowledge.md`, with its counts and WhatsApp line filled from the data at build time. **The build fails** on an open `[CONFIRM …]` / `[DECIDE …]` marker or an unfilled `{{…}}`.
 - **Limits:** 6 model calls a minute and 20 per rolling 24 hours per IP, in memory; only requests that reach the model count; over the daily limit, 429 `daily_limit`, a fixed local message with Email, input disabled, chips hidden; "N questions left today" at 3 or fewer.
@@ -170,7 +170,7 @@ Built and merged, but **off**: `NEXT_PUBLIC_HELP_ASSISTANT` is not set in Railwa
 - **Local answers:** the chips "How does Practice work?", "What is Debrief?" and "Is it free?" answer with text read verbatim from the pack, and "Something else" shows a local prompt with the contact buttons; none of them calls the model or counts.
 - **Hand-offs and safety:** a "Prefer a person?" row with Email (and WhatsApp when configured); a danger or distress message gets the 999 and Samaritans 116 123 reply with no buttons. Hidden while a Practice question is on screen.
 - **Pre-launch checklist:**
-  - [ ] Real privacy notice live
+  - [x] Real privacy notice live
   - [ ] WhatsApp number set, or a decision to go without
   - [ ] A separate Anthropic key (`ANTHROPIC_API_KEY_ASSISTANT`) with a spend cap
   - [ ] Auto-reload on in the Anthropic Console
@@ -182,10 +182,10 @@ Built and merged, but **off**: `NEXT_PUBLIC_HELP_ASSISTANT` is not set in Railwa
 ## Open items / next steps
 
 **Needs Amiro (only he can do these):**
-- [ ] **Phone checks of the latest deploys** (Debrief leaking-tap landlord matches; a vague Debrief asks a follow-up; a money struggle ranks Money & transactions; Practice shows 12 category cards with 10 scenarios each and a 5-question session; no "Bridgely" text; favicon and WhatsApp share preview using a never-shared link such as `https://chatbritish.ai/?v=3`; the footer shows on the home page, picker and recap, is hidden while a Practice question is on screen; Contact opens a mail draft to support@chatbritish.ai; /privacy loads and says the notice is being finalised)
+- [ ] **Phone checks of the latest deploys** (Debrief leaking-tap landlord matches; a vague Debrief asks a follow-up; a money struggle ranks Money & transactions; Practice shows 12 category cards with 10 scenarios each and a 5-question session; no "Bridgely" text; favicon and WhatsApp share preview using a never-shared link such as `https://chatbritish.ai/?v=3`; the footer shows on the home page, picker and recap, is hidden while a Practice question is on screen; Contact opens a mail draft to support@chatbritish.ai; /privacy loads the notice dated 9 October 2026)
 - [ ] Phone checks of the new home page (header and menu, hero collage, situation cards, How it works, coach ledger, FAQ, footer)
 - [ ] Add a payment method to Voyage (see costs)
-- [ ] Confirm who the registrant of `chatbritish.ai` is (should be Kianoush or the new company, not a personal account of Amiro)
+- [ ] Confirm who the registrant of `chatbritish.ai` is (should be Kianoush or the controller named in the privacy notice, not a personal account of Amiro)
 - [ ] Say who made the two real Debriefs logged on the live site on 4 Oct (if neither Amiro nor Kianoush, a real user is on the site and a privacy notice becomes urgent)
 
 **Needs Kianoush:**
@@ -195,13 +195,19 @@ Built and merged, but **off**: `NEXT_PUBLIC_HELP_ASSISTANT` is not set in Railwa
 - [ ] WP-17's Surface Markers phrase carries a trailing comma in the spreadsheet, and the home page ledger shows it verbatim ("Let's take that offline,")
 - [ ] Founder video and bio for the home page founder section (`NEXT_PUBLIC_FOUNDER_VIDEO_ID` and `content/founder.ts`)
 - [ ] The five taxonomy gaps above; the AB-2 "(not the letter)" detail
-- [ ] A short privacy notice is needed before promoting the site (it collects free text and optional email). Not a lawyer's advice — have the wording checked. A draft exists; before publishing it needs the code audit and Kianoush's decisions on controller, retention, an under-18 rule and email consent.
 
 **Privacy (before promoting the site or switching on the Help assistant):**
 - [ ] Retention jobs (pg_cron) not yet scheduled; nothing deletes `users`, `debrief_gaps` or unused anonymous auth users today
 - [ ] Check in the dashboards: the Supabase project region; whether `auth.sessions` / `auth.audit_log_entries` have IP columns and hold IPs; Railway log retention; the data processing agreements (Supabase, Railway, Voyage, Anthropic)
-- [ ] Privacy notice v2: awaiting the founder's answers and a solicitor's check, then publish it in place of the /privacy stub
 - [ ] The Help assistant stays off (`NEXT_PUBLIC_HELP_ASSISTANT` unset) until the notice is live
+
+**Confirm before wide promotion:**
+- [ ] Retention jobs (pg_cron) scheduled
+- [ ] Data processing agreements accepted (Anthropic, Supabase, Voyage AI, Railway) and the transfer safeguards named
+- [ ] Supabase region confirmed as the UK
+- [ ] The solicitor's check of notice sections 4 and 7
+- [ ] ICO data protection fee paid for the controller
+- [ ] Update the notice date whenever its text changes
 
 **Endorsement (critical path):**
 - [ ] Business Plan (UKES template), CV, Financial Plan — none started. Start with the CV; collect his teaching history, qualifications, years coaching, client numbers, Instagram reach, testimonials
