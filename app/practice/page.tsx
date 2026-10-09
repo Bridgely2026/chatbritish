@@ -222,11 +222,11 @@ function PracticeContent() {
                 disabled={disabled}
                 onClick={() => !disabled && startSession(category)}
                 className={`flex flex-col overflow-hidden rounded-lg border text-left transition ${
-                  disabled ? "cursor-not-allowed border-line bg-white/50" : "border-line bg-white hover:shadow-md"
+                  disabled ? "cursor-not-allowed border-line bg-surface/50" : "border-line bg-surface hover:shadow-md"
                 }`}
               >
                 {/* Coming-soon cards get a muted band instead of primary. */}
-                <p className={`eyebrow px-4 py-2.5 text-white ${disabled ? "bg-muted" : "bg-primary"}`}>{category}</p>
+                <p className={`eyebrow px-4 py-2.5 text-on-primary ${disabled ? "bg-muted" : "bg-primary"}`}>{category}</p>
                 <div className="flex flex-1 items-start gap-4 p-4">
                   <CategoryIcon
                     category={category}
@@ -271,9 +271,9 @@ function PracticeContent() {
         {/* Rail-ticket stub: score above the tear line, record below it. The
             notches are masks, so the outline is a drop-shadow on the wrapper. */}
         <div className="cut-outline mt-6">
-          <div className="ticket-top bg-white">
+          <div className="ticket-top bg-surface">
             <div className="flex min-h-[2.25rem] items-center bg-primary px-6 py-2.5">
-              {activeCategory && <p className="eyebrow text-white">{activeCategory}</p>}
+              {activeCategory && <p className="eyebrow text-on-primary">{activeCategory}</p>}
             </div>
             <div className="px-6 pb-6 pt-5">
               <h1 className="font-display text-2xl font-medium text-ink">Session complete</h1>
@@ -286,7 +286,7 @@ function PracticeContent() {
               <p className="mt-3 text-muted">{message}</p>
             </div>
           </div>
-          <div className="ticket-stub bg-white px-6 pb-5">
+          <div className="ticket-stub bg-surface px-6 pb-5">
             <div className="mx-2 border-t-2 border-dashed border-line" aria-hidden="true" />
             <div className="space-y-1 pt-4">
               {streak > 0 && <p className="text-sm text-muted">🔥 {streak} day streak</p>}
@@ -345,7 +345,7 @@ function PracticeContent() {
       <h1 className="mt-4 font-display text-2xl font-medium text-ink">{scenario.category}</h1>
 
       <div
-        className="mt-8 rounded-lg border border-line bg-white p-6"
+        className="mt-8 rounded-lg border border-line bg-surface p-6"
         // Reserves room for the fixed feedback bar below once it's shown, so
         // the last option never ends up hidden behind it — see
         // feedbackBarHeight's ResizeObserver setup above. 112px matches the
@@ -373,7 +373,7 @@ function PracticeContent() {
                     ? "border-sage bg-sage-light text-ink"
                     : showState && isChosen && !opt.correct
                       ? "border-brick bg-brick-light text-ink"
-                      : "border-line bg-white text-ink hover:border-primary disabled:hover:border-line"
+                      : "border-line bg-surface text-ink hover:border-primary disabled:hover:border-line"
                 }`}
               >
                 <span
@@ -407,7 +407,7 @@ function PracticeContent() {
               cover most of a phone screen. From sm up it's side by side. */}
           <div className="mx-auto grid max-w-2xl grid-cols-[auto_1fr] items-center gap-x-3 px-6 py-3 sm:grid-cols-[auto_1fr_auto] sm:items-start sm:gap-x-4 sm:py-5">
             <span
-              className={`col-start-1 row-start-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white sm:row-span-3 ${
+              className={`col-start-1 row-start-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-on-primary sm:row-span-3 ${
                 lastAnswer.correct ? "bg-sage" : "bg-brick"
               }`}
             >
@@ -426,7 +426,7 @@ function PracticeContent() {
             <button
               type="button"
               onClick={goToNextOrRecap}
-              className="col-span-2 row-start-3 mt-3 w-full rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-white transition hover:bg-primary-dark sm:col-span-1 sm:col-start-3 sm:row-span-3 sm:row-start-1 sm:mt-0 sm:w-auto sm:self-center sm:py-3"
+              className="col-span-2 row-start-3 mt-3 w-full rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-on-primary transition hover:bg-primary-dark sm:col-span-1 sm:col-start-3 sm:row-span-3 sm:row-start-1 sm:mt-0 sm:w-auto sm:self-center sm:py-3"
             >
               {currentIndex + 1 < sessionScenarios.length ? "Next question" : "See results"}
             </button>

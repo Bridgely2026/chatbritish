@@ -58,8 +58,8 @@ function Chip({
       aria-pressed={selected}
       className={`rounded-lg border px-4 py-2 text-sm transition ${
         selected
-          ? "border-primary bg-primary text-white"
-          : "border-line bg-white text-ink hover:border-primary hover:shadow-md"
+          ? "border-primary bg-primary text-on-primary"
+          : "border-line bg-surface text-ink hover:border-primary hover:shadow-md"
       }`}
     >
       {children}
@@ -227,7 +227,7 @@ export default function OnboardingPage() {
 
           <div className="mt-8 grid gap-3 sm:grid-cols-3">
             {startingPoint.rankedCategories.map((category, i) => (
-              <div key={category} className="rounded-lg border border-line bg-white p-4">
+              <div key={category} className="rounded-lg border border-line bg-surface p-4">
                 <p className="eyebrow text-primary">Priority {i + 1}</p>
                 <p className="mt-1 text-sm text-ink">{category}</p>
               </div>
@@ -362,7 +362,7 @@ export default function OnboardingPage() {
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
                   placeholder="e.g. Manchester"
-                  className="mt-3 w-full rounded-lg border border-field bg-white p-3 text-sm text-ink placeholder:text-muted/70 focus:border-primary"
+                  className="mt-3 w-full rounded-lg border border-field bg-surface p-3 text-sm text-ink placeholder:text-muted focus:border-primary"
                 />
               </div>
 
@@ -377,7 +377,7 @@ export default function OnboardingPage() {
                   rows={3}
                   placeholder="e.g. I never know if my manager is actually saying yes or no"
                   aria-describedby="struggle-privacy"
-                  className="mt-3 w-full rounded-lg border border-field bg-white p-3 text-sm text-ink placeholder:text-muted/70 focus:border-primary"
+                  className="mt-3 w-full rounded-lg border border-field bg-surface p-3 text-sm text-ink placeholder:text-muted focus:border-primary"
                 />
                 <PrivacyNote id="struggle-privacy">We use what you write to personalise what you see.</PrivacyNote>
               </div>
@@ -411,7 +411,7 @@ export default function OnboardingPage() {
                   placeholder="you@example.com"
                   aria-invalid={!emailValid}
                   aria-describedby={!emailValid ? "email-privacy email-error" : "email-privacy"}
-                  className="mt-3 w-full rounded-lg border border-field bg-white p-3 text-sm text-ink placeholder:text-muted/70 focus:border-primary"
+                  className="mt-3 w-full rounded-lg border border-field bg-surface p-3 text-sm text-ink placeholder:text-muted focus:border-primary"
                 />
                 <PrivacyNote id="email-privacy">
                   Optional. We&apos;ll only use it to tell you about courses that might suit you, and you can ask us to stop at any time.
@@ -426,7 +426,7 @@ export default function OnboardingPage() {
           )}
 
           {saveFailed && (
-            <div role="alert" className="rounded-lg border border-brick/40 bg-white p-4 text-sm text-ink">
+            <div role="alert" className="rounded-lg border border-brick/40 bg-surface p-4 text-sm text-ink">
               <p>We couldn&rsquo;t save your answers just now. Your answers are still here, so you can try again.</p>
               <button
                 type="button"

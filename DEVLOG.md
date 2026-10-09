@@ -642,6 +642,30 @@ the button shows; without one it doesn't. Screenshots and
 https://chatbritish.ai/privacy`: HTTP 200, contains "Kianoush Language
 Academy Ltd" and "9 October 2026", no noindex, no "being finalised" text.
 
+## Dark site (9 Oct 2026, branch `dark-site`)
+
+The whole site is dark, always: no toggle, no `prefers-color-scheme`. The
+colour tokens keep their names but now read CSS variables in
+`app/globals.css` (`rgb(var(--c-…) / <alpha-value>)`, so `bg-primary/40`
+still works). New tokens: `surface` (cards, inputs; replaces `bg-white`),
+`on-primary` (text on filled primary), `bubble` (Help reply bubble),
+`shadow`. `.keep-light` restores the old light values and is used on the
+home page's phone screens, the Debrief browser mockup and the navy closing
+band. Illustration tiles, WhatsApp/LinkedIn buttons, the flag, share images
+and favicon are unchanged. `html` and `body` both carry the canvas colour,
+`color-scheme: dark` in CSS plus `<meta name="color-scheme" content="dark">`
+and `themeColor #0E1621` (root layout viewport).
+- **Values chosen beyond the brief:** sage `#8DBBA5`, field (input border)
+  `#6B7F99` (3.9:1 on surface), placeholders `muted` instead of `muted/70`
+  (4.2:1 was under 4.5). Brick-light and sage-light are the dark tints
+  `#3A1E1B` / `#1B2B27`.
+- **Checks:** 768 bounding-box values (header, h1, primary buttons, feedback
+  bar, footer, home sections) at 375x667, 360x640 and 1280x800 identical to
+  main (max difference 0px); feedback bar 149.5 / 168.75 / 110.5 px; CLS 0;
+  no sideways scroll; canvas colour at domcontentloaded. A seeded
+  `Math.random` makes both builds draw the same Practice questions. Report,
+  contrast table and screenshots: `~/Desktop/chatbritish-design-screens/v13`.
+
 ---
 
 ## Open technical items (engineering-only; see CLAUDE.md for the rest)

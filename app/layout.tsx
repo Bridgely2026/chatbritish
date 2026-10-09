@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Caveat, Fraunces, Work_Sans } from "next/font/google";
 import Footer from "@/components/Footer";
 import HelpAssistant from "@/components/HelpAssistant";
@@ -25,6 +25,10 @@ export const metadata: Metadata = {
   openGraph: { title, description, type: "website", url: "./" },
   twitter: { card: "summary_large_image", title, description },
 };
+
+// The site is always dark: <meta name="color-scheme" content="dark"> and the
+// browser bar in the canvas colour (globals.css sets the same on html).
+export const viewport: Viewport = { themeColor: "#0E1621", colorScheme: "dark" };
 
 // Self-hosted at build time by next/font, so the browser never requests
 // anything from Google. tailwind.config.ts maps the variables to font-display,

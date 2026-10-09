@@ -108,12 +108,12 @@ export default function DebriefPage() {
                 rows={4}
                 placeholder="e.g. My landlord said he'd 'sort it when he gets a chance' about the broken boiler and it's been three weeks"
                 aria-describedby="debrief-privacy"
-                className="w-full rounded-lg border border-field bg-white p-4 pr-12 text-sm text-ink placeholder:text-muted/70 focus:border-primary"
+                className="w-full rounded-lg border border-field bg-surface p-4 pr-12 text-sm text-ink placeholder:text-muted focus:border-primary"
               />
               <button
                 type="button"
                 title="Voice input (not wired up in this shell)"
-                className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full border border-line bg-white text-muted"
+                className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full border border-line bg-surface text-muted"
               >
                 🎤
               </button>
@@ -132,7 +132,7 @@ export default function DebriefPage() {
         {phase.kind === "follow_up" && (
           <form
             onSubmit={(e) => handleFollowUpSubmit(e, phase.question)}
-            className="mt-10 rounded-lg border border-line bg-white p-6"
+            className="mt-10 rounded-lg border border-line bg-surface p-6"
           >
             <p className="eyebrow text-primary">One quick check</p>
             <p className="mt-2 text-sm leading-relaxed text-ink">{phase.question}</p>
@@ -141,7 +141,7 @@ export default function DebriefPage() {
               onChange={(e) => setFollowUpAnswer(e.target.value)}
               rows={3}
               placeholder="Your answer"
-              className="mt-4 w-full rounded-lg border border-field bg-white p-3 text-sm text-ink placeholder:text-muted/70 focus:border-primary"
+              className="mt-4 w-full rounded-lg border border-field bg-surface p-3 text-sm text-ink placeholder:text-muted focus:border-primary"
             />
             <button
               type="submit"
@@ -160,7 +160,7 @@ export default function DebriefPage() {
         )}
 
         {phase.kind === "no_match" && (
-          <div className="mt-10 rounded-lg border border-line bg-white p-6">
+          <div className="mt-10 rounded-lg border border-line bg-surface p-6">
             <p className="eyebrow text-primary">No close match yet</p>
             <p className="mt-2 text-sm leading-relaxed text-ink">{phase.message}</p>
             <button
@@ -174,7 +174,7 @@ export default function DebriefPage() {
         )}
 
         {phase.kind === "matched" && (
-          <div className="mt-10 rounded-lg border border-line bg-white p-6">
+          <div className="mt-10 rounded-lg border border-line bg-surface p-6">
             {matchedCategory && <p className="text-xs text-muted">{matchedCategory}</p>}
 
             <Field label="Surface signal" value={phase.result.surface_signal} italic />

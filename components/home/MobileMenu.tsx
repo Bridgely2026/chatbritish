@@ -44,7 +44,7 @@ export default function MobileMenu({ links }: { links: MenuLink[] }) {
           <path d="M3 6l5 5 5-5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </summary>
-      <div className="absolute right-0 top-[52px] min-w-[220px] rounded-[10px] border border-line bg-white p-2 shadow-[0_12px_30px_rgba(0,0,0,0.12)]">
+      <div className="absolute right-0 top-[52px] min-w-[220px] rounded-[10px] border border-line bg-surface p-2 shadow-[0_12px_30px_rgb(var(--c-shadow)/0.12)]">
         <nav aria-label="Main">
           {links.map((link) => (
             <Link

@@ -156,20 +156,20 @@ export default function HelpAssistant({ chipReplies }: { chipReplies: ChipReply[
           role="dialog"
           aria-labelledby="help-title"
           tabIndex={-1}
-          className="fixed inset-x-0 bottom-0 z-50 flex max-h-[85dvh] flex-col overflow-hidden rounded-t-2xl border border-line bg-white text-ink shadow-[0_24px_60px_rgba(15,35,60,0.35)] outline-none min-[560px]:inset-x-auto min-[560px]:bottom-[calc(max(18px,env(safe-area-inset-bottom,0px))+68px)] min-[560px]:right-[max(18px,env(safe-area-inset-right,0px))] min-[560px]:max-h-[min(620px,calc(100dvh-120px))] min-[560px]:w-[380px] min-[560px]:rounded-2xl"
+          className="fixed inset-x-0 bottom-0 z-50 flex max-h-[85dvh] flex-col overflow-hidden rounded-t-2xl border border-line bg-surface text-ink shadow-[0_24px_60px_rgb(var(--c-shadow)/0.35)] outline-none min-[560px]:inset-x-auto min-[560px]:bottom-[calc(max(18px,env(safe-area-inset-bottom,0px))+68px)] min-[560px]:right-[max(18px,env(safe-area-inset-right,0px))] min-[560px]:max-h-[min(620px,calc(100dvh-120px))] min-[560px]:w-[380px] min-[560px]:rounded-2xl"
         >
-          <div className="on-dark flex items-center gap-2.5 bg-primary px-4 py-3.5 text-white">
+          <div className="on-dark flex items-center gap-2.5 bg-primary px-4 py-3.5 text-on-primary">
             <div>
               <h2 id="help-title" className="font-display text-[17px] font-semibold leading-tight">
                 Chat British Help
               </h2>
-              <p className="text-[12.5px] text-[#C9D6E8]">Automated assistant</p>
+              <p className="text-[12.5px] text-on-primary/80">Automated assistant</p>
             </div>
             <button
               type="button"
               onClick={() => close(true)}
               aria-label="Close help"
-              className="ml-auto grid h-11 w-11 place-items-center rounded-lg hover:bg-white/15"
+              className="ml-auto grid h-11 w-11 place-items-center rounded-lg hover:bg-on-primary/15"
             >
               <svg viewBox="0 0 12 12" aria-hidden="true" className="h-[18px] w-[18px]">
                 <path d="M2 2 L10 10 M10 2 L2 10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" fill="none" />
@@ -235,7 +235,7 @@ export default function HelpAssistant({ chipReplies }: { chipReplies: ChipReply[
               disabled={limitReached}
               placeholder="Ask a question"
               autoComplete="off"
-              className="min-h-[44px] min-w-0 flex-1 rounded-lg border-[1.5px] border-field bg-white px-3 text-base text-ink placeholder:text-muted focus:border-primary disabled:bg-canvas"
+              className="min-h-[44px] min-w-0 flex-1 rounded-lg border-[1.5px] border-field bg-surface px-3 text-base text-ink placeholder:text-muted focus:border-primary disabled:bg-canvas"
             />
             <button type="submit" disabled={loading || limitReached || draft.trim() === ""} className="btn-primary px-4">
               Send
@@ -269,7 +269,7 @@ export default function HelpAssistant({ chipReplies }: { chipReplies: ChipReply[
         onClick={() => (open ? close(false) : setOpen(true))}
         aria-expanded={open}
         aria-controls={open ? "help-panel" : undefined}
-        className={`fixed bottom-[max(18px,env(safe-area-inset-bottom,0px))] right-[max(18px,env(safe-area-inset-right,0px))] z-50 inline-flex min-h-[54px] items-center gap-2.5 rounded-full bg-primary pl-4 pr-5 font-semibold text-white shadow-[0_10px_28px_rgba(15,35,60,0.35)] transition hover:bg-primary-dark ${
+        className={`fixed bottom-[max(18px,env(safe-area-inset-bottom,0px))] right-[max(18px,env(safe-area-inset-right,0px))] z-50 inline-flex min-h-[54px] items-center gap-2.5 rounded-full bg-primary pl-4 pr-5 font-semibold text-on-primary shadow-[0_10px_28px_rgb(var(--c-shadow)/0.35)] transition hover:bg-primary-dark ${
           open ? "max-[559px]:hidden" : ""
         }`}
       >
@@ -286,15 +286,15 @@ export default function HelpAssistant({ chipReplies }: { chipReplies: ChipReply[
 const FALLBACK_TEXT = "Sorry, I can't answer right now. You can email us and a person will reply.";
 
 const CHIP =
-  "min-h-[36px] rounded-full border border-line bg-white px-3 text-[13.5px] font-medium text-primary hover:bg-sky disabled:opacity-50";
+  "min-h-[36px] rounded-full border border-line bg-surface px-3 text-[13.5px] font-medium text-primary hover:bg-sky disabled:opacity-50";
 
 function Bubble({ role, children }: { role: "user" | "assistant"; children: React.ReactNode }) {
   return role === "user" ? (
-    <div className="max-w-[88%] self-end rounded-[14px] rounded-br-[4px] bg-primary px-[13px] py-2.5 text-[15px] leading-normal text-white">
+    <div className="max-w-[88%] self-end rounded-[14px] rounded-br-[4px] bg-primary px-[13px] py-2.5 text-[15px] leading-normal text-on-primary">
       {children}
     </div>
   ) : (
-    <div className="max-w-[88%] self-start rounded-[14px] rounded-bl-[4px] bg-sky px-[13px] py-2.5 text-[15px] leading-normal text-ink">
+    <div className="max-w-[88%] self-start rounded-[14px] rounded-bl-[4px] bg-bubble px-[13px] py-2.5 text-[15px] leading-normal text-ink">
       {children}
     </div>
   );

@@ -189,7 +189,7 @@ export default function LandingPage() {
             </div>
             <div className="grid gap-[26px] min-[560px]:grid-cols-2 min-[980px]:grid-cols-3">
               {SITUATIONS.map((s) => (
-                <article key={s.art} className="flex flex-col overflow-hidden rounded-xl border border-line bg-white">
+                <article key={s.art} className="flex flex-col overflow-hidden rounded-xl border border-line bg-surface">
                   <SituationArt name={s.art} />
                   <div className="flex flex-1 flex-col gap-1.5 px-5 pb-[22px] pt-[18px]">
                     <h3 className="font-display text-[22px] font-semibold leading-[1.12] text-ink">{s.title}</h3>
@@ -284,7 +284,7 @@ export default function LandingPage() {
               </p>
             </div>
             {ledgerRows.length > 0 && (
-              <table className="w-full border-separate border-spacing-0 overflow-hidden rounded-xl border border-line bg-white">
+              <table className="w-full border-separate border-spacing-0 overflow-hidden rounded-xl border border-line bg-surface">
                 <thead className="max-[759px]:hidden">
                   <tr>
                     <th scope="col" className="bg-sky px-[18px] py-3 text-left text-sm font-semibold text-ink">
@@ -345,10 +345,10 @@ export default function LandingPage() {
         </section>
       </main>
 
-      {/* Closing band */}
-      <section className="on-dark tweed bg-primary py-[76px]" aria-labelledby="band-title">
+      {/* Closing band: navy with white text on the dark site too (.keep-light). */}
+      <section className="keep-light on-dark tweed bg-primary py-[76px]" aria-labelledby="band-title">
         <div className="wrap flex flex-wrap items-center justify-between gap-7">
-          <h2 id="band-title" className="max-w-[11em] font-display text-[clamp(1.8rem,3.4vw,2.5rem)] font-semibold leading-[1.12] tracking-[-0.01em] text-white">
+          <h2 id="band-title" className="max-w-[11em] font-display text-[clamp(1.8rem,3.4vw,2.5rem)] font-semibold leading-[1.12] tracking-[-0.01em] text-on-primary">
             Stop guessing what people mean.
           </h2>
           <div className="flex w-full flex-wrap gap-3.5 min-[560px]:w-auto">
@@ -377,7 +377,7 @@ export default function LandingPage() {
 // Wide screens: absolutely placed, as in the mockup. Below 980px it stacks.
 function StampCard({ norm }: { norm: NonNullable<typeof heroNorm> }) {
   return (
-    <div className="w-[min(100%,380px)] -rotate-3 rounded bg-white p-[22px] min-[980px]:absolute min-[980px]:left-0 min-[980px]:top-[50px] min-[980px]:w-[252px] shadow-[0_0_0_7px_#fff,0_0_0_8px_#DDE1E6,0_18px_40px_rgba(20,35,55,0.14)]">
+    <div className="w-[min(100%,380px)] -rotate-3 rounded bg-surface p-[22px] min-[980px]:absolute min-[980px]:left-0 min-[980px]:top-[50px] min-[980px]:w-[252px] shadow-[0_0_0_7px_rgb(var(--c-surface)),0_0_0_8px_rgb(var(--c-line)),0_18px_40px_rgb(var(--c-shadow)/0.14)]">
       <p className="mb-3 border-b border-line pb-2.5 font-mono text-xs leading-[1.3] text-muted">{norm.category}</p>
       <p className="font-display text-[19px] font-medium italic leading-[1.35] text-ink">
         {norm.phrases.map((phrase) => `\u201C${phrase}\u201D`).join(" / ")}
