@@ -1,35 +1,48 @@
 import type { Config } from "tailwindcss";
 
+// A colour read from a CSS variable in app/globals.css.
+const token = (name: string) => `rgb(var(--c-${name}) / <alpha-value>)`;
+
 const config: Config = {
   content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        // Page background; cards and panels sit on it in white.
-        canvas: "#FBFAF7",
-        ink: "#1C2733",
+        // The values live in app/globals.css as CSS variables (space-separated
+        // RGB), so the site is dark everywhere and .keep-light can bring back
+        // the light palette for the home page's device mockups and the
+        // closing band. Opacity modifiers (bg-primary/40) still work.
+        // Page background.
+        canvas: token("canvas"),
+        // Cards, panels and inputs on the canvas.
+        surface: token("surface"),
+        ink: token("ink"),
         // Brand colour: buttons, links, eyebrow labels, rules, card bands.
-        primary: "#1F3A5F",
-        "primary-dark": "#172D49",
-        // Secondary-button hover and other light brand tints.
-        sky: "#EAF1F8",
-        // Decorative only: never text, never a border on a light background.
-        amber: "#F2A93B",
+        primary: token("primary"),
+        "primary-dark": token("primary-dark"),
+        // Text and icons on a filled primary background.
+        "on-primary": token("on-primary"),
+        // Secondary-button hover and other brand tints.
+        sky: token("sky"),
+        // The Help assistant's reply bubble (sky is too close to surface).
+        bubble: token("bubble"),
+        // Decorative only: never text.
+        amber: token("amber"),
         // Brick and sage are reserved for answer states (wrong / correct) and
         // error messages, with one decorative exception: the red-pen margin
-        // note on the home hero is brick.
-        brick: "#A63A2E",
-        "brick-light": "#F0DAD5",
-        sage: "#4B6C5E",
-        "sage-light": "#DCE5DF",
-        // #5B6773 was proposed, but it (like the old #5B6670) fell under 4.5:1
-        // on the wrong-answer feedback bar (brick-light). This passes on
-        // canvas, white, sky, brick-light and sage-light.
-        muted: "#56626E",
-        // Light neutral for card borders and hairlines.
-        line: "#DDE1E6",
-        // Text-input borders: an input needs a visible edge, so 3:1 on white.
-        field: "#858F99",
+        // note on the home hero is brick. The -light names are the tints the
+        // answer states sit on (dark tints on the dark site).
+        brick: token("brick"),
+        "brick-light": token("brick-light"),
+        sage: token("sage"),
+        "sage-light": token("sage-light"),
+        muted: token("muted"),
+        // Card borders and hairlines.
+        line: token("line"),
+        // Text-input borders: an input needs a visible edge, so 3:1 on surface.
+        field: token("field"),
+        // Box-shadow colour (used with an alpha).
+        shadow: token("shadow"),
       },
       fontFamily: {
         display: ["var(--font-fraunces)", "Fraunces", "Georgia", "serif"],

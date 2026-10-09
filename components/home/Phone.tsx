@@ -3,7 +3,7 @@ import type { Scenario, ScenarioOption } from "@/lib/scenarios";
 
 // A drawn phone showing a Practice screen. Decorative: the whole screen is
 // one image to assistive tech, described by `label`. Fixed pixel sizes, like
-// a screenshot, and always light (the site has no dark mode).
+// a screenshot, and always light on the dark site (.keep-light).
 export function Phone({ label, height = 552, children }: { label: string; height?: number; children: ReactNode }) {
   return (
     <div className="w-[274px] shrink-0 rounded-[40px] bg-[#0F1722] p-[9px] shadow-[0_26px_50px_rgba(15,23,34,0.28)]">
@@ -11,7 +11,7 @@ export function Phone({ label, height = 552, children }: { label: string; height
         role="img"
         aria-label={label}
         style={{ height }}
-        className="relative overflow-hidden rounded-[32px] bg-canvas text-[12.5px] leading-[1.45] text-ink"
+        className="keep-light relative overflow-hidden rounded-[32px] bg-canvas text-[12.5px] leading-[1.45] text-ink"
       >
         {children}
       </div>
@@ -34,7 +34,7 @@ export function PracticeQuestionScreen({ scenario, chosen }: { scenario: Scenari
   return (
     <>
       <ScreenTop streak={4} />
-      <div className="bg-primary px-4 py-[7px] text-xs font-medium text-white">{scenario.category}</div>
+      <div className="bg-primary px-4 py-[7px] text-xs font-medium text-on-primary">{scenario.category}</div>
       <div className="px-4 py-3.5">
         <p>{scenario.setup}</p>
         <p className="my-2.5 font-display text-[14.5px] font-medium italic leading-[1.3]">{scenario.prompt}</p>
@@ -48,7 +48,7 @@ export function PracticeQuestionScreen({ scenario, chosen }: { scenario: Scenari
                   ? "border-brick bg-brick-light"
                   : state === "right"
                     ? "border-sage bg-sage-light"
-                    : "border-line bg-white"
+                    : "border-line bg-surface"
               }`}
             >
               <span
@@ -73,7 +73,7 @@ export function PracticeQuestionScreen({ scenario, chosen }: { scenario: Scenari
           Not quite
         </p>
         <p className="text-xs text-muted">{chosen.feedback}</p>
-        <span className="mt-[9px] block rounded-md bg-primary py-[9px] text-center text-[12.5px] font-semibold text-white">
+        <span className="mt-[9px] block rounded-md bg-primary py-[9px] text-center text-[12.5px] font-semibold text-on-primary">
           Next question
         </span>
       </div>
@@ -87,8 +87,8 @@ export function RecapScreen() {
   return (
     <>
       <ScreenTop streak={4} />
-      <div className="relative mx-4 my-3.5 border border-line bg-white">
-        <div className="bg-primary px-3.5 py-[7px] text-xs font-medium text-white">Dating &amp; relationships</div>
+      <div className="relative mx-4 my-3.5 border border-line bg-surface">
+        <div className="bg-primary px-3.5 py-[7px] text-xs font-medium text-on-primary">Dating &amp; relationships</div>
         <div className="p-3.5">
           <p className="mb-2.5 font-display text-lg font-semibold leading-[1.1]">Session complete</p>
           <p className="font-display text-[38px] font-semibold leading-none">
@@ -107,10 +107,10 @@ export function RecapScreen() {
           The ones you missed will come back.
         </div>
       </div>
-      <span className="mx-4 mt-2 block rounded-md border-[1.5px] border-primary bg-primary py-[9px] text-center text-[12.5px] font-semibold text-white">
+      <span className="mx-4 mt-2 block rounded-md border-[1.5px] border-primary bg-primary py-[9px] text-center text-[12.5px] font-semibold text-on-primary">
         Practise another category
       </span>
-      <span className="mx-4 mt-2 block rounded-md border-[1.5px] border-primary bg-white py-[9px] text-center text-[12.5px] font-semibold text-primary">
+      <span className="mx-4 mt-2 block rounded-md border-[1.5px] border-primary bg-surface py-[9px] text-center text-[12.5px] font-semibold text-primary">
         Back to this category
       </span>
     </>

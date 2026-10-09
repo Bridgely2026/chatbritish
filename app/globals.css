@@ -5,17 +5,69 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Colour tokens as space-separated RGB, read by tailwind.config.ts. The site
+   is always dark, whatever the device setting; there is no toggle.
+   Contrast (WCAG): ink on canvas 15.3:1, on surface 13.5:1; muted on canvas
+   8.1:1, on surface 7.1:1, on the answer tints 6.6:1 or more; primary (links,
+   focus rings) on canvas 7.2:1, on surface 6.4:1; on-primary on primary
+   7.2:1; field on surface 3.9:1. */
+:root {
+  --c-canvas: 14 22 33; /* #0E1621 */
+  --c-surface: 21 34 51; /* #152233 */
+  --c-ink: 231 236 242; /* #E7ECF2 */
+  --c-primary: 127 166 218; /* #7FA6DA */
+  --c-primary-dark: 108 149 203; /* #6C95CB */
+  --c-on-primary: 14 22 33; /* #0E1621 */
+  --c-sky: 20 37 56; /* #142538 */
+  --c-bubble: 34 54 82; /* #223652 */
+  --c-amber: 242 169 59; /* #F2A93B */
+  --c-brick: 229 138 123; /* #E58A7B */
+  --c-brick-light: 58 30 27; /* #3A1E1B */
+  --c-sage: 141 187 165; /* #8DBBA5 */
+  --c-sage-light: 27 43 39; /* #1B2B27 */
+  --c-muted: 163 174 188; /* #A3AEBC */
+  --c-line: 43 60 82; /* #2B3C52 */
+  --c-field: 107 127 153; /* #6B7F99 */
+  --c-shadow: 0 0 0; /* #000000 */
+}
+
+/* The light palette, kept on purpose for the home page's phone and browser
+   mockups (they show screens, like screenshots) and the navy closing band. */
+.keep-light {
+  --c-canvas: 251 250 247; /* #FBFAF7 */
+  --c-surface: 255 255 255; /* #FFFFFF */
+  --c-ink: 28 39 51; /* #1C2733 */
+  --c-primary: 31 58 95; /* #1F3A5F */
+  --c-primary-dark: 23 45 73; /* #172D49 */
+  --c-on-primary: 255 255 255; /* #FFFFFF */
+  --c-sky: 234 241 248; /* #EAF1F8 */
+  --c-bubble: 234 241 248; /* #EAF1F8 */
+  --c-brick: 166 58 46; /* #A63A2E */
+  --c-brick-light: 240 218 213; /* #F0DAD5 */
+  --c-sage: 75 108 94; /* #4B6C5E */
+  --c-sage-light: 220 229 223; /* #DCE5DF */
+  --c-muted: 86 98 110; /* #56626E */
+  --c-line: 221 225 230; /* #DDE1E6 */
+  --c-field: 133 143 153; /* #858F99 */
+  --c-shadow: 20 35 55; /* #142337 */
+  color-scheme: light;
+}
+
+/* Background on html as well as body, so the first paint is never white;
+   color-scheme makes scroll bars, form controls and autofill dark. */
 html {
   scroll-behavior: smooth;
+  color-scheme: dark;
+  background-color: rgb(var(--c-canvas));
 }
 
 body {
-  background-color: #fbfaf7;
-  color: #1c2733;
+  background-color: rgb(var(--c-canvas));
+  color: rgb(var(--c-ink));
 }
 
 :focus-visible {
-  outline: 2px solid #1f3a5f;
+  outline: 2px solid rgb(var(--c-primary));
   outline-offset: 2px;
 }
 
@@ -27,22 +79,23 @@ body {
 
   /* Buttons and links. Primary: filled, 44px tall. Secondary: outlined, same
      height. The focus ring comes from :focus-visible above (2px primary,
-     2px offset); on a primary background, add focus-visible:outline-white. */
+     2px offset); on a filled primary background, put .on-dark on a parent. */
   .btn-primary {
-    @apply inline-flex min-h-[44px] items-center justify-center rounded-lg bg-primary px-6 py-3 text-sm font-medium text-white transition hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-primary;
+    @apply inline-flex min-h-[44px] items-center justify-center rounded-lg bg-primary px-6 py-3 text-sm font-medium text-on-primary transition hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-primary;
   }
   .btn-secondary {
-    @apply inline-flex min-h-[44px] items-center justify-center rounded-lg border border-primary bg-white px-6 py-2.5 text-sm font-medium text-primary transition hover:bg-sky disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white;
+    @apply inline-flex min-h-[44px] items-center justify-center rounded-lg border border-primary bg-transparent px-6 py-2.5 text-sm font-medium text-primary transition hover:bg-sky disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent;
   }
   .link {
     @apply font-medium text-primary underline-offset-4 hover:underline;
   }
-  /* For a primary (navy) background: a white button and an outlined one. */
+  /* For a filled primary background (the closing band, inside .keep-light):
+     a surface-coloured button and an outlined one. */
   .btn-light {
-    @apply inline-flex min-h-[44px] items-center justify-center gap-2.5 rounded-lg bg-white px-6 py-3 text-sm font-medium text-primary transition hover:bg-sky;
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2.5 rounded-lg bg-surface px-6 py-3 text-sm font-medium text-primary transition hover:bg-sky;
   }
   .btn-ghost {
-    @apply inline-flex min-h-[44px] items-center justify-center gap-2.5 rounded-lg border border-white/70 bg-transparent px-6 py-2.5 text-sm font-medium text-white transition hover:bg-white/10;
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2.5 rounded-lg border border-on-primary/70 bg-transparent px-6 py-2.5 text-sm font-medium text-on-primary transition hover:bg-on-primary/10;
   }
   /* Contact buttons in the services' own colours; white text is 6.7:1 on the
      WhatsApp green and 5.7:1 on the LinkedIn blue. */
@@ -52,9 +105,9 @@ body {
   .btn-linkedin {
     @apply inline-flex min-h-[44px] items-center justify-center gap-2.5 rounded-lg bg-[#0A66C2] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#0857A6];
   }
-  /* Focus ring on navy backgrounds. */
+  /* Focus ring on filled primary backgrounds. */
   .on-dark :focus-visible {
-    outline-color: #fff;
+    outline-color: rgb(var(--c-on-primary));
   }
 
   /* Page container: 1120px wide, 24px gutters (18px below 560px), never
@@ -90,8 +143,8 @@ body {
   /* Hairline outline that follows a masked shape (applied to a wrapper, since
      a mask would clip the element's own border and shadow). */
   .cut-outline {
-    filter: drop-shadow(1px 0 0 #dde1e6) drop-shadow(-1px 0 0 #dde1e6) drop-shadow(0 1px 0 #dde1e6)
-      drop-shadow(0 -1px 0 #dde1e6);
+    filter: drop-shadow(1px 0 0 rgb(var(--c-line))) drop-shadow(-1px 0 0 rgb(var(--c-line)))
+      drop-shadow(0 1px 0 rgb(var(--c-line))) drop-shadow(0 -1px 0 rgb(var(--c-line)));
   }
 
   /* Rail-ticket halves: semicircular notches where the two halves meet. */
@@ -118,7 +171,8 @@ body {
 }
 
 @layer components {
-  /* Faint herringbone weave for the primary closing band: 3% white lines.
+  /* Faint herringbone weave for the navy closing band (which stays light, see
+     .keep-light): 3% white lines.
      White text stays at 10.5:1 over the lightest point (11.5:1 without it). */
   .tweed {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12'%3E%3Cpath d='M0 6 6 0M0 12 6 6M6 0l6 6M6 6l6 6' stroke='%23fff' stroke-opacity='.03'/%3E%3C/svg%3E");
