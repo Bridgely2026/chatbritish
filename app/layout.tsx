@@ -49,7 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${fraunces.variable} ${workSans.variable} ${caveat.variable}`}>
       <body className="font-sans antialiased">
         {children}
-        <Footer />
+        <Footer year={new Date().getFullYear()} />
         {helpAssistantEnabled && <HelpAssistant chipReplies={HELP_CHIP_REPLIES} />}
       </body>
     </html>

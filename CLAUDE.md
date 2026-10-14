@@ -142,6 +142,7 @@ Also: the AB-2 scenario omits the taxonomy's "(not the letter)" detail — his c
 | `NEXT_PUBLIC_LINKEDIN_URL` | Shows the LinkedIn button in the footer |
 | `NEXT_PUBLIC_FOUNDER_VIDEO_ID` | YouTube video ID for the home page founder section, which also needs a bio in `content/founder.ts` |
 | `NEXT_PUBLIC_HELP_ASSISTANT` | `on` turns the Help assistant on; anything else leaves it off (button hidden, `/api/assistant` returns 404) |
+| `NEXT_PUBLIC_FA_ENABLED` | `on` turns on the Persian interface under `/fa` (UI chrome only) and the language switcher; anything else: every `/fa` route returns 404, no switcher or hreflang, English pages unchanged |
 | `ANTHROPIC_API_KEY_ASSISTANT` | A separate Anthropic key for the Help assistant; falls back to `ANTHROPIC_API_KEY` |
 
 ### RAG robustness
@@ -226,6 +227,10 @@ Low confidence → one follow-up, never a guess. Retrieval-confident but inappro
 - [ ] Decide whether practice questions need titles (a Title column). The "Based on norm…" line was removed from the Practice feedback bar and the Debrief answer card (the ID stays in the data).
 - [ ] Optional: register `chatbritish.co.uk` (cheap; blocks squatters) and redirect it to `.ai`; `www` needs a higher Railway plan or registrar forwarding
 - [ ] When there's a paid tier: account claiming at payment, Google OAuth as an additional login
+
+**Persian interface (branch `feature/farsi-ui`, not merged, flag `NEXT_PUBLIC_FA_ENABLED`):**
+- [ ] Kianoush reviews `FA-STRINGS-FOR-REVIEW.md` (13 public claims flagged first) before merge
+- [ ] Decide whether to set the flag on Railway after merge (off = English site unchanged)
 
 **Parked ideas (considered, not built):**
 - PWA: an installable shell (manifest and icons, no service worker) is about an afternoon of work. Parked. iPhone has no install prompt. Push notifications for a follow-up nudge would need a service worker and are a much bigger job. Avoid page-caching service workers: we deploy often and they can serve stale pages.
