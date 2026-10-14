@@ -666,6 +666,51 @@ and `themeColor #0E1621` (root layout viewport).
   `Math.random` makes both builds draw the same Practice questions. Report,
   contrast table and screenshots: `~/Desktop/chatbritish-design-screens/v13`.
 
+## Persian interface (`feature/farsi-ui`, Oct 2026)
+
+- **What:** UI chrome in Persian under `/fa` (RTL), behind
+  `NEXT_PUBLIC_FA_ENABLED=on`. Scenarios, taxonomy text, Debrief answers,
+  /privacy and the Help assistant stay English, marked `lang="en" dir="ltr"`
+  (`components/En.tsx`). Stored and scored values stay the canonical English.
+- **How:** a typed dictionary, no library: `messages/en.ts` (types, the
+  existing English text) and `messages/fa.json` (every Persian string,
+  type-checked against it). `lib/i18n.ts` has the flag, `fmt`, `fmtNodes`,
+  `localeHref`, hreflang. Page bodies moved to `components/screens/*`;
+  `app/*/page.tsx` and `app/fa/*/page.tsx` are thin wrappers. No
+  middleware, cookie or Accept-Language redirect: the locale is the URL.
+- **`<html lang>`:** the single root layout can't see the URL without
+  making every page dynamic, so the server HTML keeps `lang="en"` and the
+  `/fa` wrapper div carries `lang="fa" dir="rtl"`; `HtmlLangSync` sets them
+  on `<html>` after load and removes them on leaving (tested: links, Back,
+  Forward, /privacy). The alternative (two root layouts) would have moved
+  `app/privacy`, which was protected.
+- **Footer** is now a client component (it reads the locale from the URL);
+  the year comes from the server as a prop so it can't differ on hydration.
+- **Fonts:** Vazirmatn via `next/font` (`lib/font-fa.ts`, not preloaded).
+  Gotcha: next/font emits `@font-face` for every subset, Latin included,
+  and each stack ends in an Arial fallback face. So the Persian stacks name
+  the English font first ("Work Sans" / "Fraunces", by family name) and
+  Vazirmatn after it: Persian letters fall through to Vazirmatn, Latin text
+  and digits keep the English fonts.
+- **Text nodes:** `fmt()` merged "Twelve" + " everyday…" into one text node,
+  which kerns differently (70–240px pixel diffs). `fmtNodes()` returns the
+  parts so React renders the same nodes as before.
+- **Guards (flag on only):** `lib/script-detect.ts` `isMostlyArabicScript`
+  (≥30% Arabic-script letters). Debrief blocks submit (description and
+  follow-up) with no request; onboarding skips `/api/classify-struggle`
+  and still saves.
+- **Nav:** the switcher shows from `sm` up only; with it, the English Nav
+  overflowed 2–57px at 375–320. Phones use the footer switcher (and the
+  home menu). The English Nav already overflows 12px at 320px on main.
+- **Checks (Playwright, all APIs and Supabase mocked):** flag off, 27
+  screenshots (5 pages + 4 Practice states x 375x667/360x640/1280) pixel-
+  identical to main, HTML identical apart from build hashes and the
+  logical-class swaps; `/fa*` 404. Flag on: 13 states x 3 viewports with no
+  sideways scroll, one h1, nav on one row, contrast ≥4.5:1, focus visible;
+  feedback bar tested on all 120 scenarios x 3 options x 3 viewports (max
+  28.2% of a 375x667 screen); no cookies, no Google requests, only the
+  three storage keys.
+
 ---
 
 ## Open technical items (engineering-only; see CLAUDE.md for the rest)

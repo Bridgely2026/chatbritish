@@ -178,3 +178,38 @@ body {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12'%3E%3Cpath d='M0 6 6 0M0 12 6 6M6 0l6 6M6 6l6 6' stroke='%23fff' stroke-opacity='.03'/%3E%3C/svg%3E");
   }
 }
+
+/* Persian pages (app/fa, and the footer there). The English font comes
+   first, by its family name: Fraunces and Work Sans have no Arabic-script
+   glyphs, so Persian letters fall through to Vazirmatn while Latin text and
+   digits keep the English fonts (digits stay Latin). Named directly rather
+   than through --font-work-sans/--font-fraunces, because those end in a
+   generated Arial fallback face that would draw the Persian letters first.
+   :lang(fa) matches only elements whose language is Persian, so English
+   content inside these pages (lang="en") keeps its own spacing. Taller lines
+   for Persian; no uppercase, letter-spacing (it breaks the joins between
+   letters) or italics, which Persian lacks. */
+.locale-fa,
+.site-footer:lang(fa),
+.font-sans:lang(fa) {
+  font-family: "Work Sans", var(--font-vazirmatn), system-ui, sans-serif;
+}
+.font-display:lang(fa) {
+  font-family: "Fraunces", var(--font-vazirmatn), Georgia, serif;
+}
+*:lang(fa) {
+  letter-spacing: 0 !important;
+}
+.eyebrow:lang(fa) {
+  text-transform: none;
+  font-size: 0.8125rem;
+}
+.italic:lang(fa) {
+  font-style: normal;
+}
+:is(p, li, summary, label, legend, td, th, span):lang(fa) {
+  line-height: 1.75;
+}
+:is(h1, h2, h3):lang(fa) {
+  line-height: 1.45;
+}
